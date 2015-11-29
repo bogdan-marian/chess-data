@@ -8,6 +8,7 @@ package eu.chessdata.services;
 public class ProfileService {
     /**
      * get profile from backend
+     * basic service
      */
     public static void getProfile(){
 
