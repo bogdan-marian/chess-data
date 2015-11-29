@@ -1,0 +1,22 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="eu.chessdata.SignInActivity">
+    <item
+        android:id="@+id/action_test_endpoints"
+        android:orderInCategory="100"
+        android:title="@string/test_endpoints"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_create_quote"
+        android:title="@string/create_quote"
+        />
+    <item
+        android:id="@+id/action_create_and_iterate_over_endpoints"
+        android:title="@string/create_and_iterate"
+        />
+    <item
+        android:id="@+id/action_getProfile"
+        android:title="@string/action_getProfile"
+        />
+</menu>

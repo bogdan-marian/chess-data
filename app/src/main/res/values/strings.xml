@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">chess-data</string>
+    <string name="signed_out">Would you like to sign in?</string>
+    <string name="charlesBuxton">In life, as in chess, forethought wins.(Charles Buxton)</string>
+
+    <!-- TODO(user): replace with your real server client ID -->
+    <!-- Server Client ID.  This should be a valid Web OAuth 2.0 Client ID obtained
+         from https://console.developers.google.com/ -->
+    <string name="server_client_id" translatable="false">264714598866-ne3a6fp88topjmnidocrt86u7inokqlr.apps.googleusercontent.com</string>
+    <string name="desc_king_icon">google icon</string>
+    <string name="title_text">Chess Data</string>
+    <string name="sign_out">Sign out</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="loading">Loading...</string>
+    <string name="test_endpoints">Test endpoints</string>
+    <string name="create_quote">Create Quote</string>
+    <string name="create_and_iterate">Create and iterate</string>
+    <string name="action_getProfile">getProfile</string>
+
+</resources>
