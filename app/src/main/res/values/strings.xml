@@ -16,5 +16,6 @@
     <string name="create_quote">Create Quote</string>
     <string name="create_and_iterate">Create and iterate</string>
     <string name="action_getProfile">getProfile</string>
+    <string name="hello">Hello</string>
 
 </resources>

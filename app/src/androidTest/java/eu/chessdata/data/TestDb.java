@@ -63,6 +63,31 @@ public class TestDb extends AndroidTestCase {
         Log.d(TAG,"profileRowId = " + profileRowId);
         assertTrue(profileRowId != -1);
         // data is inserted
+
+        // Fourth Step: Query the database and receive a Cursor back
+        // A cursor is your primary interface to the query results.
+        Cursor cursor = db.query(ChessDataContract.ProfileEntry.TABLE_NAME,
+                null,//all columns
+                null,//columns for the "where" clause
+                null, //values for the "where" clause
+                null, //columns to group by
+                null, //columns to filter by row groups
+                null  //sort order )
+        );
+
+        // Move the cursor to a valid database row and check to see if we got any records back
+        // from the query
+        assertTrue( "Error: No Records returned from profile query", cursor.moveToFirst() );
+
+        // Fifth Step: Validate data in resulting Cursor with the original ContentValues
+        // (you can use the validateCurrentRecord function in TestUtilities to validate the
+        // query if you like)
+        TestUtilities.validateCurrentRecord("Error: Profile Query Validation Failed",
+                cursor, testValues);
+
+        // Move the cursor to demonstrate that there is only one record in the database
+        assertFalse( "Error: More than one record returned from weather query",
+                cursor.moveToNext() );
         return 1;
     }
 }

@@ -1,15 +1,29 @@
 package eu.chessdata.data;
 
+import android.net.Uri;
 import android.provider.BaseColumns;
 
 /**
- * Created by bogda on 29/11/2015.
+ * each table as 2 id columns
+ * _id is the inner sqlite id column auto incremented by sqlite
+ * tableId is the datastore id.
+ * To identify if a entity was not yet created on the datastore is enough to
+ * check if tableId column is null.
  */
 public class ChessDataContract {
+    public static final String CONTENT_AUTHORITY = "eu.chessdata";
+    public static final Uri BASE_CONTENT_URI = Uri.parse("content://"+ CONTENT_AUTHORITY);
+
+    public static final String PATH_PROFILE = "profile";
+
     /*
-    Inner class that defines the conent of the location table
+    Inner class that defines the content of the profile table.
      */
     public static final class ProfileEntry implements BaseColumns{
+        public static final Uri CONTENT_URI =
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_PROFILE).build();
+
+
         public static final String TABLE_NAME = "profile";
         public static final String COLUMN_ID = "_id";
         public static final String COLUMN_PROFILE_ID ="profileId";

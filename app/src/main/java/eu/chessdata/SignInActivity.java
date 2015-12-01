@@ -30,6 +30,7 @@ import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 
 import java.io.IOException;
+import java.util.Date;
 
 import eu.chessdata.backend.profileEndpoint.ProfileEndpoint;
 import eu.chessdata.backend.profileEndpoint.model.Profile;
@@ -222,10 +223,10 @@ public class SignInActivity extends AppCompatActivity implements
             String idToken = mAcct.getIdToken();
 
             String charlesBuxton = getString(R.string.charlesBuxton);
+            String hello = getString(R.string.hello);
             Log.d(TAG, "bogdan debug: displayName = " + displayName);
             mStatusTextView.setText(charlesBuxton + "\n" +
-                    displayName + "\n" +
-                    idToken);
+                    hello + " " + displayName);
         } else {
             mStatusTextView.setText(R.string.signed_out);
 
@@ -479,7 +480,8 @@ public class SignInActivity extends AppCompatActivity implements
             Log.d(TAG, "GetProfile: param[0]="+idTokenString);
             try {
                 Profile profile = profileEndpoint.getProfile(idTokenString).execute();
-                Log.d(TAG,"GetProfile: "+profile.getName()+"-"+profile.getEmail()+"-"+profile.getDateCreated());
+                Date date = new Date(profile.getDateCreated());
+                Log.d(TAG,"GetProfile: "+profile.getName()+"-"+profile.getEmail()+"-"+date.toString());
                 return  profile;
             } catch (IOException e) {
                 e.printStackTrace();

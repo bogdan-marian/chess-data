@@ -15,11 +15,11 @@ public class Profile {
     private String profileId;
     private Email email;
     private String name;
-    private Date dateOfBirth;
+    private long dateOfBirth;
     private int elo;
     private int altElo;
-    private Date dateCreated;
-    private Date updateStamp;
+    private long dateCreated;
+    private long updateStamp;
 
     //constructors;
     public Profile(){}
@@ -27,12 +27,13 @@ public class Profile {
         this.profileId = profileId;
         this.email=email;
         this.name = name;
-        Date date = new Date();
+        long date = new Date().getTime();
         this.dateCreated = date;
         this.updateStamp = date;
     }
 
     //generated
+
     public String getProfileId() {
         return profileId;
     }
@@ -57,11 +58,11 @@ public class Profile {
         this.name = name;
     }
 
-    public Date getDateOfBirth() {
+    public long getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(Date dateOfBirth) {
+    public void setDateOfBirth(long dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
@@ -81,19 +82,19 @@ public class Profile {
         this.altElo = altElo;
     }
 
-    public Date getDateCreated() {
+    public long getDateCreated() {
         return dateCreated;
     }
 
-    public void setDateCreated(Date dateCreated) {
+    public void setDateCreated(long dateCreated) {
         this.dateCreated = dateCreated;
     }
 
-    public Date getUpdateStamp() {
+    public long getUpdateStamp() {
         return updateStamp;
     }
 
-    public void setUpdateStamp(Date updateStamp) {
+    public void setUpdateStamp(long updateStamp) {
         this.updateStamp = updateStamp;
     }
 }

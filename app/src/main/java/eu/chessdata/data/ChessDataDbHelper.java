@@ -24,11 +24,11 @@ public class ChessDataDbHelper extends SQLiteOpenHelper{
                 ProfileEntry.COLUMN_PROFILE_ID+" TEXT UNIQUE, "+
                 ProfileEntry.COLUMN_EMAIL+" TEXT UNIQUE NOT NULL, " +
                 ProfileEntry.COLUMN_NAME+" TEXT NOT NULL, "+
-                ProfileEntry.COLUMN_DATE_DATE_OF_BIRTH +" TEXT NOT NULL, "+
+                ProfileEntry.COLUMN_DATE_DATE_OF_BIRTH +" INTEGER NOT NULL, "+
                 ProfileEntry.COLUMN_ELO +" INTEGER NOT NULL, "+
                 ProfileEntry.COLUMN_ALT_ELO +" INTEGER NOT NULL, "+
-                ProfileEntry.COLUMN_DATE_CREATED+" TEXT NOT NULL, "+
-                ProfileEntry.COLUMN_UPATE_STAMP+" TEXT NOT NULL"+
+                ProfileEntry.COLUMN_DATE_CREATED+" INTEGER NOT NULL, "+
+                ProfileEntry.COLUMN_UPATE_STAMP+" INTEGER NOT NULL"+
                 " );";
         db.execSQL(SQL_CREATE_PROFILE_TABLE);
     }
