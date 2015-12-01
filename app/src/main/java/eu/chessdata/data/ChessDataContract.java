@@ -11,7 +11,8 @@ public class ChessDataContract {
      */
     public static final class ProfileEntry implements BaseColumns{
         public static final String TABLE_NAME = "profile";
-        public static final String COLUMN_PROFILE_ID = "profile_id";
+        public static final String COLUMN_ID = "_id";
+        public static final String COLUMN_PROFILE_ID ="profileId";
         public static final String COLUMN_EMAIL="email";
         public static final String COLUMN_NAME = "name";
         public static final String COLUMN_DATE_DATE_OF_BIRTH = "date_of_birth";

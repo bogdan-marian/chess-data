@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 import java.util.HashSet;
 
@@ -11,6 +12,8 @@ import java.util.HashSet;
  * Created by bogda on 29/11/2015.
  */
 public class TestDb extends AndroidTestCase {
+    private String TAG = "bogdan";
+
     void deleteTheDatabase(){
         mContext.deleteDatabase(ChessDataDbHelper.DATABASE_NAME);
     }
@@ -47,17 +50,19 @@ public class TestDb extends AndroidTestCase {
     }
 
     public void testProfileTable(){
+        Log.d(TAG, "launch insert profile?");
         insertProfile();
     }
-    public String insertProfile(){
+    public long insertProfile(){
         ChessDataDbHelper dbHelper = new ChessDataDbHelper(mContext);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         String testProfile1 = "testProfile1";
         ContentValues testValues = TestUtilities.createProfileValues(testProfile1);
-        Long locationRowId;
-        locationRowId = db.insert(ChessDataContract.ProfileEntry.TABLE_NAME,null,testValues);
-        assertTrue(locationRowId != -1);
+        long profileRowId;
+        profileRowId = db.insert(ChessDataContract.ProfileEntry.TABLE_NAME,null,testValues);
+        Log.d(TAG,"profileRowId = " + profileRowId);
+        assertTrue(profileRowId != -1);
         // data is inserted
-        return "data inserted";
+        return 1;
     }
 }

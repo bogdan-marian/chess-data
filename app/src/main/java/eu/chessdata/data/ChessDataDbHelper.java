@@ -20,14 +20,15 @@ public class ChessDataDbHelper extends SQLiteOpenHelper{
     @Override
     public void onCreate(SQLiteDatabase db) {
         String SQL_CREATE_PROFILE_TABLE = "CREATE TABLE " + ProfileEntry.TABLE_NAME +" ("+
-                ProfileEntry.COLUMN_PROFILE_ID +"TEXT PRIMARY KEY, " +
-                ProfileEntry.COLUMN_EMAIL+"TEXT UNIQUE NOT NULL, " +
-                ProfileEntry.COLUMN_NAME+"TEXT NOT NULL, "+
-                ProfileEntry.COLUMN_DATE_DATE_OF_BIRTH +"TEXT NOT NULL, "+
-                ProfileEntry.COLUMN_ELO +"INTEGER NOT NULL, "+
-                ProfileEntry.COLUMN_ALT_ELO +"INTEGER NOT NULL, "+
-                ProfileEntry.COLUMN_DATE_CREATED+"TEXT NOT NULL, "+
-                ProfileEntry.COLUMN_UPATE_STAMP+"TEXT_NOT_NULL"+
+                ProfileEntry.COLUMN_ID +" INTEGER PRIMARY KEY, " +
+                ProfileEntry.COLUMN_PROFILE_ID+" TEXT UNIQUE, "+
+                ProfileEntry.COLUMN_EMAIL+" TEXT UNIQUE NOT NULL, " +
+                ProfileEntry.COLUMN_NAME+" TEXT NOT NULL, "+
+                ProfileEntry.COLUMN_DATE_DATE_OF_BIRTH +" TEXT NOT NULL, "+
+                ProfileEntry.COLUMN_ELO +" INTEGER NOT NULL, "+
+                ProfileEntry.COLUMN_ALT_ELO +" INTEGER NOT NULL, "+
+                ProfileEntry.COLUMN_DATE_CREATED+" TEXT NOT NULL, "+
+                ProfileEntry.COLUMN_UPATE_STAMP+" TEXT NOT NULL"+
                 " );";
         db.execSQL(SQL_CREATE_PROFILE_TABLE);
     }
