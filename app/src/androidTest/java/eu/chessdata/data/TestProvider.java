@@ -1,10 +1,14 @@
 package eu.chessdata.data;
 
 import android.content.ComponentName;
+import android.content.ContentValues;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.test.AndroidTestCase;
+
 import eu.chessdata.data.ChessDataContract.ProfileEntry;
 /**
  * Created by bogda on 03/12/2015.
@@ -56,4 +60,35 @@ public class TestProvider extends AndroidTestCase{
         }
     }
 
+    /*
+        This test uses the database directly to insert a profile and then uses the ContentProvider to
+        read out the data.
+     */
+    public void testBasicProfileQueries(){
+        //insert our test record into the database
+        ChessDataDbHelper dbHelper = new ChessDataDbHelper(mContext);
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        ContentValues testValues = TestUtilities.createProfileVipValues();
+        long profileRowId = TestUtilities.insertProfileVipValues(mContext);
+
+        //test the basic content provider query
+        Cursor profileCursor = mContext.getContentResolver().query(
+                ProfileEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+
+        //make sure that we get the correct cursor out of hte database
+        TestUtilities.validateCursor("testBasicProfileQueries, profile query", profileCursor, testValues);
+
+        // Has the NotificationUri been set correctly? --- we can only test this easily against API
+        // level 19 or greater because getNotificationUri was added in API level 19.
+        if ( Build.VERSION.SDK_INT >= 19 ) {
+            assertEquals("Error: Location Query did not properly set NotificationUri",
+                    profileCursor.getNotificationUri(), ProfileEntry.CONTENT_URI);
+        }
+    }
 }
