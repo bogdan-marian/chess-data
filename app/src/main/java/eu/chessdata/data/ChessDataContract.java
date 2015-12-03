@@ -1,6 +1,7 @@
 package eu.chessdata.data;
 
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
@@ -28,7 +29,9 @@ public class ChessDataContract {
                 ContentResolver.CURSOR_DIR_BASE_TYPE+"/"+CONTENT_AUTHORITY+"/"+PATH_PROFILE;
         public static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE+"/"+CONTENT_AUTHORITY+"/"+PATH_PROFILE;
-
+        public static Uri buildProfileUri(long id){
+            return ContentUris.withAppendedId(CONTENT_URI,id);
+        }
 
         public static final String TABLE_NAME = "profile";
         public static final String COLUMN_ID = "_id";

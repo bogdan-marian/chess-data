@@ -9,7 +9,6 @@ public class ProfileService {
      * basic service
      */
     public static void getProfile(){
-
         throw new IllegalStateException("Please finish this");
     }
 }

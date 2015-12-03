@@ -17,6 +17,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <provider
+            android:authorities="eu.chessdata"
+            android:name=".data.ChessDataProvider"/>
     </application>
 
 </manifest>
