@@ -7,7 +7,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.support.annotation.Nullable;
 
 /**
  * Created by bogda on 03/12/2015.
@@ -40,7 +39,15 @@ public class ChessDataProvider extends ContentProvider{
         switch (sUriMatcher.match(uri)){
             case PROFILE:
             {
-                retCursor = null;
+                retCursor = mOpenHelper.getReadableDatabase().query(
+                        ChessDataContract.ProfileEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
                 break;
             }
             default:
