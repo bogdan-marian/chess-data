@@ -70,7 +70,7 @@ public class TestProvider extends AndroidTestCase{
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         ContentValues testValues = TestUtilities.createProfileVipValues();
-        long profileRowId = TestUtilities.insertProfileVipValues(mContext);
+        long profileRowId = TestUtilities.insertProfileVipValues(mContext, testValues);
 
         //test the basic content provider query
         Cursor profileCursor = mContext.getContentResolver().query(
