@@ -1,19 +1,22 @@
 package eu.chessdata.data;
 
 import android.content.ComponentName;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Build;
 import android.test.AndroidTestCase;
 
 import eu.chessdata.data.ChessDataContract.ProfileEntry;
+
 /**
  * Created by bogda on 03/12/2015.
  */
-public class TestProvider extends AndroidTestCase{
+public class TestProvider extends AndroidTestCase {
 
     @Override
     protected void setUp() throws Exception {
@@ -21,16 +24,31 @@ public class TestProvider extends AndroidTestCase{
         deleteAllRecords();
     }
 
-    public void deleteAllRecords(){
-        deleteAllRecordsFromDB();
+    public void deleteAllRecords() {
+        deleteAllRecordsFromProvider();
     }
 
-    public void deleteAllRecordsFromDB() {
-        ChessDataDbHelper dbHelper = new ChessDataDbHelper(mContext);
+    public void deleteAllRecordsFromProvider() {
+        /*ChessDataDbHelper dbHelper = new ChessDataDbHelper(mContext);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         db.delete(ProfileEntry.TABLE_NAME, null,null);
-        db.close();
+        db.close();*/
+
+        mContext.getContentResolver().delete(
+                ProfileEntry.CONTENT_URI,
+                null,
+                null
+        );
+        Cursor cursor = mContext.getContentResolver().query(
+                ProfileEntry.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+        assertEquals("Error: Records not deleted from profile table ", 0,cursor.getCount());
+        cursor.close();
     }
 
     /*
@@ -64,13 +82,13 @@ public class TestProvider extends AndroidTestCase{
         This test uses the database directly to insert a profile and then uses the ContentProvider to
         read out the data.
      */
-    public void testBasicProfileQueries(){
+    public void testBasicProfileQueries() {
         //insert our test record into the database
         ChessDataDbHelper dbHelper = new ChessDataDbHelper(mContext);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         ContentValues testValues = TestUtilities.createProfileVipValues();
-        long profileRowId = TestUtilities.insertProfileVipValues(mContext, testValues);
+        long profileRowId = TestUtilities.insertProfileValues(mContext, testValues);
 
         //test the basic content provider query
         Cursor profileCursor = mContext.getContentResolver().query(
@@ -86,9 +104,54 @@ public class TestProvider extends AndroidTestCase{
 
         // Has the NotificationUri been set correctly? --- we can only test this easily against API
         // level 19 or greater because getNotificationUri was added in API level 19.
-        if ( Build.VERSION.SDK_INT >= 19 ) {
+        if (Build.VERSION.SDK_INT >= 19) {
             assertEquals("Error: Location Query did not properly set NotificationUri",
                     profileCursor.getNotificationUri(), ProfileEntry.CONTENT_URI);
         }
+    }
+
+    public void testInsertReadProfile() {
+        ContentValues testValues = TestUtilities.createProfileVipValues();
+
+        //register a content observer for our insert.
+        //This tome, directly with
+        TestUtilities.TestContentObserver tco = TestUtilities.getTestContentObserver();
+        mContext.getContentResolver().registerContentObserver(ProfileEntry.CONTENT_URI, true, tco);
+        Uri profileUri = mContext.getContentResolver().insert(ProfileEntry.CONTENT_URI, testValues);
+
+        //Did our content resolver get called?
+        tco.waitForNotificationOrFail();
+        mContext.getContentResolver().unregisterContentObserver(tco);
+
+        long profileRowId = ContentUris.parseId(profileUri);
+
+        //Verify wee got a row back.
+        assertTrue(profileRowId != -1);
+
+        //
+        Cursor cursor = mContext.getContentResolver().query(
+                ProfileEntry.CONTENT_URI,
+                null, // leaving "columns" null just returns all the columns.
+                null, // cols for "where" clause
+                null, // values for "where" clause
+                null  // sort order
+        );
+
+        TestUtilities.validateCursor("testInsertReadProvider, Error validating profileEntry. ",
+                cursor, testValues);
+    }
+
+    public void testDeleteAllRecords() {
+        testInsertReadProfile();
+
+        TestUtilities.TestContentObserver profileObserver = TestUtilities.getTestContentObserver();
+        mContext.getContentResolver().registerContentObserver(ProfileEntry.CONTENT_URI, true, profileObserver);
+
+        deleteAllRecordsFromProvider();
+
+        //make sure that you are calling
+        //getContext().getContentResolver().notifyChange(uri, null); in the ContentProvider delete.
+        profileObserver.waitForNotificationOrFail();
+        mContext.getContentResolver().unregisterContentObserver(profileObserver);
     }
 }
