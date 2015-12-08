@@ -1,7 +1,5 @@
 package eu.chessdata;
 
-import eu.chessdata.tools.MyGlobalSharedObjects;
-
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -36,6 +34,7 @@ import eu.chessdata.backend.profileEndpoint.ProfileEndpoint;
 import eu.chessdata.backend.profileEndpoint.model.Profile;
 import eu.chessdata.backend.quoteEndpoint.QuoteEndpoint;
 import eu.chessdata.backend.quoteEndpoint.model.Quote;
+import eu.chessdata.tools.MyGlobalSharedObjects;
 
 
 /**
@@ -55,6 +54,8 @@ public class SignInActivity extends AppCompatActivity implements
     private GoogleSignInAccount mAcct;
     private TextView mStatusTextView;
     private ProgressDialog mProgressDialog;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
