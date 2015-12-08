@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'com.neenbedankt.android-apt'
 
 android {
     compileSdkVersion 23
@@ -38,4 +39,7 @@ dependencies {
     compile 'com.android.support:design:23.1.1'
     compile 'com.google.android.gms:play-services-auth:8.3.0'
     compile project(path: ':backend', configuration: 'android-endpoints')
+    compile 'com.squareup:javapoet:1.2.0'
+    compile 'ckm.simple:simple_sql_provider_annotation:1.0.6'
+    compile 'ckm.simple:simple_sql_provider_processor:1.0.6'
 }

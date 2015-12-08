@@ -20,7 +20,7 @@
 
         <provider
             android:authorities="eu.chessdata"
-            android:name=".data.ChessDataProvider"/>
+            android:name=".data.simplesql.SimpleProvider"/>
     </application>
 
 </manifest>
