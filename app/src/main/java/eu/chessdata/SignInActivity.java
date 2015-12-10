@@ -1,8 +1,11 @@
 package eu.chessdata;
 
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.util.Pair;
@@ -28,13 +31,15 @@ import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 
 import java.io.IOException;
-import java.util.Date;
 
 import eu.chessdata.backend.profileEndpoint.ProfileEndpoint;
 import eu.chessdata.backend.profileEndpoint.model.Profile;
 import eu.chessdata.backend.quoteEndpoint.QuoteEndpoint;
 import eu.chessdata.backend.quoteEndpoint.model.Quote;
+import eu.chessdata.data.simplesql.ProfileSql;
+import eu.chessdata.data.simplesql.ProfileTable;
 import eu.chessdata.tools.MyGlobalSharedObjects;
+import eu.chessdata.tools.Params;
 
 
 /**
@@ -47,14 +52,16 @@ public class SignInActivity extends AppCompatActivity implements
 
     private SignInActivity mSignInActivity = this;
 
-    private static final String TAG = "SignInActivity";
+    private static final String TAG = "my-debug-tag";
     private static final int RC_SIGN_IN = 9001;
 
     private GoogleApiClient mGoogleApiClient;
     private GoogleSignInAccount mAcct;
     private TextView mStatusTextView;
     private ProgressDialog mProgressDialog;
+    private SharedPreferences mSharedPref;
 
+    private ContentResolver mContentResolver;
 
 
     @Override
@@ -69,6 +76,11 @@ public class SignInActivity extends AppCompatActivity implements
         findViewById(R.id.sign_in_button).setOnClickListener(this);
         findViewById(R.id.sign_out_button).setOnClickListener(this);
         findViewById(R.id.disconnect_button).setOnClickListener(this);
+
+        //bogdan: set shared prefs and context
+        mSharedPref = this.getSharedPreferences(
+                getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        mContentResolver = this.getContentResolver();
 
         // [START configure_signin]
         // Configure sign-in to request the user's ID, email address, and basic
@@ -149,6 +161,7 @@ public class SignInActivity extends AppCompatActivity implements
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             mAcct = result.getSignInAccount();
+            new GetProfile().execute(mAcct.getIdToken());
             updateUI(true);
         } else {
             // Signed out, show unauthenticated UI.
@@ -225,7 +238,6 @@ public class SignInActivity extends AppCompatActivity implements
 
             String charlesBuxton = getString(R.string.charlesBuxton);
             String hello = getString(R.string.hello);
-            Log.d(TAG, "bogdan debug: displayName = " + displayName);
             mStatusTextView.setText(charlesBuxton + "\n" +
                     hello + " " + displayName);
         } else {
@@ -315,10 +327,10 @@ public class SignInActivity extends AppCompatActivity implements
             context = params[0].first;
             String name = params[0].second;
 
-           try {
+            try {
                 String idToken = mAcct.getIdToken();
-               Quote quote = quoteEndpoint.getRandomQuote().setIdToken(idToken).execute();
-               return quote.getWhat();
+                Quote quote = quoteEndpoint.getRandomQuote().setIdToken(idToken).execute();
+                return quote.getWhat();
             } catch (IOException e) {
                 return e.getMessage();
             }
@@ -366,7 +378,7 @@ public class SignInActivity extends AppCompatActivity implements
 
         @Override
         protected void onPostExecute(Quote quote) {
-            String result = quote.getWho()+"-"+quote.getWhat();
+            String result = quote.getWho() + "-" + quote.getWhat();
             Toast.makeText(context, result, Toast.LENGTH_LONG).show();
         }
     }
@@ -383,7 +395,7 @@ public class SignInActivity extends AppCompatActivity implements
                 quoteEndpoint = builder.build();
             }
 
-            Log.d(TAG,"IterateOverEndpoint START");
+            Log.d(TAG, "IterateOverEndpoint START");
             context = params[0].first;
             Quote quote = params[0].second;
 
@@ -401,19 +413,19 @@ public class SignInActivity extends AppCompatActivity implements
 
         @Override
         protected void onPostExecute(Quote quote) {
-            Log.d(TAG,"IterateOverEndpoint START");
-            if (quote.getWho()!="not valid"){
-                String result ="("+quote+")";
+            Log.d(TAG, "IterateOverEndpoint START");
+            if (quote.getWho() != "not valid") {
+                String result = "(" + quote + ")";
                 Long counter = quote.getCounter();
-                Log.d(TAG, " IterateOverEndpoint post counter = "+counter +"("+result+")");
+                Log.d(TAG, " IterateOverEndpoint post counter = " + counter + "(" + result + ")");
                 if (counter < 5) {
                     Log.d(TAG, " IterateOverEndpoint connect again to endpoint = " + counter);
                     new IterateOverEndpoint()
-                            .execute(new Pair<Context, Quote>(mSignInActivity,quote));
-                }else{
+                            .execute(new Pair<Context, Quote>(mSignInActivity, quote));
+                } else {
                     Log.d(TAG, " THIS DATA IS > 5");
                 }
-            }else{
+            } else {
                 Toast.makeText(context, "not valid", Toast.LENGTH_LONG).show();
             }
         }
@@ -424,7 +436,7 @@ public class SignInActivity extends AppCompatActivity implements
         private Context context;
 
         @Override
-        protected Quote doInBackground(Context ... params) {
+        protected Quote doInBackground(Context... params) {
             if (quoteEndpoint == null) {  // Only do this once
                 QuoteEndpoint.Builder builder = new QuoteEndpoint.Builder(AndroidHttp.newCompatibleTransport(), new AndroidJsonFactory(), null)
                         .setRootUrl("https://chess-data.appspot.com/_ah/api/");
@@ -449,45 +461,81 @@ public class SignInActivity extends AppCompatActivity implements
         @Override
         protected void onPostExecute(Quote quote) {
             Toast.makeText(context, "CreateAndStartIterate before"
-                    +quote.getCounter()
-                    +" "+quote.getWho(), Toast.LENGTH_LONG).show();
-            if (quote.getWho()!="not valid"){
-                String result ="("+quote+"):"+ quote.getWho()+"-"+quote.getWhat();
-                if (quote.getCounter()< 5){
+                    + quote.getCounter()
+                    + " " + quote.getWho(), Toast.LENGTH_LONG).show();
+            if (quote.getWho() != "not valid") {
+                String result = "(" + quote + "):" + quote.getWho() + "-" + quote.getWhat();
+                if (quote.getCounter() < 5) {
                     result = "Continue iterating: ";
                     Toast.makeText(context, result, Toast.LENGTH_LONG).show();
                     Log.d(TAG, "DEBUG: CreateAndStartIterate => IterateOverEndpoint");
                     new IterateOverEndpoint()
                             .execute(new Pair<Context, Quote>(mSignInActivity, quote));
                 }
-            }else{
+            } else {
                 Toast.makeText(context, "not valid", Toast.LENGTH_LONG).show();
             }
         }
     }
 
-    class GetProfile extends AsyncTask<String,String,Profile>{
+    /**
+     * Identify the current user. Store the user on the backend
+     * if identification and storage complete then store the user also in the local contentProvider
+     * configure value for the pref_default_profile_key
+     */
+    class GetProfile extends AsyncTask<String, String, Profile> {
 
         @Override
-        protected Profile doInBackground(String... params) {
+        protected Profile doInBackground(String... paramsVar) {
             ProfileEndpoint.Builder builder =
                     new ProfileEndpoint.Builder(
                             AndroidHttp.newCompatibleTransport(),
                             new AndroidJsonFactory(),
                             null)
-                    .setRootUrl(MyGlobalSharedObjects.ROOT_URL);
+                            .setRootUrl(MyGlobalSharedObjects.ROOT_URL);
             ProfileEndpoint profileEndpoint = builder.build();
-            String idTokenString = params[0];
-            Log.d(TAG, "GetProfile: param[0]="+idTokenString);
+            String idTokenString = paramsVar[0];
             try {
                 Profile profile = profileEndpoint.getProfile(idTokenString).execute();
-                Date date = new Date(profile.getDateCreated());
-                Log.d(TAG,"GetProfile: "+profile.getName()+"-"+profile.getEmail()+"-"+date.toString());
-                return  profile;
+                if (profile != null) {
+                    ProfileSql profileSql = new ProfileSql(profile);
+                    //query the profile using the content provider
+                    Params params = Params.getProfileById(profile.getProfileId());
+                    Cursor cursor = getContentResolver().query(
+                            params.getUri(),
+                            params.getProjection(),
+                            params.getSelection(),
+                            params.getSelectionArgs(),
+                            params.getSortOrder());
+                    if (cursor == null){
+                        throw new IllegalStateException("Cursor is null");
+                    }
+                    if (cursor.getCount() < 1){
+                        //TODO: 09/12/2015 Save the profileSql
+                        Log.d(TAG, "Saving the default profile in sqlite");
+                        //default profile not in database so go one and insert it.
+                        mContentResolver.insert(
+                                ProfileTable.CONTENT_URI, ProfileTable.getContentValues(
+                                        new ProfileSql(profile),false));
+                    }
+                    //profile in the database
+                    Log.d(TAG, "Saving the default profile in shared preferences " +
+                            profileSql.name + " " + profileSql.profileId);
+                    SharedPreferences.Editor editor = mSharedPref.edit();
+                    editor.putString(getString(R.string.pref_default_profile_key),
+                            profileSql.profileId);
+                    editor.commit();
+                }
+                return profile;
             } catch (IOException e) {
                 e.printStackTrace();
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Profile profile) {
+
         }
     }
 }

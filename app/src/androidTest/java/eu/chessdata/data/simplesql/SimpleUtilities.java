@@ -8,8 +8,8 @@ import java.util.Date;
  * Created by bogda on 07/12/2015.
  */
 public class SimpleUtilities extends AndroidTestCase{
-    static Profile createProfileVipValues(){
-        Profile vip = new Profile();
+    static ProfileSql createProfileVipValues(){
+        ProfileSql vip = new ProfileSql();
         vip.profileId = "profileVip1";
         vip.email = "testmail@mail.com";
         vip.name = "Test Profile Name";
@@ -23,7 +23,7 @@ public class SimpleUtilities extends AndroidTestCase{
         return vip;
     }
 
-    static void compareProfilesNoId(Profile profileA, Profile profileB){
+    static void compareProfilesNoId(ProfileSql profileA, ProfileSql profileB){
         assertTrue("Profile not the same ", profileA.profileId.equals(profileB.profileId));
         assertTrue("email not the same ", profileA.email.equals(profileB.email));
         assertTrue("name not the same ", profileA.name.equals(profileB.name));
