@@ -533,9 +533,16 @@ public class SignInActivity extends AppCompatActivity implements
             return null;
         }
 
+        /**
+         * In reads the default profile id from the settings
+         * if it matches with the param profile then it opens the HomeActivity else
+         * sign's out
+         * @param profile
+         */
         @Override
         protected void onPostExecute(Profile profile) {
-
+            Intent intent = new Intent(mSignInActivity,HomeActivity.class);
+            startActivity(intent);
         }
     }
 }
