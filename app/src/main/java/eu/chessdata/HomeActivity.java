@@ -33,9 +33,7 @@ public class HomeActivity extends AppCompatActivity
                         .setAction("Action", null).show();
             }
         });
-        String user_name = "Please Implement Name";
-        mTextViewUserName = (TextView) findViewById(R.id.user_name);
-        mTextViewUserName.setText(user_name);
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
