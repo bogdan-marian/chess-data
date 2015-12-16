@@ -35,7 +35,9 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_tournament_fragment">Hello tournament fragment</string>
-    <string name="pref_profile_email">pref_profile_email</string>
-    <string name="pref_profile_idToken">pref_profile_idToken</string>
-    <string name="pref_profile_signedOut">pref_profile_signedOut</string>
+    <string name="pref_profile_email" translatable="false">pref_profile_email</string>
+    <string name="pref_profile_idToken" translatable="false">pref_profile_idToken</string>
+    <string name="pref_profile_signedOut" translatable="false">pref_profile_signedOut</string>
+    <string name="pref_profile_profileId" translatable="false">pref_profile_profileId</string>
+    <string name="pref_profile_id">pref_profile_id</string>
 </resources>

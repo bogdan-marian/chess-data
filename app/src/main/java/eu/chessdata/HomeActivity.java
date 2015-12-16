@@ -1,5 +1,7 @@
 package eu.chessdata;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentTransaction;
@@ -8,6 +10,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +18,8 @@ import android.widget.TextView;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    private String TAG = "my-debug-tag";
+    private SharedPreferences mSharedPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,8 +58,27 @@ public class HomeActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         //Set the user name
+        String defaultValue = getString(R.string.pref_profile_signedOut);
+        mSharedPref = this.getSharedPreferences(
+                getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        String displayName = mSharedPref.getString(
+                getString(R.string.pref_profile_display_name), defaultValue);
         View header = navigationView.getHeaderView(0);
-        ((TextView)header.findViewById(R.id.user_name)).setText("Manual name");
+        ((TextView)header.findViewById(R.id.user_name)).setText(displayName);
+
+        String email = mSharedPref.getString(
+                getString(R.string.pref_profile_email), defaultValue);
+        ((TextView)header.findViewById(R.id.user_email)).setText(email);
+
+        //debug section
+        String debugDefaultValue = "defaultValue";
+        String debugDisplayName = mSharedPref.getString(
+                getString(R.string.pref_profile_display_name), debugDefaultValue);
+        String debugEmail = mSharedPref.getString(
+                getString(R.string.pref_profile_email), debugDefaultValue);
+        String debugProfileIdToken = mSharedPref.getString(
+                getString(R.string.pref_profile_idToken), debugDefaultValue);
+        Log.d(TAG, "[name,email,id]=" + debugDisplayName + "," + debugEmail + "," + debugProfileIdToken);
     }
 
     @Override

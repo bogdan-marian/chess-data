@@ -241,10 +241,22 @@ public class SignInActivity extends AppCompatActivity implements
             //set the the default username and email in shared preferences
             SharedPreferences.Editor editor = mSharedPref.edit();
             editor.putString(getString(R.string.pref_profile_display_name), mAcct.getDisplayName());
-            editor.putString(getString(R.string.pref_profile_email),mAcct.getEmail());
-            editor.putString(getString(R.string.pref_profile_idToken),mAcct.getIdToken());
+
+            editor.putString(getString(R.string.pref_profile_email), mAcct.getEmail());
+            editor.putString(getString(R.string.pref_profile_idToken), mAcct.getIdToken());
             editor.commit();
-            Log.d(TAG, "Finished saving in shared preferences");
+
+            String debugDefaultValue = "defaultValue";
+            String debugDisplayName = mSharedPref.getString(
+                    getString(R.string.pref_profile_display_name), debugDefaultValue);
+            String debugEmail = mSharedPref.getString(
+                    getString(R.string.pref_profile_email), debugDefaultValue);
+            String debugProfileIdToken = mSharedPref.getString(
+                    getString(R.string.pref_profile_idToken), debugDefaultValue);
+            Log.d(TAG,"[name,email,id]="+debugDisplayName+","+debugEmail+","+debugProfileIdToken);
+
+            //make sure that the profile is also present on the backend
+            new GetProfile().execute(mAcct.getIdToken());
         } else {
             mStatusTextView.setText(R.string.signed_out);
 
@@ -258,7 +270,6 @@ public class SignInActivity extends AppCompatActivity implements
             editor.putString(getString(R.string.pref_profile_email),signedOut);
             editor.putString(getString(R.string.pref_profile_idToken), signedOut);
             editor.commit();
-            Log.d(TAG, "Finished setting the signed out values");
         }
     }
 
@@ -532,12 +543,11 @@ public class SignInActivity extends AppCompatActivity implements
                                 ProfileTable.CONTENT_URI, ProfileTable.getContentValues(
                                         new ProfileSql(profile),false));
                     }
-                    //profile in the database
-                    Log.d(TAG, "Saving the default profile in shared preferences " +
-                            profileSql.name + " " + profileSql.profileId);
+                    //profile in the shared preferences
                     SharedPreferences.Editor editor = mSharedPref.edit();
-                    editor.putString(getString(R.string.pref_profile_display_name),
+                    editor.putString(getString(R.string.pref_profile_profileId),
                             profileSql.profileId);
+                    editor.putLong(getString(R.string.pref_profile_id), profileSql.id);
                     editor.commit();
                 }
                 return profile;
