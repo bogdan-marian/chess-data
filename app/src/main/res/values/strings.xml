@@ -23,7 +23,7 @@
     <string name="preference_file_key" translatable="false">eu.chessdata.PREFERENCE_FILE_KEY</string>
 
     <!--this is the key used to read the default profile-->
-    <string name="pref_default_profile_key" translatable="false">default_profile</string>
+    <string name="pref_profile_display_name" translatable="false">default_profile</string>
     <string name="pref_default_profile_not_set" translatable="false">no_profile</string>
     <string name="title_activity_home">HomeActivity</string>
 
@@ -35,4 +35,7 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_tournament_fragment">Hello tournament fragment</string>
+    <string name="pref_profile_email">pref_profile_email</string>
+    <string name="pref_profile_idToken">pref_profile_idToken</string>
+    <string name="pref_profile_signedOut">pref_profile_signedOut</string>
 </resources>

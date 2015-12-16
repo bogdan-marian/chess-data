@@ -157,14 +157,12 @@ public class SignInActivity extends AppCompatActivity implements
 
     // [START handleSignInResult]
     private void handleSignInResult(GoogleSignInResult result) {
-        Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             mAcct = result.getSignInAccount();
-            new GetProfile().execute(mAcct.getIdToken());
             updateUI(true);
         } else {
-            // Signed out, show unauthenticated UI.
+
             updateUI(false);
         }
     }
@@ -234,17 +232,33 @@ public class SignInActivity extends AppCompatActivity implements
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.VISIBLE);
 
             String displayName = mAcct.getDisplayName();
-            String idToken = mAcct.getIdToken();
 
             String charlesBuxton = getString(R.string.charlesBuxton);
             String hello = getString(R.string.hello);
             mStatusTextView.setText(charlesBuxton + "\n" +
                     hello + " " + displayName);
+
+            //set the the default username and email in shared preferences
+            SharedPreferences.Editor editor = mSharedPref.edit();
+            editor.putString(getString(R.string.pref_profile_display_name), mAcct.getDisplayName());
+            editor.putString(getString(R.string.pref_profile_email),mAcct.getEmail());
+            editor.putString(getString(R.string.pref_profile_idToken),mAcct.getIdToken());
+            editor.commit();
+            Log.d(TAG, "Finished saving in shared preferences");
         } else {
             mStatusTextView.setText(R.string.signed_out);
 
             findViewById(R.id.sign_in_button).setVisibility(View.VISIBLE);
             findViewById(R.id.sign_out_and_disconnect).setVisibility(View.GONE);
+
+            //set the default username and profile info as signed_out
+            String signedOut = getString(R.string.pref_profile_signedOut);
+            SharedPreferences.Editor editor = mSharedPref.edit();
+            editor.putString(getString(R.string.pref_profile_display_name), signedOut);
+            editor.putString(getString(R.string.pref_profile_email),signedOut);
+            editor.putString(getString(R.string.pref_profile_idToken), signedOut);
+            editor.commit();
+            Log.d(TAG, "Finished setting the signed out values");
         }
     }
 
@@ -522,7 +536,7 @@ public class SignInActivity extends AppCompatActivity implements
                     Log.d(TAG, "Saving the default profile in shared preferences " +
                             profileSql.name + " " + profileSql.profileId);
                     SharedPreferences.Editor editor = mSharedPref.edit();
-                    editor.putString(getString(R.string.pref_default_profile_key),
+                    editor.putString(getString(R.string.pref_profile_display_name),
                             profileSql.profileId);
                     editor.commit();
                 }
