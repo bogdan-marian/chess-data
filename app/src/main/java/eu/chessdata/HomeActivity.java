@@ -119,7 +119,7 @@ public class HomeActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_tournament) {
             // Handle the camera action
             QuoteFragment quoteFragment = new QuoteFragment();
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
