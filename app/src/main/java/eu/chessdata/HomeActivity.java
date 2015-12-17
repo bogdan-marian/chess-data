@@ -108,6 +108,8 @@ public class HomeActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
+        }else if(id==R.id.action_create_club){
+            (new ClubCreateDialogFragment()).show(getSupportFragmentManager(),"ClubCreateDialogFragment");
         }
 
         return super.onOptionsItemSelected(item);
@@ -121,15 +123,15 @@ public class HomeActivity extends AppCompatActivity
 
         if (id == R.id.nav_tournament) {
             // Handle the camera action
-            QuoteFragment quoteFragment = new QuoteFragment();
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_container, quoteFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
-        } else if (id == R.id.nav_gallery) {
             TournamentFragment tournamentFragment = new TournamentFragment();
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, tournamentFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
+        } else if (id == R.id.nav_gallery) {
+            QuoteFragment quoteFragment = new QuoteFragment();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, quoteFragment);
             transaction.addToBackStack(null);
             transaction.commit();
         } else if (id == R.id.nav_slideshow) {
