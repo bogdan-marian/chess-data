@@ -6,7 +6,6 @@ import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.config.Named;
 import com.google.appengine.api.datastore.Email;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
-import com.google.appengine.repackaged.com.google.common.base.Pair;
 import com.googlecode.objectify.Key;
 
 import eu.chessdata.backend.entities.Profile;
@@ -42,6 +41,7 @@ public class ProfileEndpoint {
         MyEntry<Status, Payload> secPair = MySecurityService.getProfile(idTokenString);
         if (secPair.getKey() == Status.VALID_USER) {
             //look in datastore and see if wee have this user
+            System.out.println("Valid idToken = " + idTokenString);
             Payload payload = (Payload) secPair.getValue();
             String profileId = payload.getSubject();
             Key key = Key.create(Profile.class, profileId);

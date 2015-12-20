@@ -27,6 +27,31 @@
         android:layout_height="wrap_content"
         android:hint="@string/hint.club.name"/>
     <EditText
+        android:id="@+id/shortName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint.club.shortName"/>
+    <EditText
+        android:id="@+id/email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint.club.email"/>
+    <EditText
+        android:id="@+id/country"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint.club.country"/>
+    <EditText
+        android:id="@+id/city"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint.club.city"/>
+    <EditText
+        android:id="@+id/homePage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint.club.homePage"/>
+    <EditText
         android:id="@+id/clubDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

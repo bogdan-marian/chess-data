@@ -4,6 +4,7 @@ import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyFactory;
 import com.googlecode.objectify.ObjectifyService;
 
+import eu.chessdata.backend.entities.Club;
 import eu.chessdata.backend.entities.Profile;
 
 /**
@@ -13,6 +14,7 @@ public class OfyService {
     static{
         //ObjectifyService.register(Quote.class);
         ObjectifyService.register(Profile.class);
+        ObjectifyService.register(Club.class);
     }
 
     public static Objectify ofy(){

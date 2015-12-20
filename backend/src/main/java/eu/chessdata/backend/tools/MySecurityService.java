@@ -6,9 +6,6 @@ import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oau
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Map;
-
-import com.google.appengine.repackaged.com.google.common.base.Pair;
 
 
 /**
@@ -57,4 +54,5 @@ public class MySecurityService {
             return new MyEntry<>(Status.INVALID_USER, new Payload());
         }
     }
+
 }

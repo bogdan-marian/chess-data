@@ -8,7 +8,8 @@
             <param-value>
                 eu.chessdata.backend.endpoints.example.MyEndpoint,
                 eu.chessdata.backend.endpoints.example.QuoteEndpoint,
-                eu.chessdata.backend.endpoints.ProfileEndpoint
+                eu.chessdata.backend.endpoints.ProfileEndpoint,
+                eu.chessdata.backend.endpoints.ClubEndpoint
             </param-value>
         </init-param>
     </servlet>

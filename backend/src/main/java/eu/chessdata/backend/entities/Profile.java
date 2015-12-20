@@ -27,6 +27,7 @@ public class Profile {
         this.profileId = profileId;
         this.email=email;
         this.name = name;
+
         long date = new Date().getTime();
         this.dateCreated = date;
         this.updateStamp = date;
