@@ -536,7 +536,7 @@ public class SignInActivity extends AppCompatActivity implements
                         throw new IllegalStateException("Cursor is null");
                     }
                     if (cursor.getCount() < 1){
-                        //TODO: 09/12/2015 Save the profileSql
+                        // Save the profile in content provider
                         Log.d(TAG, "Saving the default profile in sqlite");
                         //default profile not in database so go one and insert it.
                         mContentResolver.insert(
@@ -547,7 +547,8 @@ public class SignInActivity extends AppCompatActivity implements
                     SharedPreferences.Editor editor = mSharedPref.edit();
                     editor.putString(getString(R.string.pref_profile_profileId),
                             profileSql.profileId);
-                    editor.putLong(getString(R.string.pref_profile_id), profileSql.id);
+                    editor.putLong(getString(R.string.pref_profileSql_id), profileSql.id);
+                    editor.putString(getString(R.string.pref_security_id_token_string), idTokenString);
                     editor.commit();
                 }
                 return profile;

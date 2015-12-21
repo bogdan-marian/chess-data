@@ -32,4 +32,33 @@ public class SimpleUtilities extends AndroidTestCase{
         assertTrue("dateCreate not the same ", profileA.dateCreated == profileB.dateCreated);
         assertTrue("updateStamp not the same ", profileA.updateStamp == profileB.updateStamp);
     }
+
+    static ClubSql createClubVipValues(){
+        ClubSql clubSql = new ClubSql();
+        clubSql.clubId = 101L;
+        clubSql.name = "debug1";
+        clubSql.shortName = "debug1";
+        clubSql.email = "debug1";
+        clubSql.country = "debug1";
+        clubSql.city = "debug1";
+        clubSql.homePage = "debug1";
+        clubSql.description = "debug1";
+
+        Date dateValue = new Date();
+        long date = dateValue.getTime();
+
+        clubSql.dateCreated = date;
+        clubSql.updateStamp = date;
+
+        return clubSql;
+    }
+
+    static void compareClubsNoId(ClubSql clubA, ClubSql clubB){
+        //TODO finish implementing this compareson
+        assertTrue("Profile not the same ", clubA.clubId.equals(clubB.clubId));
+        assertTrue("email not the same ", clubA.email.equals(clubB.email));
+        assertTrue("name not the same ", clubA.name.equals(clubB.name));
+        assertTrue("dateCreate not the same ", clubA.dateCreated == clubB.dateCreated);
+        assertTrue("updateStamp not the same ", clubA.updateStamp == clubB.updateStamp);
+    }
 }

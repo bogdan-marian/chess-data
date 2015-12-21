@@ -40,6 +40,21 @@ public class TestSimpleProvider extends AndroidTestCase {
         );
         assertEquals("Error: Not able to delete from profile ", 0, cursor.getCount());
         cursor.close();
+
+        mContext.getContentResolver().delete(
+                ClubTable.CONTENT_URI,
+                null,
+                null
+        );
+        cursor = mContext.getContentResolver().query(
+                ClubTable.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+        assertEquals("Error: Not able to delete from ClubTable ", 0, cursor.getCount());
+        cursor.close();
     }
 
     public void test1ProfileInsertVip(){
@@ -92,4 +107,15 @@ public class TestSimpleProvider extends AndroidTestCase {
         assertNotNull("Cursor is null ", cursor);
         assertTrue("Cursor query did not returned values ", cursor.getCount() > 0);
     }
+
+    /*public void test4ClubInsert(){
+        ClubSql vip = SimpleUtilities.createClubVipValues();
+        ContentResolver contentResolver = mContext.getContentResolver();
+
+        contentResolver.insert(ClubTable.CONTENT_URI, ClubTable.getContentValues(vip, false));
+
+        Cursor cursor = contentResolver.query(ClubTable.CONTENT_URI, null, null, null, null);
+        ClubSql club1 = ClubTable.getRow(cursor, true);
+        SimpleUtilities.compareClubsNoId(vip, club1);
+    }*/
 }
