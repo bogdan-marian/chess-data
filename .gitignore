@@ -10,3 +10,4 @@ backend/build/
 build/
 captures/
 gradle/
+gradlew
