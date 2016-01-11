@@ -7,7 +7,11 @@ import com.google.api.server.spi.config.Named;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.googlecode.objectify.Key;
 
+import java.util.Date;
+
 import eu.chessdata.backend.entities.Club;
+import eu.chessdata.backend.entities.ClubManager;
+import eu.chessdata.backend.entities.ClubMember;
 import eu.chessdata.backend.tools.MyEntry;
 import eu.chessdata.backend.tools.MySecurityService;
 import eu.chessdata.backend.tools.MySecurityService.Status;
@@ -32,7 +36,6 @@ public class ClubEndpoint {
 
     /**
      * Create the club and also add the default club manager and club member
-     * TODO add the default club manager and club member
      * @param club
      * @param idTokenString
      * @return
@@ -47,10 +50,23 @@ public class ClubEndpoint {
         else {
             final Key<Club> clubKey = factory().allocateId(Club.class);
             club.setClubId(clubKey.getId());
+            Date date = new Date();
+            club.setDateCreated(date.getTime());
+            club.setUpdateStamp(date.getTime());
             ofy().save().entity(club).now();
 
+            //create ClubManager
             String profileId =((GoogleIdToken.Payload) secPair.getValue()).getSubject();
-            System.out.println("time to create manager and member for pair: " +profileId + "/" + clubKey.getId());
+            final Key<ClubManager> managerKey = factory().allocateId(ClubManager.class);
+            ClubManager clubManager = new ClubManager(
+                    managerKey.getId(), profileId,clubKey.getId(),date.getTime());
+            ofy().save().entity(clubManager).now();
+
+            //createClubMember
+            final Key<ClubMember> memberKey = factory().allocateId(ClubMember.class);
+            ClubMember clubMember = new ClubMember(
+                    memberKey.getId(),profileId,clubKey.getId(),date.getTime());
+            ofy().save().entity(clubMember).now();
             return  club;
         }
     }
