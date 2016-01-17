@@ -42,6 +42,7 @@
     <string name="pref_profile_signedOut" translatable="false">pref_profile_signedOut</string>
     <string name="pref_profile_profileId" translatable="false">pref_profile_profileId</string>
     <string name="pref_profileSql_id" translatable="false">pref_profile_id</string>
+    <string name="my_debug_tag" translatable="false">my-debug-tag</string>
 
     <string name="drawer_tournaments">Tournaments</string>
 
@@ -56,5 +57,6 @@
     <string name="hint.club.country">Country</string>
     <string name="hint.club.city">City</string>
     <string name="hint.club.homePage">Home page</string>
+
 
 </resources>

@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
+import eu.chessdata.R;
 import eu.chessdata.tools.Params;
 
 /**
