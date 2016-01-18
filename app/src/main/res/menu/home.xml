@@ -6,8 +6,7 @@
         android:title="@string/action.create.club"
         app:showAsAction="never"/>
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:id="@+id/action_change_managed_club"
+        android:title="@string/change_managed_club"
         app:showAsAction="never" />
 </menu>
