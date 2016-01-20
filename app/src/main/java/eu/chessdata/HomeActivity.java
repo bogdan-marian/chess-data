@@ -1,7 +1,9 @@
 package eu.chessdata;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -10,7 +12,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -22,7 +23,9 @@ import android.widget.TextView;
 import java.util.HashMap;
 import java.util.Map;
 
+import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.tools.MyGlobalSharedObjects;
+import eu.chessdata.tools.Params;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -116,7 +119,11 @@ public class HomeActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_change_managed_club) {
             //(new DeviceSetDefaultManagedClub()).show(getSupportFragmentManager(),"DeviceSetDefaultManagedClub");
-            ManagedClub managedClub = new ManagedClub(getSupportFragmentManager());
+            String debugDefaultValue = "defaultValue";
+            String profileId = mSharedPref.getString(
+                    getString( R.string.pref_profile_profileId), debugDefaultValue);
+            ContentResolver contentResolver = getContentResolver();
+            ManagedClub managedClub = new ManagedClub(getSupportFragmentManager(),profileId,contentResolver);
             managedClub.execute();
         }else if(id==R.id.action_create_club){
             (new ClubCreateDialogFragment()).show(getSupportFragmentManager(),"ClubCreateDialogFragment");
@@ -162,16 +169,39 @@ public class HomeActivity extends AppCompatActivity
     class ManagedClub extends AsyncTask<Void,Void,Void>{
 
         private FragmentManager mFragmentManager;
-        public ManagedClub(FragmentManager fragmentManager){
+        private String mProfileId;
+        ContentResolver mContentResolver;
+        public ManagedClub(FragmentManager fragmentManager, String profileId,
+                           ContentResolver contentResolver){
             mFragmentManager = fragmentManager;
+            mProfileId = profileId;
+            mContentResolver = contentResolver;
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Void doInBackground(Void... nothing) {
             Map <String,Long> map = new HashMap<>();
-            map.put("Item 1", 101L);
-            map.put("Item 2", 102L);
+
+            Params params = Params.getManagedClubs(mProfileId);
+            Cursor cursor = mContentResolver.query(
+                    params.getUri(),
+                    params.getProjection(),
+                    params.getSelection(),
+                    params.getSelectionArgs(),
+                    params.getSortOrder());
+
+            String columnName = ClubTable.FIELD_NAME;
+            int nameId = cursor.getColumnIndex(columnName);
+            String columnLongId = ClubTable.FIELD__ID;
+            int sqlId = cursor.getColumnIndex(columnLongId);
+
+            while (cursor.moveToNext()){
+                String name = cursor.getString(nameId);
+                long id = cursor.getLong(sqlId);
+                map.put(name,id);
+            }
             MyGlobalSharedObjects.managedClubs = map;
+            cursor.close();
             return null;
         }
 

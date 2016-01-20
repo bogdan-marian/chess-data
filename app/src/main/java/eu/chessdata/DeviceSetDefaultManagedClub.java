@@ -1,15 +1,13 @@
 package eu.chessdata;
 
 import android.app.Dialog;
-import android.support.v4.app.DialogFragment;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import eu.chessdata.tools.MyGlobalSharedObjects;
@@ -19,9 +17,15 @@ import eu.chessdata.tools.MyGlobalSharedObjects;
  */
 public class DeviceSetDefaultManagedClub  extends DialogFragment    {
     private String TAG = "my-debug-tag";
+    private SharedPreferences mSharedPreferences;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+        mSharedPreferences = super.getContext().getSharedPreferences(
+                getString(R.string.preference_file_key),Context.MODE_PRIVATE
+        );
+        final SharedPreferences.Editor editor = mSharedPreferences.edit();
 
         final Map<String,Long> map = MyGlobalSharedObjects.managedClubs;
         final String[]items = new String[map.size()];
@@ -35,8 +39,10 @@ public class DeviceSetDefaultManagedClub  extends DialogFragment    {
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Log.d(TAG,"Item cliked "+ items[which]
-                    + "And id = " + map.get(items[which]));
+
+                editor.putString(getString(R.string.pref_managed_club_name), items[which]);
+                editor.putLong(getString(R.string.pref_managed_club_sqlId), map.get(items[which]));
+                editor.commit();
             }
         });
 

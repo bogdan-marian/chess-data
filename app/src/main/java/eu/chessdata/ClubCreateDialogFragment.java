@@ -2,9 +2,11 @@ package eu.chessdata;
 
 import android.app.Dialog;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -123,13 +125,19 @@ public class ClubCreateDialogFragment extends DialogFragment {
                 Club vipClub = clubEndpoint.create(mIdTokenString,club).execute();
                 //Store vipClub also in content provider
                 if (vipClub != null){
-                    mContentResolver.insert(
+                    Uri newUri = mContentResolver.insert(
                             ClubTable.CONTENT_URI, ClubTable.getContentValues(
                                     new ClubSql(vipClub), false
-                            )
-                    );
-                    Log.d(TAG, "vipClub should be stored in contentProvider");
-                    //TODO set this club as managed club on backend project and also on app
+                            ));
+
+
+                    //TODO find the club sqlId and store it in shared preferences
+                    long sqlId = ContentUris.parseId(newUri);
+                    String clubName = vipClub.getName();
+                    SharedPreferences.Editor editor = mSharedPreferences.edit();
+                    editor.putLong(getString(R.string.pref_managed_club_sqlId),sqlId);
+                    editor.putString(getString(R.string.pref_managed_club_name),clubName);
+                    editor.commit();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
