@@ -2,12 +2,15 @@ package eu.chessdata;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -15,6 +18,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import eu.chessdata.tools.MyGlobalSharedObjects;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -108,6 +116,8 @@ public class HomeActivity extends AppCompatActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_change_managed_club) {
             //(new DeviceSetDefaultManagedClub()).show(getSupportFragmentManager(),"DeviceSetDefaultManagedClub");
+            ManagedClub managedClub = new ManagedClub(getSupportFragmentManager());
+            managedClub.execute();
         }else if(id==R.id.action_create_club){
             (new ClubCreateDialogFragment()).show(getSupportFragmentManager(),"ClubCreateDialogFragment");
         }
@@ -147,5 +157,28 @@ public class HomeActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    class ManagedClub extends AsyncTask<Void,Void,Void>{
+
+        private FragmentManager mFragmentManager;
+        public ManagedClub(FragmentManager fragmentManager){
+            mFragmentManager = fragmentManager;
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            Map <String,Long> map = new HashMap<>();
+            map.put("Item 1", 101L);
+            map.put("Item 2", 102L);
+            MyGlobalSharedObjects.managedClubs = map;
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result){
+            DeviceSetDefaultManagedClub dialog = new DeviceSetDefaultManagedClub();
+            dialog.show(mFragmentManager,"somTag");
+        }
     }
 }
