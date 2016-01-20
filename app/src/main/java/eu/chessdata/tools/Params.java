@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.data.simplesql.ProfileTable;
 
 /**
@@ -31,6 +32,17 @@ public class Params {
         params.selection = mSelectionClause;
         params.selectionArgs = mSelectionArgs;
 
+        return params;
+    }
+
+    /**
+     * TODO change tis so in returns via a parameter the actual managed clubs
+     * @return
+     */
+    public static Params getManagedClubs(String profileId){
+        Params params = new Params();
+
+        params.uri = ClubTable.CONTENT_URI;
         return params;
     }
 

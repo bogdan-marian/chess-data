@@ -107,7 +107,7 @@ public class HomeActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_change_managed_club) {
-            (new DeviceSetDefaultManagedClub()).show(getSupportFragmentManager(),"DeviceSetDefaultManagedClub");
+            //(new DeviceSetDefaultManagedClub()).show(getSupportFragmentManager(),"DeviceSetDefaultManagedClub");
         }else if(id==R.id.action_create_club){
             (new ClubCreateDialogFragment()).show(getSupportFragmentManager(),"ClubCreateDialogFragment");
         }
