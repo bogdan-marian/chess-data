@@ -1,5 +1,6 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".TournamentFragment">
@@ -7,7 +8,11 @@
     <!-- TODO: Update blank fragment layout -->
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:text="@string/hello_tournament_fragment" />
+    <ListView
+        android:id="@+id/listView_tournament"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"></ListView>
 
-</FrameLayout>
+</LinearLayout>
