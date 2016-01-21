@@ -125,11 +125,11 @@ public class ClubCreateDialogFragment extends DialogFragment {
                 Club vipClub = clubEndpoint.create(mIdTokenString,club).execute();
                 //Store vipClub also in content provider
                 if (vipClub != null){
+                    //this is the line that actually inserts data in sqlite
                     Uri newUri = mContentResolver.insert(
                             ClubTable.CONTENT_URI, ClubTable.getContentValues(
                                     new ClubSql(vipClub), false
                             ));
-
 
                     //TODO find the club sqlId and store it in shared preferences
                     long sqlId = ContentUris.parseId(newUri);
