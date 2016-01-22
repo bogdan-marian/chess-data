@@ -43,4 +43,6 @@ dependencies {
     compile 'ckm.simple:simple_sql_provider_annotation:1.0.6'
     compile 'ckm.simple:simple_sql_provider_processor:1.0.6'
     compile 'com.android.support:support-v4:23.1.1'
+    compile 'com.google.http-client:google-http-client-gson:1.21.0'
+    //compile 'com.google.code.gson:gson:2.5'
 }

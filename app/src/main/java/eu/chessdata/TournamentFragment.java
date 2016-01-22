@@ -1,11 +1,18 @@
 package eu.chessdata;
 
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+
+import eu.chessdata.data.simplesql.ClubTable;
 
 /**
  * some useful imports
@@ -16,30 +23,30 @@ import android.widget.ListView;
  import android.support.v4.content.Loader;
  */
 
-public class TournamentFragment extends Fragment /*implements LoaderManager.LoaderCallbacks<Cursor>*/{
+public class TournamentFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
     private String TAG = "my-debug-tag";
 
     private static final int TOURNAMENT_LOADER = 0;
     private ClubAdapter mClubAdapter;
 
-    /*@Override
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         getLoaderManager().initLoader(TOURNAMENT_LOADER,null,this);
         super.onActivityCreated(savedInstanceState);
-    }*/
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         //Cursor adapter will take data from our cursor and populate the ListView.
-        //mClubAdapter = new ClubAdapter(getActivity(),null,0);
+        mClubAdapter = new ClubAdapter(getActivity(),null,0);
 
         View fragmentView = inflater.inflate(R.layout.fragment_tournament,container,false);
         ListView listView = (ListView)fragmentView.findViewById(R.id.listView_tournament);
-        //listView.setAdapter(mClubAdapter);
+        listView.setAdapter(mClubAdapter);
         return fragmentView;
     }
 
-  /*  @Override
+    @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String sortOrder = ClubTable.FIELD__ID + " DESC";
         Uri clubUri = ClubTable.CONTENT_URI;
@@ -60,5 +67,5 @@ public class TournamentFragment extends Fragment /*implements LoaderManager.Load
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mClubAdapter.swapCursor(null);
-    }*/
+    }
 }
