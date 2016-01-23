@@ -8,6 +8,7 @@ import eu.chessdata.backend.entities.Club;
 import eu.chessdata.backend.entities.ClubManager;
 import eu.chessdata.backend.entities.ClubMember;
 import eu.chessdata.backend.entities.Profile;
+import eu.chessdata.backend.entities.Tournament;
 
 /**
  * Created by bogda on 25/11/2015.
@@ -19,6 +20,7 @@ public class OfyService {
         ObjectifyService.register(ClubManager.class);
         ObjectifyService.register(ClubMember.class);
         ObjectifyService.register(Profile.class);
+        ObjectifyService.register(Tournament.class);
     }
 
     public static Objectify ofy(){

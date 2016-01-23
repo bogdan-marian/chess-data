@@ -7,11 +7,15 @@ import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oau
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+import eu.chessdata.backend.entities.Tournament;
+
 
 /**
  * Created by bogda on 26/11/2015.
  */
 public class MySecurityService {
+
+
     public static enum Status{
         VALID_USER,
         INVALID_USER
@@ -55,4 +59,12 @@ public class MySecurityService {
         }
     }
 
+    public static boolean canCreateTournament(String profileId, Tournament tournament) {
+        throw new IllegalStateException("Please implement this");
+    }
+
+    private static boolean isClubMember(String profileId, Long clubId){
+
+        throw new IllegalStateException("Please implement this");
+    }
 }
