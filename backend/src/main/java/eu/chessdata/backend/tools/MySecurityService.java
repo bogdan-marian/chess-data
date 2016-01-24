@@ -3,11 +3,15 @@ package eu.chessdata.backend.tools;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.googlecode.objectify.cmd.Query;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+import eu.chessdata.backend.entities.ClubManager;
 import eu.chessdata.backend.entities.Tournament;
+
+import static eu.chessdata.backend.tools.OfyService.ofy;
 
 
 /**
@@ -59,12 +63,14 @@ public class MySecurityService {
         }
     }
 
-    public static boolean canCreateTournament(String profileId, Tournament tournament) {
-        throw new IllegalStateException("Please implement this");
-    }
 
-    private static boolean isClubMember(String profileId, Long clubId){
-
-        throw new IllegalStateException("Please implement this");
+    public static boolean isClubManager(String profileId, Long clubId){
+        Query<ClubManager> q = ofy().load().type(ClubManager.class);
+        q = q.filter("profileId =", profileId);
+        q = q.filter("clubId = ", clubId);
+        for (ClubManager clubManager : q){
+            return true;
+        }
+        return false;
     }
 }

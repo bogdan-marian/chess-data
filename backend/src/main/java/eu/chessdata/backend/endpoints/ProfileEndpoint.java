@@ -32,7 +32,7 @@ public class ProfileEndpoint {
     /**
      * Authenticate the request store the user in datastore
      * and then return the user. If request not valid
-     * //todo: experiment with what to do if request can not validate
+     * todo: experiment with what to do if request can not validate
      *
      * @return
      */

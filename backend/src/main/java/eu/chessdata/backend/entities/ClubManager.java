@@ -2,6 +2,7 @@ package eu.chessdata.backend.entities;
 
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
 
 /**
  * Created by bogda on 20/12/2015.
@@ -10,7 +11,9 @@ import com.googlecode.objectify.annotation.Id;
 public class ClubManager {
     @Id
     private Long clubManagerId;
+    @Index
     private String profileId;
+    @Index
     private Long clubId;
     private long dateCreated;
 
