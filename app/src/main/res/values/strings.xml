@@ -60,5 +60,7 @@
     <string name="hint.club.city">City</string>
     <string name="hint.club.homePage">Home page</string>
     <string name="change_managed_club">Select club to manage</string>
+    <string name="action_create_tournament">Create tournament</string>
+    <string name="dialog.tournament.details">Tournament details</string>
 
 </resources>

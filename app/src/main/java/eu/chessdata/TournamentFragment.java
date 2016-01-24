@@ -8,6 +8,9 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -16,34 +19,55 @@ import eu.chessdata.data.simplesql.ClubTable;
 
 /**
  * some useful imports
- *
- import android.support.v4.app.Fragment;
- import android.support.v4.app.LoaderManager;
- import android.support.v4.content.CursorLoader;
- import android.support.v4.content.Loader;
+ * <p/>
+ * import android.support.v4.app.Fragment;
+ * import android.support.v4.app.LoaderManager;
+ * import android.support.v4.content.CursorLoader;
+ * import android.support.v4.content.Loader;
  */
 
-public class TournamentFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+public class TournamentFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private String TAG = "my-debug-tag";
 
     private static final int TOURNAMENT_LOADER = 0;
     private ClubAdapter mClubAdapter;
 
     @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        getLoaderManager().initLoader(TOURNAMENT_LOADER,null,this);
-        super.onActivityCreated(savedInstanceState);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //notify that this fragment also needs to handle menu events
+        setHasOptionsMenu(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         //Cursor adapter will take data from our cursor and populate the ListView.
-        mClubAdapter = new ClubAdapter(getActivity(),null,0);
+        mClubAdapter = new ClubAdapter(getActivity(), null, 0);
 
-        View fragmentView = inflater.inflate(R.layout.fragment_tournament,container,false);
-        ListView listView = (ListView)fragmentView.findViewById(R.id.listView_tournament);
+        View fragmentView = inflater.inflate(R.layout.fragment_tournament, container, false);
+        ListView listView = (ListView) fragmentView.findViewById(R.id.listView_tournament);
         listView.setAdapter(mClubAdapter);
         return fragmentView;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        getLoaderManager().initLoader(TOURNAMENT_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.tournament_fragment, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_create_tournament){
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
