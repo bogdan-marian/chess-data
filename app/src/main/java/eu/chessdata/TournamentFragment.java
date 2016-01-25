@@ -65,7 +65,7 @@ public class TournamentFragment extends Fragment implements LoaderManager.Loader
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_create_tournament){
-            return true;
+            (new TournamentCreateFragment()).show(getFragmentManager(),"TournamentCreateFragment");
         }
         return super.onOptionsItemSelected(item);
     }
