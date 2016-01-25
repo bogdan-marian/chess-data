@@ -11,6 +11,7 @@ import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 
 import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
+import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
 import eu.chessdata.tools.MyGlobalSharedObjects;
 
 /**
@@ -49,11 +50,11 @@ public class TournamentService extends IntentService {
      * @see IntentService
      */
     // TODO: Customize helper method
-    public static void startActionFoo(Context context, String param1, String param2) {
+    public static void startActionCreateTournament(Context context, Tournament tournament) {
         Intent intent = new Intent(context, TournamentService.class);
         intent.setAction(ACTION_CREATE_TOURNAMENT);
-        intent.putExtra(EXTRA_JSON_TOURNAMENT, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
+//        intent.putExtra(EXTRA_JSON_TOURNAMENT, param1);
+//        intent.putExtra(EXTRA_PARAM2, param2);
         context.startService(intent);
     }
 
@@ -79,7 +80,7 @@ public class TournamentService extends IntentService {
             if (ACTION_CREATE_TOURNAMENT.equals(action)) {
                 final String param1 = intent.getStringExtra(EXTRA_JSON_TOURNAMENT);
                 final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-                handleActionFoo(param1, param2);
+                handleActionFoo("string1", "string2");
             } else if (ACTION_BAZ.equals(action)) {
                 final String param1 = intent.getStringExtra(EXTRA_JSON_TOURNAMENT);
                 final String param2 = intent.getStringExtra(EXTRA_PARAM2);
