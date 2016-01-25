@@ -27,6 +27,7 @@ public class TestSimpleProvider extends AndroidTestCase {
     }
 
     private void deleteAllRecordsFromProvider() {
+        //======================================
         mContext.getContentResolver().delete(
                 ProfileTable.CONTENT_URI,
                 null,
@@ -42,6 +43,7 @@ public class TestSimpleProvider extends AndroidTestCase {
         assertEquals("Error: Not able to delete from profile ", 0, cursor.getCount());
         cursor.close();
 
+        //======================================
         mContext.getContentResolver().delete(
                 ClubTable.CONTENT_URI,
                 null,
@@ -55,6 +57,21 @@ public class TestSimpleProvider extends AndroidTestCase {
                 null
         );
         assertEquals("Error: Not able to delete from ClubTable ", 0, cursor.getCount());
+        cursor.close();
+        //======================================
+        mContext.getContentResolver().delete(
+                TournamentTable.CONTENT_URI,
+                null,
+                null
+        );
+        cursor = mContext.getContentResolver().query(
+                TournamentTable.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+        assertEquals("Error: Not able to delete from TournamentTable ", 0, cursor.getCount());
         cursor.close();
     }
 
@@ -107,6 +124,16 @@ public class TestSimpleProvider extends AndroidTestCase {
                 params.getSortOrder());
         assertNotNull("Cursor is null ", cursor);
         assertTrue("Cursor query did not returned values ", cursor.getCount() > 0);
+    }
+
+    public void test4TournamentInsert(){
+        TournamentSql vipTournament = SimpleUtilities.createTournamentVipValues();
+        ContentResolver contentResolver = mContext.getContentResolver();
+
+        contentResolver.insert(TournamentTable.CONTENT_URI, TournamentTable.getContentValues(vipTournament, false));
+        Cursor cursor = contentResolver.query(TournamentTable.CONTENT_URI, null, null, null, null);
+        TournamentSql tournament1 = TournamentTable.getRow(cursor, true);
+        SimpleUtilities.compareTournamentsNoId(vipTournament, tournament1);
     }
 
     /*public void test4ClubInsert(){

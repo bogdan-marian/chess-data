@@ -33,6 +33,16 @@ public class SimpleUtilities extends AndroidTestCase{
         assertTrue("updateStamp not the same ", profileA.updateStamp == profileB.updateStamp);
     }
 
+    static void compareTournamentsNoId(TournamentSql tournamentA, TournamentSql tournamentB){
+        assertTrue("tournamentId not the same ", tournamentA.getTournamentId().equals(
+            tournamentB.getTournamentId()));
+        assertTrue("clubId not the same ", (long)tournamentA.getClubId() ==
+                (long)tournamentB.getClubId());
+        assertTrue("name not the same", tournamentA.getName().equals(tournamentB.getName()));
+        assertTrue("description not the same", tournamentA.getDescription()
+                .equals(tournamentB.getDescription()));
+    }
+
     static ClubSql createClubVipValues(){
         ClubSql clubSql = new ClubSql();
         clubSql.clubId = 101L;
@@ -51,6 +61,22 @@ public class SimpleUtilities extends AndroidTestCase{
         clubSql.updateStamp = date;
 
         return clubSql;
+    }
+
+    static TournamentSql createTournamentVipValues(){
+        long time = (new Date()).getTime();
+        TournamentSql tournamentSql = new TournamentSql();
+        tournamentSql.setTournamentId(201L);
+        tournamentSql.setClubId(201L);
+        tournamentSql.setName("debug2");
+        tournamentSql.setDescription("debug2");
+        tournamentSql.setTotalRounds(201);
+        tournamentSql.setStartDate(time);
+        tournamentSql.setEndDate(time);
+        tournamentSql.setLocation("Liege");
+        tournamentSql.setDateCreated(time);
+        tournamentSql.setUpdateStamp(time);
+        return tournamentSql;
     }
 
     static void compareClubsNoId(ClubSql clubA, ClubSql clubB){

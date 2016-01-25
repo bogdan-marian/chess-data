@@ -15,7 +15,7 @@ import eu.chessdata.R;
         name = "SimpleProvider",
         authority = "eu.chessdata",
         database = "chess-data.db",
-        version = 2
+        version = 3
 )
 public class ChessProviderConfig implements ProviderConfig{
     private String TAG = "my-debug-tag";
@@ -23,7 +23,7 @@ public class ChessProviderConfig implements ProviderConfig{
     @Override
     public UpgradeScript[] getUpdateScripts() {
         UpgradeScript from1 = new UpgradeScript();
-        from1.oldVersion = 1;
+        from1.oldVersion = 2;
         from1.sqlScriptResource = R.raw.simplesql_updatefrom_01;
 
         Log.d(TAG, "Update script will remove all tables");
