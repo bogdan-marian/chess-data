@@ -3,8 +3,10 @@ package eu.chessdata.services;
 import android.app.IntentService;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
@@ -17,6 +19,7 @@ import java.io.IOException;
 import eu.chessdata.R;
 import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
+import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.data.simplesql.TournamentSql;
 import eu.chessdata.data.simplesql.TournamentTable;
 import eu.chessdata.tools.MyGlobalSharedObjects;
@@ -36,6 +39,8 @@ public class TournamentService extends IntentService {
     private SharedPreferences mSharedPreferences;
     private ContentResolver mContentResolver;
     private String mIdTokenString;
+    private Long mClubEndpointId;
+
 
     // TODO: Rename actions, choose action names that describe tasks that this
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
@@ -92,6 +97,10 @@ public class TournamentService extends IntentService {
             mIdTokenString = mSharedPreferences.getString(
                     getString(R.string.pref_security_id_token_string), "defaultValue");
 
+            long clubSqlId = mSharedPreferences.getLong(
+                    getString(R.string.pref_managed_club_sqlId),0L);
+            mClubEndpointId = getClubEndpointId(clubSqlId);
+
             final String action = intent.getAction();
             if (ACTION_CREATE_TOURNAMENT.equals(action)) {
                 final String jsonTournament = intent.getStringExtra(EXTRA_JSON_TOURNAMENT);
@@ -110,8 +119,11 @@ public class TournamentService extends IntentService {
      */
     private void handleActionCreateTournament(String jsonTournament) {
         Tournament tournament = deserializeFromJson(jsonTournament);
-        if (tournament != null){
+
+        if (tournament !=null && mClubEndpointId != null){
             try {
+                //set the id
+                tournament.setClubId(mClubEndpointId);
                 //insert tournament in datastore
                 Tournament vipTournament = sTournamentEndpoint.create(mIdTokenString, tournament).execute();
                 if (vipTournament != null){
@@ -171,5 +183,23 @@ public class TournamentService extends IntentService {
                         null
                 ).setRootUrl(MyGlobalSharedObjects.ROOT_URL);
         return builder.build();
+    }
+
+    private Long getClubEndpointId(long clubSqlId){
+        Uri clubUri = ClubTable.CONTENT_URI;
+        String[] projection = {
+                ClubTable.FIELD__ID,
+                ClubTable.FIELD_CLUBID
+        };
+        int COL_CLUBID = 1;
+        String selection = ClubTable.FIELD__ID + " = ?";
+        String stringClubSqlId = Long.toString(clubSqlId);
+        String[] selectionArguments = {stringClubSqlId};
+
+        Cursor cursor = mContentResolver.query(clubUri, projection, selection, selectionArguments, null);
+        int count = cursor.getCount();
+        cursor.moveToFirst();
+        long endPointId = cursor.getLong(COL_CLUBID);
+        return endPointId;
     }
 }

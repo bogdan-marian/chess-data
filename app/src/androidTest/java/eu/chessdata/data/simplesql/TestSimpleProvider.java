@@ -2,6 +2,7 @@ package eu.chessdata.data.simplesql;
 
 import android.content.ContentResolver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
@@ -136,7 +137,7 @@ public class TestSimpleProvider extends AndroidTestCase {
         SimpleUtilities.compareTournamentsNoId(vipTournament, tournament1);
     }
 
-    /*public void test4ClubInsert(){
+    public void test5ClubInsert(){
         ClubSql vip = SimpleUtilities.createClubVipValues();
         ContentResolver contentResolver = mContext.getContentResolver();
 
@@ -145,5 +146,43 @@ public class TestSimpleProvider extends AndroidTestCase {
         Cursor cursor = contentResolver.query(ClubTable.CONTENT_URI, null, null, null, null);
         ClubSql club1 = ClubTable.getRow(cursor, true);
         SimpleUtilities.compareClubsNoId(vip, club1);
-    }*/
+    }
+
+    public void test6TestClubSelectQuery(){
+        ClubSql vip = SimpleUtilities.createClubVipValues();
+        ContentResolver contentResolver = mContext.getContentResolver();
+
+        contentResolver.insert(ClubTable.CONTENT_URI, ClubTable.getContentValues(vip, false));
+
+        Cursor cursor = contentResolver.query(ClubTable.CONTENT_URI, null, null, null, null);
+        ClubSql club1 = ClubTable.getRow(cursor, true);
+        SimpleUtilities.compareClubsNoId(vip, club1);
+
+        //There is club in database. Time to build select statement
+        Uri clubUri = ClubTable.CONTENT_URI;
+
+        long clubSqlIdVal = club1.id;
+        String stringId = Long.toString(clubSqlIdVal);
+
+        String[] projection = {
+                ClubTable.FIELD__ID,
+                ClubTable.FIELD_CLUBID
+        };
+        int INDEX_CLUB_ID = 1;
+        String selection = ClubTable.FIELD__ID + " = ?";
+        String[] selectionArguments = {stringId};
+
+        cursor = contentResolver.query(
+                clubUri,
+                projection,
+                selection,
+                selectionArguments,
+                null
+        );
+        cursor.moveToFirst();
+        Log.d(TAG,"Cursor size = " + cursor.getCount());
+        long endPointId = cursor.getLong(INDEX_CLUB_ID);
+        Log.d(TAG,"Endpoint id = " + endPointId);
+        assertTrue(endPointId == (long)vip.clubId);
+    }
 }
