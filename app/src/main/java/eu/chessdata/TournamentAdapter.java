@@ -8,13 +8,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import eu.chessdata.data.simplesql.ClubTable;
+import eu.chessdata.data.simplesql.TournamentTable;
 
 /**
  * Created by Bogdan Oloeriu on 21/01/2016.
  */
-public class ClubAdapter extends CursorAdapter {
-    public ClubAdapter(Context context, Cursor c, int flags) {
+public class TournamentAdapter extends CursorAdapter {
+    public TournamentAdapter(Context context, Cursor c, int flags) {
         super(context, c, flags);
     }
 
@@ -30,8 +30,8 @@ public class ClubAdapter extends CursorAdapter {
         tv.setText(getCursorData(cursor));
     }
     private String getCursorData(Cursor cursor){
-        int idx_club_name = cursor.getColumnIndex(ClubTable.FIELD_NAME);
-        String value = cursor.getString(idx_club_name);
+        int idx_tournament_name = cursor.getColumnIndex(TournamentTable.FIELD_NAME);
+        String value = cursor.getString(idx_tournament_name);
         return value;
     }
 }

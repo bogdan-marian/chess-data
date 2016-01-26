@@ -1,7 +1,9 @@
 package eu.chessdata;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
@@ -22,6 +24,7 @@ import eu.chessdata.services.TournamentService;
 public class TournamentCreateFragment extends DialogFragment{
     //private String TAG = "my-debug-tag";
     private View mView;
+    private long mManagedClubId;
     //private SharedPreferences mSharedPreferences;
     @NonNull
     @Override
@@ -34,6 +37,11 @@ public class TournamentCreateFragment extends DialogFragment{
         numberPicker.setMinValue(3);
         numberPicker.setMaxValue(14);
         numberPicker.setValue(7);
+
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences(
+                getString(R.string.preference_file_key), Context.MODE_PRIVATE
+        );
+
 
         builder.setPositiveButton("Create tournament", new DialogInterface.OnClickListener() {
             @Override

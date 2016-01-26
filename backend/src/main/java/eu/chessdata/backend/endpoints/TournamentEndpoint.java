@@ -10,7 +10,6 @@ import com.googlecode.objectify.cmd.Query;
 
 import java.util.Date;
 
-import eu.chessdata.backend.entities.Club;
 import eu.chessdata.backend.entities.ClubManager;
 import eu.chessdata.backend.entities.Tournament;
 import eu.chessdata.backend.tools.MyEntry;
@@ -61,7 +60,7 @@ public class TournamentEndpoint {
         return indexTournament;
     }
 
-    @ApiMethod(httpMethod = "post")
+    @ApiMethod(name = "create", httpMethod = "post")
     public Tournament create(Tournament tournament, @Named("idTokenString") String idTokenString){
         MyEntry<MySecurityService.Status, GoogleIdToken.Payload> secPair =
                 MySecurityService.getProfile(idTokenString);
@@ -73,6 +72,7 @@ public class TournamentEndpoint {
         }
         String profileId =((GoogleIdToken.Payload) secPair.getValue()).getSubject();
         if (!MySecurityService.isClubManager(profileId, tournament.getClubId())){
+            System.out.println("ProfileId: " + profileId+ " / clubId: " + tournament.getClubId());
             ilegalTournament.setDescription("Illegal not a club manager");
             return ilegalTournament;
         }

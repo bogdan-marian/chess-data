@@ -15,7 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import eu.chessdata.data.simplesql.ClubTable;
+import eu.chessdata.data.simplesql.TournamentTable;
 
 /**
  * some useful imports
@@ -30,7 +30,7 @@ public class TournamentFragment extends Fragment implements LoaderManager.Loader
     private String TAG = "my-debug-tag";
 
     private static final int TOURNAMENT_LOADER = 0;
-    private ClubAdapter mClubAdapter;
+    private TournamentAdapter mTournamentAdapter;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,11 +42,11 @@ public class TournamentFragment extends Fragment implements LoaderManager.Loader
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         //Cursor adapter will take data from our cursor and populate the ListView.
-        mClubAdapter = new ClubAdapter(getActivity(), null, 0);
+        mTournamentAdapter = new TournamentAdapter(getActivity(), null, 0);
 
         View fragmentView = inflater.inflate(R.layout.fragment_tournament, container, false);
         ListView listView = (ListView) fragmentView.findViewById(R.id.listView_tournament);
-        listView.setAdapter(mClubAdapter);
+        listView.setAdapter(mTournamentAdapter);
         return fragmentView;
     }
 
@@ -72,11 +72,11 @@ public class TournamentFragment extends Fragment implements LoaderManager.Loader
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        String sortOrder = ClubTable.FIELD__ID + " DESC";
-        Uri clubUri = ClubTable.CONTENT_URI;
+        String sortOrder = TournamentTable.FIELD__ID + " DESC";
+        Uri tournamentUri = TournamentTable.CONTENT_URI;
 
         return new CursorLoader(getContext(),
-                clubUri,
+                tournamentUri,
                 null,//projection
                 null,
                 null,
@@ -85,11 +85,11 @@ public class TournamentFragment extends Fragment implements LoaderManager.Loader
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        mClubAdapter.swapCursor(data);
+        mTournamentAdapter.swapCursor(data);
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        mClubAdapter.swapCursor(null);
+        mTournamentAdapter.swapCursor(null);
     }
 }
