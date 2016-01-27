@@ -2,6 +2,7 @@ package eu.chessdata.backend.entities;
 
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
 
 /**
  * Created by bogda on 20/12/2015.
@@ -10,20 +11,27 @@ import com.googlecode.objectify.annotation.Id;
 public class ClubMember {
     @Id
     private Long clubMemberId;
-    private String profileId;
-    private Long clubId;
+    @Index private String profileId;
+    @Index private Long virtualProfileId;
+    @Index private Long clubId;
+    @Index boolean archived = false;
     private long dateCreated;
+    private long updateStamp;
 
     //constructors
     public ClubMember(){}
     public ClubMember(Long clubMemberId,
                       String profileId,
+                      Long virtualProfileId,
                       Long clubId,
-                      long dateCreated){
+                      long dateCreated,
+                      long updateStamp){
         this.clubMemberId = clubMemberId;
         this.profileId = profileId;
+        this.virtualProfileId = virtualProfileId;
         this.clubId = clubId;
         this.dateCreated = dateCreated;
+        this.updateStamp = updateStamp;
     }
 
     //generated
@@ -58,5 +66,29 @@ public class ClubMember {
 
     public void setDateCreated(long dateCreated) {
         this.dateCreated = dateCreated;
+    }
+
+    public Long getVirtualProfileId() {
+        return virtualProfileId;
+    }
+
+    public void setVirtualProfileId(Long virtualProfileId) {
+        this.virtualProfileId = virtualProfileId;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
+    }
+
+    public long getUpdateStamp() {
+        return updateStamp;
+    }
+
+    public void setUpdateStamp(long updateStamp) {
+        this.updateStamp = updateStamp;
     }
 }

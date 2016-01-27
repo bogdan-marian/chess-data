@@ -11,8 +11,10 @@ import com.googlecode.objectify.annotation.Index;
 public class ClubManager {
     @Id
     private Long clubManagerId;
+
     @Index
     private String profileId;
+
     @Index
     private Long clubId;
     private long dateCreated;
@@ -23,6 +25,7 @@ public class ClubManager {
                        String profileId,
                        Long clubId,
                        long dateCreated){
+        this.clubManagerId = clubManagerId;
         this.profileId = profileId;
         this.clubId = clubId;
         this.dateCreated = dateCreated;

@@ -64,9 +64,11 @@ public class ClubEndpoint {
 
             //createClubMember
             final Key<ClubMember> memberKey = factory().allocateId(ClubMember.class);
+
             ClubMember clubMember = new ClubMember(
-                    memberKey.getId(),profileId,clubKey.getId(),date.getTime());
+                    memberKey.getId(),profileId,null,clubKey.getId(),date.getTime(),date.getTime());
             ofy().save().entity(clubMember).now();
+
             return  club;
         }
     }

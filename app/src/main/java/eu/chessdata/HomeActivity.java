@@ -145,6 +145,8 @@ public class HomeActivity extends AppCompatActivity
             transaction.replace(R.id.fragment_container, tournamentFragment);
             transaction.addToBackStack(null);
             transaction.commit();
+        } else if (id == R.id.nav_members){
+            Log.d(TAG,"Please show members fragment");
         } else if (id == R.id.nav_gallery) {
             QuoteFragment quoteFragment = new QuoteFragment();
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
