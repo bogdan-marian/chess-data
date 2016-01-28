@@ -62,5 +62,7 @@
     <string name="change_managed_club">Select club to manage</string>
     <string name="action_create_tournament">Create tournament</string>
     <string name="dialog.tournament.details">Tournament details</string>
+    <string name="action_create_virtual_profile">Create virtual profile</string>
+    <string name="dialog.virtualProfile.details">Virtual profile details</string>
 
 </resources>

@@ -72,4 +72,11 @@ public class ClubEndpoint {
             return  club;
         }
     }
+
+    @ApiMethod(name = "debugClubMember", httpMethod = "post")
+    public ClubMember debugClubMember(ClubMember clubMember){
+        ClubMember vipMember = new ClubMember();
+        vipMember.setProfileId("Not created: just a debug message");
+        return vipMember;
+    }
 }

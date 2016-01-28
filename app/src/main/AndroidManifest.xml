@@ -32,6 +32,9 @@
             android:exported="false" />
         <service
             android:name=".services.TournamentService"
+            android:exported="false" />
+        <service
+            android:name=".services.ProfileService"
             android:exported="false"></service>
     </application>
 
