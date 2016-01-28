@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.chessdata.data.simplesql.ClubTable;
+import eu.chessdata.members.MainMembersFragment;
 import eu.chessdata.tools.MyGlobalSharedObjects;
 import eu.chessdata.tools.Params;
 
@@ -146,7 +147,11 @@ public class HomeActivity extends AppCompatActivity
             transaction.addToBackStack(null);
             transaction.commit();
         } else if (id == R.id.nav_members){
-            Log.d(TAG,"Please show members fragment");
+            MainMembersFragment mainMembersFragment = new MainMembersFragment();
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container,mainMembersFragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
         } else if (id == R.id.nav_gallery) {
             QuoteFragment quoteFragment = new QuoteFragment();
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
