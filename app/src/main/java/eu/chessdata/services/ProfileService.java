@@ -132,7 +132,8 @@ public class ProfileService extends IntentService {
                 }
 
                 //everything ok on server side
-                
+
+
             } catch (IOException e) {
                 Log.d(TAG, "Something when wrong: handleActionCreateVirtualProfile: ");
             }
