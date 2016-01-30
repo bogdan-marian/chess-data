@@ -16,7 +16,7 @@ import com.google.api.client.json.gson.GsonFactory;
 import java.io.IOException;
 
 import eu.chessdata.R;
-import eu.chessdata.backend.profileEndpoint.ProfileEndpoint;
+import eu.chessdata.backend.virtualProfileEndpoint.VirtualProfileEndpoint;
 import eu.chessdata.backend.virtualProfileEndpoint.model.VirtualProfile;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.tools.MyGlobalSharedObjects;
@@ -29,8 +29,8 @@ import eu.chessdata.tools.MyGlobalSharedObjects;
  * helper methods.
  */
 public class ProfileService extends IntentService {
-    private static ProfileEndpoint sProfileEndpoint = buildProfileEndpoint();
     private static GsonFactory sGsonFactory = new GsonFactory();
+    private static VirtualProfileEndpoint sVirtualProfileEndpoint = buildVirtualProfileEndpoint();
 
     private String TAG = "my-debug-tag";
     private SharedPreferences mSharedPreferences;
@@ -92,7 +92,7 @@ public class ProfileService extends IntentService {
                     getString(R.string.pref_security_id_token_string), "defaultValue");
 
             long clubSqlId = mSharedPreferences.getLong(
-                    getString(R.string.pref_managed_club_sqlId),0L);
+                    getString(R.string.pref_managed_club_sqlId), 0L);
             mClubEndpointId = getClubEndpointId(clubSqlId);
 
             final String action = intent.getAction();
@@ -113,7 +113,30 @@ public class ProfileService extends IntentService {
      */
     private void handleActionCreateVirtualProfile(String jsonVirtualProfile) {
         VirtualProfile virtualProfile = deserializeVirtualProfile(jsonVirtualProfile);
-        Log.d(TAG,"Please finish: Profile data = " + virtualProfile);
+
+        if (virtualProfile != null && mClubEndpointId != null) {
+
+            try {
+                VirtualProfile vipProfile = sVirtualProfileEndpoint
+                        .createVirtualProfile(mClubEndpointId, mIdTokenString, virtualProfile)
+                        .execute();
+
+                if (vipProfile == null){
+                    Log.d(TAG, "Something when wrong: null vipProfile: ");
+                    return;
+                }
+                String[] notCreated = vipProfile.getName().split(": ");
+                if (notCreated[0].equals("Not created")){
+                    Log.d(TAG,"Found chess-data-error: " + vipProfile.getName());
+                    return;
+                }
+
+                //everything ok on server side
+                
+            } catch (IOException e) {
+                Log.d(TAG, "Something when wrong: handleActionCreateVirtualProfile: ");
+            }
+        }
     }
 
     /**
@@ -125,8 +148,8 @@ public class ProfileService extends IntentService {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    private static String serializeVirtualProfile(VirtualProfile virtualProfile){
-        try{
+    private static String serializeVirtualProfile(VirtualProfile virtualProfile) {
+        try {
             String jsonVirtualProfile = sGsonFactory.toString(virtualProfile);
             return jsonVirtualProfile;
         } catch (IOException e) {
@@ -134,7 +157,7 @@ public class ProfileService extends IntentService {
         }
     }
 
-    private static VirtualProfile deserializeVirtualProfile (String jsonString){
+    private static VirtualProfile deserializeVirtualProfile(String jsonString) {
         try {
             VirtualProfile virtualProfile =
                     sGsonFactory.fromString(jsonString, VirtualProfile.class);
@@ -145,9 +168,9 @@ public class ProfileService extends IntentService {
         }
     }
 
-    private static ProfileEndpoint buildProfileEndpoint() {
-        ProfileEndpoint.Builder builder =
-                new ProfileEndpoint.Builder(
+    private static VirtualProfileEndpoint buildVirtualProfileEndpoint() {
+        VirtualProfileEndpoint.Builder builder =
+                new VirtualProfileEndpoint.Builder(
                         AndroidHttp.newCompatibleTransport(),
                         new AndroidJsonFactory(),
                         null
@@ -155,7 +178,7 @@ public class ProfileService extends IntentService {
         return builder.build();
     }
 
-    private Long getClubEndpointId(long clubSqlId){
+    private Long getClubEndpointId(long clubSqlId) {
         Uri clubUri = ClubTable.CONTENT_URI;
         String[] projection = {
                 ClubTable.FIELD__ID,

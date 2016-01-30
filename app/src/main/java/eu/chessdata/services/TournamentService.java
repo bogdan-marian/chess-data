@@ -3,7 +3,6 @@ package eu.chessdata.services;
 import android.app.IntentService;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -72,7 +71,6 @@ public class TournamentService extends IntentService {
     }
 
 
-
     /**
      * Starts this service to perform action Baz with the given parameters. If
      * the service is already performing a task this action will be queued.
@@ -98,7 +96,7 @@ public class TournamentService extends IntentService {
                     getString(R.string.pref_security_id_token_string), "defaultValue");
 
             long clubSqlId = mSharedPreferences.getLong(
-                    getString(R.string.pref_managed_club_sqlId),0L);
+                    getString(R.string.pref_managed_club_sqlId), 0L);
             mClubEndpointId = getClubEndpointId(clubSqlId);
 
             final String action = intent.getAction();
@@ -114,24 +112,25 @@ public class TournamentService extends IntentService {
     }
 
     /**
-     * Handle action Foo in the provided background thread with the provided
+     * Handle action Foo in the provided background thread with the providedm
      * parameters.
      */
     private void handleActionCreateTournament(String jsonTournament) {
         Tournament tournament = deserializeFromJson(jsonTournament);
 
-        if (tournament !=null && mClubEndpointId != null){
+        if (tournament != null && mClubEndpointId != null) {
             try {
                 //set the id
                 tournament.setClubId(mClubEndpointId);
                 //insert tournament in datastore
-                Tournament vipTournament = sTournamentEndpoint.create(mIdTokenString, tournament).execute();
-                if (vipTournament != null){
+                Tournament vipTournament = sTournamentEndpoint.create(mIdTokenString, tournament)
+                        .execute();
+                if (vipTournament != null) {
                     //insert in sqlite
                     TournamentSql tournamentSql = new TournamentSql(vipTournament);
                     Uri newUri = mContentResolver.insert(
                             TournamentTable.CONTENT_URI, TournamentTable.getContentValues(
-                                    tournamentSql,false
+                                    tournamentSql, false
                             )
                     );
                     Log.d(TAG, "Tournament uri: " + newUri.toString());
@@ -152,9 +151,9 @@ public class TournamentService extends IntentService {
     }
 
 
-
     /**
      * creates json from tournament
+     *
      * @param tournament
      * @return
      */
@@ -167,9 +166,9 @@ public class TournamentService extends IntentService {
         }
     }
 
-    private static Tournament deserializeFromJson (String jsonString){
+    private static Tournament deserializeFromJson(String jsonString) {
         try {
-            return sGsonFactory.fromString(jsonString,Tournament.class);
+            return sGsonFactory.fromString(jsonString, Tournament.class);
         } catch (IOException e) {
             throw new IllegalStateException("Not able to deserialize json");
         }
@@ -185,7 +184,7 @@ public class TournamentService extends IntentService {
         return builder.build();
     }
 
-    private Long getClubEndpointId(long clubSqlId){
+    private Long getClubEndpointId(long clubSqlId) {
         Uri clubUri = ClubTable.CONTENT_URI;
         String[] projection = {
                 ClubTable.FIELD__ID,

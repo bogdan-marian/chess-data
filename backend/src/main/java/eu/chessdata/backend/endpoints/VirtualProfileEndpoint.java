@@ -5,46 +5,69 @@ import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.config.Named;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.googlecode.objectify.Key;
 
+import java.util.Date;
+
+import eu.chessdata.backend.entities.ClubMember;
 import eu.chessdata.backend.entities.VirtualProfile;
 import eu.chessdata.backend.tools.MyEntry;
 import eu.chessdata.backend.tools.MySecurityService;
+
+import static eu.chessdata.backend.tools.OfyService.factory;
+import static eu.chessdata.backend.tools.OfyService.ofy;
 
 /**
  * Created by Bogdan Oloeriu on 27/01/2016.
  */
 @Api(
-    name="virtualProfileEndpoint",
-    version = "v1",
-    namespace = @ApiNamespace(
-        ownerDomain = "backend.chessdata.eu",
-        ownerName = "backend.chessdata.eu",
-        packagePath = ""
-    )
+        name = "virtualProfileEndpoint",
+        version = "v1",
+        namespace = @ApiNamespace(
+                ownerDomain = "backend.chessdata.eu",
+                ownerName = "backend.chessdata.eu",
+                packagePath = ""
+        )
 )
 public class VirtualProfileEndpoint {
 
-    @ApiMethod(name = "create", httpMethod = "post")
-    public VirtualProfile create(VirtualProfile virtualProfile,
-                                 @Named("clubId") Long clubId,
-                                 @Named("idTokenString") String idTokenString){
-        VirtualProfile vipProfile = new VirtualProfile();
-        vipProfile.setName("Not created: Please implement this");
+    @ApiMethod(name = "createVirtualProfile", httpMethod = "post")
+    public VirtualProfile createVirtualProfile(
+            @Named("clubId") Long clubId,
+            @Named("idTokenString") String idTokenString,
+            VirtualProfile virtualProfile) {
+        VirtualProfile illegalProfile = new VirtualProfile();
+        illegalProfile.setName("Not created: Please implement this");
 
         MyEntry<MySecurityService.Status, GoogleIdToken.Payload> secPair =
                 MySecurityService.getProfile(idTokenString);
 
-        if (secPair.getKey() != MySecurityService.Status.VALID_USER){
-            vipProfile.setName("Not created: Illegal request idTokenString");
-            return vipProfile;
+        if (secPair.getKey() != MySecurityService.Status.VALID_USER) {
+            illegalProfile.setName("Not created: Illegal request idTokenString");
+            return illegalProfile;
         }
 
-        String profileId =((GoogleIdToken.Payload) secPair.getValue()).getSubject();
-        if (!MySecurityService.isClubManager(profileId, clubId)){
-            vipProfile.setName("Not created: Illegal request idTokenString");
-            return vipProfile;
+        String profileId = ((GoogleIdToken.Payload) secPair.getValue()).getSubject();
+        if (!MySecurityService.isClubManager(profileId, clubId)) {
+            illegalProfile.setName("Not created: Illegal request not a club manager");
+            return illegalProfile;
         }
+        //illegalProfile.setName("Not created: security ok so please continue working on it");
 
-        return vipProfile;
+        //create the virtualProfile
+        final Key<VirtualProfile> virtualProfileKey = factory().allocateId(VirtualProfile.class);
+        virtualProfile.setVirtualProfileId(virtualProfileKey.getId());
+        Long time = (new Date()).getTime();
+        virtualProfile.setDateCreated(time);
+        virtualProfile.setUpdateStamp(time);
+        ofy().save().entity(virtualProfile).now();
+
+        //create club member
+        final Key<ClubMember> memberKey = factory().allocateId(ClubMember.class);
+        ClubMember clubMember = new ClubMember(
+                memberKey.getId(), null, virtualProfileKey.getId(), clubId, time, time);
+        ofy().save().entity(clubMember).now();
+
+        return virtualProfile;
     }
 }
