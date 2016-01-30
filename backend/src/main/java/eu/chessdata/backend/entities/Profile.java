@@ -18,11 +18,19 @@ public class Profile {
     private long dateOfBirth;
     private int elo;
     private int altElo;
+    private boolean virtualProfile;
     private long dateCreated;
     private long updateStamp;
 
     //constructors;
     public Profile(){}
+
+    /**
+     * Used when creating an authenticated user
+     * @param profileId
+     * @param email
+     * @param name
+     */
     public Profile(String profileId, Email email, String name){
         this.profileId = profileId;
         this.email=email;
@@ -97,5 +105,13 @@ public class Profile {
 
     public void setUpdateStamp(long updateStamp) {
         this.updateStamp = updateStamp;
+    }
+
+    public boolean isVirtualProfile() {
+        return virtualProfile;
+    }
+
+    public void setVirtualProfile(boolean virtualProfile) {
+        this.virtualProfile = virtualProfile;
     }
 }

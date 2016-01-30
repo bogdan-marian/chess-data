@@ -12,8 +12,9 @@ public class ClubMember {
     @Id
     private Long clubMemberId;
     @Index private String profileId;
-    @Index private Long virtualProfileId;
     @Index private Long clubId;
+    private boolean guestProfile;
+    private boolean managerProfile;
     @Index boolean archived = false;
     private long dateCreated;
     private long updateStamp;
@@ -28,7 +29,6 @@ public class ClubMember {
                       long updateStamp){
         this.clubMemberId = clubMemberId;
         this.profileId = profileId;
-        this.virtualProfileId = virtualProfileId;
         this.clubId = clubId;
         this.dateCreated = dateCreated;
         this.updateStamp = updateStamp;
@@ -68,13 +68,6 @@ public class ClubMember {
         this.dateCreated = dateCreated;
     }
 
-    public Long getVirtualProfileId() {
-        return virtualProfileId;
-    }
-
-    public void setVirtualProfileId(Long virtualProfileId) {
-        this.virtualProfileId = virtualProfileId;
-    }
 
     public boolean isArchived() {
         return archived;
@@ -90,5 +83,21 @@ public class ClubMember {
 
     public void setUpdateStamp(long updateStamp) {
         this.updateStamp = updateStamp;
+    }
+
+    public boolean isGuestProfile() {
+        return guestProfile;
+    }
+
+    public void setGuestProfile(boolean guestProfile) {
+        this.guestProfile = guestProfile;
+    }
+
+    public boolean isManagerProfile() {
+        return managerProfile;
+    }
+
+    public void setManagerProfile(boolean managerProfile) {
+        this.managerProfile = managerProfile;
     }
 }
