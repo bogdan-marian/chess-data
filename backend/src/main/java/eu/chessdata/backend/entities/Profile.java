@@ -26,7 +26,8 @@ public class Profile {
     public Profile(){}
 
     /**
-     * Used when creating an authenticated user
+     * Used when creating an authenticated user. Important to note that wee set the virtualProfile
+     * boolean to false.
      * @param profileId
      * @param email
      * @param name
@@ -35,7 +36,7 @@ public class Profile {
         this.profileId = profileId;
         this.email=email;
         this.name = name;
-
+        this.virtualProfile = false;
         long date = new Date().getTime();
         this.dateCreated = date;
         this.updateStamp = date;

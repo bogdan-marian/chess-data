@@ -10,7 +10,6 @@ import com.googlecode.objectify.Key;
 import java.util.Date;
 
 import eu.chessdata.backend.entities.Club;
-import eu.chessdata.backend.entities.ClubManager;
 import eu.chessdata.backend.entities.ClubMember;
 import eu.chessdata.backend.tools.MyEntry;
 import eu.chessdata.backend.tools.MySecurityService;
@@ -35,46 +34,59 @@ import static eu.chessdata.backend.tools.OfyService.ofy;
 public class ClubEndpoint {
 
     /**
-     * Create the club and also add the default club manager and club member
+     * Create the club and also add the club member and set
+     * <p/>
+     * managerProfile = true
+     * questProfile = false
+     * archived = false
+     *
      * @param club
      * @param idTokenString
      * @return
      */
     @ApiMethod(name = "create", httpMethod = "post")
-    public Club create(Club club, @Named("idTokenString") String idTokenString){
+    public Club create(Club club, @Named("idTokenString") String idTokenString) {
         MyEntry<Status, GoogleIdToken.Payload> secPair = MySecurityService.getProfile(idTokenString);
-        if (secPair.getKey() != Status.VALID_USER){
+        if (secPair.getKey() != Status.VALID_USER) {
             System.out.println("Illegal request " + idTokenString);
             return new Club();
-        }
-        else {
+        } else {
             final Key<Club> clubKey = factory().allocateId(Club.class);
             club.setClubId(clubKey.getId());
-            Date date = new Date();
-            club.setDateCreated(date.getTime());
-            club.setUpdateStamp(date.getTime());
+            Long time = new Date().getTime();
+
+            club.setDateCreated(time);
+            club.setUpdateStamp(time);
             ofy().save().entity(club).now();
 
-            //create ClubManager
-            String profileId =((GoogleIdToken.Payload) secPair.getValue()).getSubject();
+            /*//create ClubManager
+
             final Key<ClubManager> managerKey = factory().allocateId(ClubManager.class);
             ClubManager clubManager = new ClubManager(
                     managerKey.getId(), profileId,clubKey.getId(),date.getTime());
-            ofy().save().entity(clubManager).now();
+            ofy().save().entity(clubManager).now();*/
 
             //createClubMember
+            String profileId = ((GoogleIdToken.Payload) secPair.getValue()).getSubject();
             final Key<ClubMember> memberKey = factory().allocateId(ClubMember.class);
 
-            ClubMember clubMember = new ClubMember(
-                    memberKey.getId(),profileId,null,clubKey.getId(),date.getTime(),date.getTime());
+            ClubMember clubMember = new ClubMember(memberKey.getId(),
+                    profileId,
+                    clubKey.getId(),
+                    false,//quest profile
+                    true, //manager profile
+                    false, //archived
+                    time, 
+                    time);
+
             ofy().save().entity(clubMember).now();
 
-            return  club;
+            return club;
         }
     }
 
     @ApiMethod(name = "debugClubMember", httpMethod = "post")
-    public ClubMember debugClubMember(ClubMember clubMember){
+    public ClubMember debugClubMember(ClubMember clubMember) {
         ClubMember vipMember = new ClubMember();
         vipMember.setProfileId("Not created: just a debug message");
         return vipMember;

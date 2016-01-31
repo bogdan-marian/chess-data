@@ -23,13 +23,18 @@ public class ClubMember {
     public ClubMember(){}
     public ClubMember(Long clubMemberId,
                       String profileId,
-                      Long virtualProfileId,
                       Long clubId,
+                      boolean guestProfile,
+                      boolean managerProfile,
+                      boolean archived,
                       long dateCreated,
                       long updateStamp){
         this.clubMemberId = clubMemberId;
         this.profileId = profileId;
         this.clubId = clubId;
+        this.guestProfile = guestProfile;
+        this.managerProfile = managerProfile;
+        this.archived = archived;
         this.dateCreated = dateCreated;
         this.updateStamp = updateStamp;
     }
