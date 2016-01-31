@@ -8,8 +8,7 @@ import com.googlecode.objectify.cmd.Query;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-import eu.chessdata.backend.entities.ClubManager;
-import eu.chessdata.backend.entities.Tournament;
+import eu.chessdata.backend.entities.ClubMember;
 
 import static eu.chessdata.backend.tools.OfyService.ofy;
 
@@ -65,11 +64,13 @@ public class MySecurityService {
 
 
     public static boolean isClubManager(String profileId, Long clubId){
-        Query<ClubManager> q = ofy().load().type(ClubManager.class);
+        Query<ClubMember> q = ofy().load().type(ClubMember.class);
         q = q.filter("profileId =", profileId);
         q = q.filter("clubId = ", clubId);
-        for (ClubManager clubManager : q){
-            return true;
+        for (ClubMember clubMember : q){
+            if (clubMember.isManagerProfile()){
+                return true;
+            }
         }
         return false;
     }

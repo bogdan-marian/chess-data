@@ -10,7 +10,7 @@ import com.googlecode.objectify.Key;
 import java.util.Date;
 
 import eu.chessdata.backend.entities.ClubMember;
-import eu.chessdata.backend.entities.VirtualProfile;
+import eu.chessdata.backend.entities.Profile;
 import eu.chessdata.backend.tools.MyEntry;
 import eu.chessdata.backend.tools.MySecurityService;
 
@@ -32,11 +32,11 @@ import static eu.chessdata.backend.tools.OfyService.ofy;
 public class VirtualProfileEndpoint {
 
     @ApiMethod(name = "createVirtualProfile", httpMethod = "post")
-    public VirtualProfile createVirtualProfile(
+    public Profile createVirtualProfile(
             @Named("clubId") Long clubId,
             @Named("idTokenString") String idTokenString,
-            VirtualProfile virtualProfile) {
-        VirtualProfile illegalProfile = new VirtualProfile();
+            Profile virtualProfile) {
+        Profile illegalProfile = new Profile();
         illegalProfile.setName("Not created: Please implement this");
 
         MyEntry<MySecurityService.Status, GoogleIdToken.Payload> secPair =
@@ -55,8 +55,8 @@ public class VirtualProfileEndpoint {
         //illegalProfile.setName("Not created: security ok so please continue working on it");
 
         //create the virtualProfile
-        final Key<VirtualProfile> virtualProfileKey = factory().allocateId(VirtualProfile.class);
-        virtualProfile.setVirtualProfileId(virtualProfileKey.getId());
+        final Key<Profile> virtualProfileKey = factory().allocateId(Profile.class);
+        virtualProfile.setProfileId(virtualProfileKey.getString());
         Long time = (new Date()).getTime();
         virtualProfile.setDateCreated(time);
         virtualProfile.setUpdateStamp(time);
@@ -64,8 +64,15 @@ public class VirtualProfileEndpoint {
 
         //create club member
         final Key<ClubMember> memberKey = factory().allocateId(ClubMember.class);
-        ClubMember clubMember = new ClubMember(
-                memberKey.getId(), null, virtualProfileKey.getId(), clubId, time, time);
+
+        ClubMember clubMember = new ClubMember(memberKey.getId(),
+                virtualProfileKey.getString(),
+                clubId,
+                false,//guestProfile
+                false,// manager profile
+                false, // archived
+                time,
+                time );
         ofy().save().entity(clubMember).now();
 
         return virtualProfile;

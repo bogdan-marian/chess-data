@@ -59,14 +59,7 @@ public class ClubEndpoint {
             club.setUpdateStamp(time);
             ofy().save().entity(club).now();
 
-            /*//create ClubManager
-
-            final Key<ClubManager> managerKey = factory().allocateId(ClubManager.class);
-            ClubManager clubManager = new ClubManager(
-                    managerKey.getId(), profileId,clubKey.getId(),date.getTime());
-            ofy().save().entity(clubManager).now();*/
-
-            //createClubMember
+            
             String profileId = ((GoogleIdToken.Payload) secPair.getValue()).getSubject();
             final Key<ClubMember> memberKey = factory().allocateId(ClubMember.class);
 
@@ -76,7 +69,7 @@ public class ClubEndpoint {
                     false,//quest profile
                     true, //manager profile
                     false, //archived
-                    time, 
+                    time,
                     time);
 
             ofy().save().entity(clubMember).now();

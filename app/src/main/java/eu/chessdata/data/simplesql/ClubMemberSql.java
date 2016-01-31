@@ -2,7 +2,6 @@ package eu.chessdata.data.simplesql;
 
 import ckm.simple.sql_provider.annotation.SimpleSQLColumn;
 import ckm.simple.sql_provider.annotation.SimpleSQLTable;
-import eu.chessdata.backend.clubEndpoint.model.ClubMember;
 
 /**
  * Created by Bogdan Oloeriu on 28/01/2016.
@@ -18,11 +17,14 @@ public class ClubMemberSql {
     @SimpleSQLColumn("profileId")
     private String profileId;
 
-    @SimpleSQLColumn("virtualProfileId")
-    private Long virtualProfileId;
-
     @SimpleSQLColumn("clubId")
     private Long clubId;
+
+    @SimpleSQLColumn("guestProfile")
+    boolean guestProfile;
+
+    @SimpleSQLColumn("managerProfile")
+    boolean managerProfile;
 
     @SimpleSQLColumn("archived")
     private boolean archived = false;
@@ -35,22 +37,22 @@ public class ClubMemberSql {
 
     //constructors
     public ClubMemberSql(){}
-    public ClubMemberSql(ClubMember clubMember){
-        this.clubMemberId = clubMember.getClubMemberId();
-        this.profileId = clubMember.getProfileId();
-        this.virtualProfileId = clubMember.getVirtualProfileId();
-        this.clubId = clubMember.getClubId();
-        this.archived = clubMember.getArchived();
-        this.dateCreated = clubMember.getDateCreated();
-        this.updateStamp = clubMember.getUpdateStamp();
-    }
 
     //boolean default generation problems
     public boolean getArchived(){
         return isArchived();
     }
 
+    public boolean getGuestProfile(){
+        return isGuestProfile();
+    }
+
+    public boolean getManagerProfile(){
+        return isManagerProfile();
+    }
+
     //getters and setters
+
 
     public long getId() {
         return id;
@@ -76,20 +78,28 @@ public class ClubMemberSql {
         this.profileId = profileId;
     }
 
-    public Long getVirtualProfileId() {
-        return virtualProfileId;
-    }
-
-    public void setVirtualProfileId(Long virtualProfileId) {
-        this.virtualProfileId = virtualProfileId;
-    }
-
     public Long getClubId() {
         return clubId;
     }
 
     public void setClubId(Long clubId) {
         this.clubId = clubId;
+    }
+
+    public boolean isGuestProfile() {
+        return guestProfile;
+    }
+
+    public void setGuestProfile(boolean guestProfile) {
+        this.guestProfile = guestProfile;
+    }
+
+    public boolean isManagerProfile() {
+        return managerProfile;
+    }
+
+    public void setManagerProfile(boolean managerProfile) {
+        this.managerProfile = managerProfile;
     }
 
     public boolean isArchived() {

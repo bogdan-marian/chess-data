@@ -6,11 +6,9 @@ import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.config.Named;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.googlecode.objectify.Key;
-import com.googlecode.objectify.cmd.Query;
 
 import java.util.Date;
 
-import eu.chessdata.backend.entities.ClubManager;
 import eu.chessdata.backend.entities.Tournament;
 import eu.chessdata.backend.tools.MyEntry;
 import eu.chessdata.backend.tools.MySecurityService;
@@ -32,33 +30,6 @@ import static eu.chessdata.backend.tools.OfyService.ofy;
         )
 )
 public class TournamentEndpoint {
-
-    public Tournament generateIndexes(){
-        Tournament indexTournament = new Tournament();
-        String profileIdExample = "107630334260856779717";
-        Long clubIdExample = 7040001L;
-
-        //==========================
-        Query<ClubManager> q = ofy().load().type(ClubManager.class);
-        q = q.filter("profileId =", profileIdExample);
-        q = q.filter("clubId = ", clubIdExample);
-        int i=0;
-        for (ClubManager clubManager : q){
-            i++;
-        }
-        if (i== 0) {
-            final Key<ClubManager> managerKey = factory().allocateId(ClubManager.class);
-            ClubManager clubManager = new ClubManager(managerKey.getId(), profileIdExample,
-                    clubIdExample, 1L);
-            ofy().save().entities(clubManager).now();
-        }
-        //==========================
-
-        boolean isClubManager = MySecurityService.isClubManager(profileIdExample, clubIdExample);
-        indexTournament.setDescription("Ok indexes should be generated: "
-                + isClubManager);
-        return indexTournament;
-    }
 
     @ApiMethod(name = "create", httpMethod = "post")
     public Tournament create(Tournament tournament, @Named("idTokenString") String idTokenString){
