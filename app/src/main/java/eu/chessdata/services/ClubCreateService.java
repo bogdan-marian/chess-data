@@ -2,8 +2,8 @@ package eu.chessdata.services;
 
 import android.app.IntentService;
 import android.content.ContentResolver;
-import android.content.Intent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Log;
@@ -110,22 +110,25 @@ public class ClubCreateService extends IntentService {
     private void handleActionCreateClub(String jsonClub) {
         Log.d(TAG, "JSON.CLUB: " + jsonClub);
         Club club = deserializeFromJson(jsonClub);
-        if (club != null){
-            Log.d(TAG,"Club is not null");
-            try {
-                //insert club in datastore
-                Club vipClub = sClubEndpoint.create(mIdTokenString,club).execute();
-                if (vipClub != null){
-                    //insert club in sqlite
-                    Uri newUri = mContentResolver.insert(
-                            ClubTable.CONTENT_URI, ClubTable.getContentValues(
-                                    new ClubSql(vipClub),false));
-                    Log.d(TAG,"Uri new sql club: " + newUri.toString());
-                }
-            } catch (IOException e) {
-                Log.d(TAG,"Not able to create vipClub from: " + club);
-            }
+        if (club == null) return;
+        Log.d(TAG, "Club is not null");
+        try {
+            //insert club in datastore
+            Club vipClub = sClubEndpoint.create(mIdTokenString, club).execute();
+            if (vipClub == null) return;
+
+            //insert club in sqlite
+            Uri newUri = mContentResolver.insert(
+                    ClubTable.CONTENT_URI, ClubTable.getContentValues(
+                            new ClubSql(vipClub), false));
+            Log.d(TAG, "Uri new sql club: " + newUri.toString());
+
+            //get the clubMember
+
+        } catch (IOException e) {
+            Log.d(TAG, "Not able to create vipClub from: " + club);
         }
+
     }
 
     /**
@@ -139,10 +142,11 @@ public class ClubCreateService extends IntentService {
 
     /**
      * In creates a Json string that represents the club
+     *
      * @param club
      * @return
      */
-    private static String serializeToJson(Club club){
+    private static String serializeToJson(Club club) {
         try {
             String jsonClub = sGsonFactory.toString(club);
             return jsonClub;
@@ -153,12 +157,13 @@ public class ClubCreateService extends IntentService {
 
     /**
      * It decodes the json club and creates a club from it.
+     *
      * @param jsonString
      * @return
      */
-    private static Club deserializeFromJson (String jsonString){
+    private static Club deserializeFromJson(String jsonString) {
         try {
-            return sGsonFactory.fromString(jsonString,Club.class);
+            return sGsonFactory.fromString(jsonString, Club.class);
         } catch (IOException e) {
             throw new IllegalStateException("Not able to deserialize json");
         }

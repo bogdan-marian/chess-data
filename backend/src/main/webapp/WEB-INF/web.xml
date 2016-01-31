@@ -10,8 +10,7 @@
                 eu.chessdata.backend.endpoints.example.QuoteEndpoint,
                 eu.chessdata.backend.endpoints.ProfileEndpoint,
                 eu.chessdata.backend.endpoints.ClubEndpoint,
-                eu.chessdata.backend.endpoints.TournamentEndpoint,
-                eu.chessdata.backend.endpoints.VirtualProfileEndpoint
+                eu.chessdata.backend.endpoints.TournamentEndpoint
             </param-value>
         </init-param>
     </servlet>

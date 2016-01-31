@@ -16,8 +16,8 @@ import com.google.api.client.json.gson.GsonFactory;
 import java.io.IOException;
 
 import eu.chessdata.R;
-import eu.chessdata.backend.virtualProfileEndpoint.VirtualProfileEndpoint;
-import eu.chessdata.backend.virtualProfileEndpoint.model.VirtualProfile;
+import eu.chessdata.backend.profileEndpoint.ProfileEndpoint;
+import eu.chessdata.backend.profileEndpoint.model.Profile;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.tools.MyGlobalSharedObjects;
 
@@ -30,7 +30,7 @@ import eu.chessdata.tools.MyGlobalSharedObjects;
  */
 public class ProfileService extends IntentService {
     private static GsonFactory sGsonFactory = new GsonFactory();
-    private static VirtualProfileEndpoint sVirtualProfileEndpoint = buildVirtualProfileEndpoint();
+    private static ProfileEndpoint sVirtualProfileEndpoint = buildVirtualProfileEndpoint();
 
     private String TAG = "my-debug-tag";
     private SharedPreferences mSharedPreferences;
@@ -58,7 +58,7 @@ public class ProfileService extends IntentService {
      * @see IntentService
      */
     // TODO: Customize helper method
-    public static void startActionCreateVirtualProfile(Context context, VirtualProfile virtualProfile) {
+    public static void startActionCreateVirtualProfile(Context context, Profile virtualProfile) {
         String jsonVirtualProfile = serializeVirtualProfile(virtualProfile);
 
         Intent intent = new Intent(context, ProfileService.class);
@@ -112,13 +112,14 @@ public class ProfileService extends IntentService {
      * parameters.
      */
     private void handleActionCreateVirtualProfile(String jsonVirtualProfile) {
-        VirtualProfile virtualProfile = deserializeVirtualProfile(jsonVirtualProfile);
+        Profile virtualProfile = deserializeVirtualProfile(jsonVirtualProfile);
+        Profile profile = deserializeVirtualProfile(jsonVirtualProfile);
 
-        if (virtualProfile != null && mClubEndpointId != null) {
+        if (profile != null && mClubEndpointId != null) {
 
             try {
-                VirtualProfile vipProfile = sVirtualProfileEndpoint
-                        .createVirtualProfile(mClubEndpointId, mIdTokenString, virtualProfile)
+                Profile vipProfile = sVirtualProfileEndpoint
+                        .createVirtualProfile(mClubEndpointId, mIdTokenString, profile)
                         .execute();
 
                 if (vipProfile == null){
@@ -149,7 +150,7 @@ public class ProfileService extends IntentService {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    private static String serializeVirtualProfile(VirtualProfile virtualProfile) {
+    private static String serializeVirtualProfile(Profile virtualProfile) {
         try {
             String jsonVirtualProfile = sGsonFactory.toString(virtualProfile);
             return jsonVirtualProfile;
@@ -158,10 +159,10 @@ public class ProfileService extends IntentService {
         }
     }
 
-    private static VirtualProfile deserializeVirtualProfile(String jsonString) {
+    private static Profile deserializeVirtualProfile(String jsonString) {
         try {
-            VirtualProfile virtualProfile =
-                    sGsonFactory.fromString(jsonString, VirtualProfile.class);
+            Profile virtualProfile =
+                    sGsonFactory.fromString(jsonString, Profile.class);
             return virtualProfile;
         } catch (IOException e) {
             Log.d("my-debug-tag", "Not able to deserializeVirtualProfile");
@@ -169,9 +170,9 @@ public class ProfileService extends IntentService {
         }
     }
 
-    private static VirtualProfileEndpoint buildVirtualProfileEndpoint() {
-        VirtualProfileEndpoint.Builder builder =
-                new VirtualProfileEndpoint.Builder(
+    private static ProfileEndpoint buildVirtualProfileEndpoint() {
+        ProfileEndpoint.Builder builder =
+                new ProfileEndpoint.Builder(
                         AndroidHttp.newCompatibleTransport(),
                         new AndroidJsonFactory(),
                         null

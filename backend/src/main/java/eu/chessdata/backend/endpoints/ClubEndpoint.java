@@ -51,6 +51,7 @@ public class ClubEndpoint {
             System.out.println("Illegal request " + idTokenString);
             return new Club();
         } else {
+            //create the club
             final Key<Club> clubKey = factory().allocateId(Club.class);
             club.setClubId(clubKey.getId());
             Long time = new Date().getTime();
@@ -59,7 +60,7 @@ public class ClubEndpoint {
             club.setUpdateStamp(time);
             ofy().save().entity(club).now();
 
-            
+            //create the clubMember
             String profileId = ((GoogleIdToken.Payload) secPair.getValue()).getSubject();
             final Key<ClubMember> memberKey = factory().allocateId(ClubMember.class);
 
@@ -76,6 +77,28 @@ public class ClubEndpoint {
 
             return club;
         }
+    }
+
+    /**
+     * Access this on the client side immediate after creating the club in
+     * order to get also  the clubMember information
+     * @param idTokenString
+     * @return clubId
+     */
+    public ClubMember getFirstManager(@Named("idTokenString") String idTokenString,
+                                      @Named("clubId") Long clubId){
+        ClubMember illegalMember = new ClubMember();
+
+        MyEntry<Status, GoogleIdToken.Payload> secPair = MySecurityService.getProfile(idTokenString);
+        if (secPair.getKey() != Status.VALID_USER) {
+            illegalMember.setProfileId("Illegal request: No valid user");
+            return illegalMember;
+        }
+
+
+
+        illegalMember.setProfileId("Illegal request: Nothing happened");
+        return illegalMember;
     }
 
     @ApiMethod(name = "debugClubMember", httpMethod = "post")

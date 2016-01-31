@@ -11,8 +11,8 @@ import android.view.View;
 import android.widget.EditText;
 
 import eu.chessdata.R;
-import eu.chessdata.backend.virtualProfileEndpoint.model.Email;
-import eu.chessdata.backend.virtualProfileEndpoint.model.VirtualProfile;
+import eu.chessdata.backend.profileEndpoint.model.Email;
+import eu.chessdata.backend.profileEndpoint.model.Profile;
 import eu.chessdata.services.ProfileService;
 
 /**
@@ -40,7 +40,7 @@ public class VirtualProfileCreateFragment extends DialogFragment{
         builder.setPositiveButton("Create virtual profile", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                VirtualProfile virtualProfile = buildVirtualProfile();
+                Profile virtualProfile = buildVirtualProfile();
                 ProfileService.startActionCreateVirtualProfile(getContext(),virtualProfile);
             }
         });
@@ -48,12 +48,13 @@ public class VirtualProfileCreateFragment extends DialogFragment{
         return builder.create();
     }
 
-    private VirtualProfile buildVirtualProfile(){
-        VirtualProfile profile = new VirtualProfile();
+    private Profile buildVirtualProfile(){
+        Profile profile = new Profile();
 
         profile.setName(((EditText) mView.findViewById(R.id.profileName)).getText().toString());
 
         String emailValue = ((EditText)mView.findViewById(R.id.email)).getText().toString();
+
         profile.setEmail(new Email().setEmail(emailValue));
 
         String intText = ((EditText) mView.findViewById(R.id.elo)).getText().toString();
