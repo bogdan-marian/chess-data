@@ -2,6 +2,7 @@ package eu.chessdata.data.simplesql;
 
 import ckm.simple.sql_provider.annotation.SimpleSQLColumn;
 import ckm.simple.sql_provider.annotation.SimpleSQLTable;
+import eu.chessdata.backend.clubEndpoint.model.ClubMember;
 
 /**
  * Created by Bogdan Oloeriu on 28/01/2016.
@@ -37,6 +38,16 @@ public class ClubMemberSql {
 
     //constructors
     public ClubMemberSql(){}
+    public ClubMemberSql(ClubMember clubMember){
+        this.clubMemberId = clubMember.getClubMemberId();
+        this.profileId = clubMember.getProfileId();
+        this.clubId = clubMember.getClubId();
+        this.guestProfile = clubMember.getGuestProfile();
+        this.managerProfile = clubMember.getManagerProfile();
+        this.archived = clubMember.getArchived();
+        this.dateCreated = clubMember.getDateCreated();
+        this.updateStamp = clubMember.getUpdateStamp();
+    }
 
     //boolean default generation problems
     public boolean getArchived(){

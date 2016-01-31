@@ -17,6 +17,7 @@ import java.io.IOException;
 import eu.chessdata.R;
 import eu.chessdata.backend.clubEndpoint.ClubEndpoint;
 import eu.chessdata.backend.clubEndpoint.model.Club;
+import eu.chessdata.backend.clubEndpoint.model.ClubMember;
 import eu.chessdata.data.simplesql.ClubSql;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.tools.MyGlobalSharedObjects;
@@ -123,10 +124,25 @@ public class ClubCreateService extends IntentService {
                             new ClubSql(vipClub), false));
             Log.d(TAG, "Uri new sql club: " + newUri.toString());
 
-            //get the clubMember
+            //get the clubMember in a loop until you succeed.
+            while (true){
+                ClubMember clubMember = sClubEndpoint.getFirstManager(mIdTokenString,vipClub.getClubId())
+                        .execute();
+                String illegalRequest = clubMember.getProfileId().split(":")[0];
+                if (illegalRequest.equals("Illegal request")) {
+                    Log.d(TAG, "From server with love: " + clubMember.getProfileId());
+                    Thread.sleep(3000L);
+                    continue;
+                }
+
+                //clubMember retrieved from server side
+                //Uri memberUri =
+            }
 
         } catch (IOException e) {
             Log.d(TAG, "Not able to create vipClub from: " + club);
+        } catch (InterruptedException e) {
+            Log.d(TAG, "Sleep was interrupted: " + club);
         }
 
     }

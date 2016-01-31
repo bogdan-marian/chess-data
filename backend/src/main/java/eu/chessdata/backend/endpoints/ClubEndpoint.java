@@ -6,6 +6,7 @@ import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.config.Named;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.cmd.Query;
 
 import java.util.Date;
 
@@ -60,7 +61,7 @@ public class ClubEndpoint {
             club.setUpdateStamp(time);
             ofy().save().entity(club).now();
 
-            //create the clubMember
+            //create the clubMember (first manager)
             String profileId = ((GoogleIdToken.Payload) secPair.getValue()).getSubject();
             final Key<ClubMember> memberKey = factory().allocateId(ClubMember.class);
 
@@ -85,6 +86,7 @@ public class ClubEndpoint {
      * @param idTokenString
      * @return clubId
      */
+    @ApiMethod(name = "getFirstManager", httpMethod = "post")
     public ClubMember getFirstManager(@Named("idTokenString") String idTokenString,
                                       @Named("clubId") Long clubId){
         ClubMember illegalMember = new ClubMember();
@@ -95,9 +97,15 @@ public class ClubEndpoint {
             return illegalMember;
         }
 
-
-
-        illegalMember.setProfileId("Illegal request: Nothing happened");
+        String profileId = ((GoogleIdToken.Payload) secPair.getValue()).getSubject();
+        Query<ClubMember> query = ofy().load().type(ClubMember.class);
+        query = query.filter("profileId", profileId);
+        query = query.filter("clubId",clubId);
+        ClubMember firstManager = query.first().now();
+        if (firstManager != null){
+            return firstManager;
+        }
+        illegalMember.setProfileId("Illegal request:I was not able to locate the firstManager");
         return illegalMember;
     }
 
