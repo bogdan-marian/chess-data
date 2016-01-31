@@ -30,7 +30,7 @@ import eu.chessdata.tools.MyGlobalSharedObjects;
  */
 public class ProfileService extends IntentService {
     private static GsonFactory sGsonFactory = new GsonFactory();
-    private static ProfileEndpoint sVirtualProfileEndpoint = buildVirtualProfileEndpoint();
+    private static ProfileEndpoint profileEndpoint = buildProfileEndpoint();
 
     private String TAG = "my-debug-tag";
     private SharedPreferences mSharedPreferences;
@@ -40,6 +40,7 @@ public class ProfileService extends IntentService {
 
     // TODO: Rename actions, choose action names that describe tasks that this
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
+
     private static final String ACTION_CREATE_VIRTUAL_PROFILE = "eu.chessdata.services.action.create.virtual.profile";
     private static final String ACTION_BAZ = "eu.chessdata.services.action.BAZ";
 
@@ -107,6 +108,7 @@ public class ProfileService extends IntentService {
         }
     }
 
+
     /**
      * Handle action Foo in the provided background thread with the provided
      * parameters.
@@ -118,7 +120,7 @@ public class ProfileService extends IntentService {
         if (profile != null && mClubEndpointId != null) {
 
             try {
-                Profile vipProfile = sVirtualProfileEndpoint
+                Profile vipProfile = profileEndpoint
                         .createVirtualProfile(mClubEndpointId, mIdTokenString, profile)
                         .execute();
 
@@ -170,7 +172,7 @@ public class ProfileService extends IntentService {
         }
     }
 
-    private static ProfileEndpoint buildVirtualProfileEndpoint() {
+    private static ProfileEndpoint buildProfileEndpoint() {
         ProfileEndpoint.Builder builder =
                 new ProfileEndpoint.Builder(
                         AndroidHttp.newCompatibleTransport(),

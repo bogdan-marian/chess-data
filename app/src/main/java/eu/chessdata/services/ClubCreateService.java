@@ -2,6 +2,7 @@ package eu.chessdata.services;
 
 import android.app.IntentService;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,6 +19,8 @@ import eu.chessdata.R;
 import eu.chessdata.backend.clubEndpoint.ClubEndpoint;
 import eu.chessdata.backend.clubEndpoint.model.Club;
 import eu.chessdata.backend.clubEndpoint.model.ClubMember;
+import eu.chessdata.data.simplesql.ClubMemberSql;
+import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubSql;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.tools.MyGlobalSharedObjects;
@@ -126,18 +129,37 @@ public class ClubCreateService extends IntentService {
 
             //get the clubMember in a loop until you succeed.
             while (true){
-                ClubMember clubMember = sClubEndpoint.getFirstManager(mIdTokenString,vipClub.getClubId())
+                ClubMember vipClubMember = sClubEndpoint.getFirstManager(mIdTokenString,vipClub.getClubId())
                         .execute();
-                String illegalRequest = clubMember.getProfileId().split(":")[0];
+                String illegalRequest = vipClubMember.getProfileId().split(":")[0];
                 if (illegalRequest.equals("Illegal request")) {
-                    Log.d(TAG, "From server with love: " + clubMember.getProfileId());
+                    Log.d(TAG, "From server with love: " + vipClubMember.getProfileId());
                     Thread.sleep(3000L);
                     continue;
                 }
 
-                //clubMember retrieved from server side
-                //Uri memberUri =
+                //vipClubMember retrieved from server side
+                Uri memberUri = mContentResolver.insert(
+                        ClubMemberTable.CONTENT_URI,
+                        ClubMemberTable.getContentValues(
+                                new ClubMemberSql(), false
+                        )
+                );
+                Log.d(TAG, "New member uri: " + memberUri.toString());
+
+
+
+                break;
             }
+
+            //change also the default Managed club
+            String clubName = vipClub.getName();
+            Long clubId = ContentUris.parseId(newUri);
+            SharedPreferences.Editor editor = mSharedPreferences.edit();
+            editor.putString(getString(R.string.pref_managed_club_name), clubName);
+            editor.putLong(getString(R.string.pref_managed_club_sqlId), clubId);
+            editor.commit();
+            Log.d(TAG, "Allso changed the default managed club");
 
         } catch (IOException e) {
             Log.d(TAG, "Not able to create vipClub from: " + club);
