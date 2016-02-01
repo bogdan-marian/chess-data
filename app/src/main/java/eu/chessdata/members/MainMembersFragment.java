@@ -30,7 +30,7 @@ import eu.chessdata.data.simplesql.ClubMemberTable;
 public class MainMembersFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
     private String TAG = "my-debug-tag";
 
-    private static final int MAIN_MEMBERS_LOADER = 0;
+    private static final int MAIN_MEMBERS_LOADER = 1;
     private ClubMembersAdapter mClubMembersAdapter;
 
     @Override
@@ -39,14 +39,14 @@ public class MainMembersFragment extends Fragment implements LoaderManager.Loade
         setHasOptionsMenu(true);
     }
 
-    @Nullable
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         //set the addapter
         mClubMembersAdapter = new ClubMembersAdapter(getActivity(),null,0);
 
         View fragmentView = inflater.inflate(R.layout.fragment_main_members,container,false);
-        ListView listView = (ListView) fragmentView.findViewById(R.id.listView_members);
+        ListView listView = (ListView) fragmentView.findViewById(R.id.listView_member);
         listView.setAdapter(mClubMembersAdapter);
 
         return fragmentView;
@@ -76,6 +76,15 @@ public class MainMembersFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Cursor cursor = getContext().getContentResolver()
+                .query(ClubMemberTable.CONTENT_URI,
+                        null,
+                        null,
+                        null,
+                        null);
+        int count = cursor.getCount();
+
+
         Uri membersUri = ClubMemberTable.CONTENT_URI;
         return new CursorLoader(getContext(),
                 membersUri,

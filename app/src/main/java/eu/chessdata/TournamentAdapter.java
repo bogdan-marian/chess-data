@@ -26,7 +26,7 @@ public class TournamentAdapter extends CursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        TextView tv = (TextView)view;
+        TextView tv = (TextView)view.findViewById(R.id.list_item_tournament_textView);
         tv.setText(getCursorData(cursor));
     }
     private String getCursorData(Cursor cursor){
