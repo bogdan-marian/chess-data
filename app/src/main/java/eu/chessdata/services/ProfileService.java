@@ -2,6 +2,7 @@ package eu.chessdata.services;
 
 import android.app.IntentService;
 import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,6 +20,8 @@ import eu.chessdata.R;
 import eu.chessdata.backend.profileEndpoint.ProfileEndpoint;
 import eu.chessdata.backend.profileEndpoint.model.Profile;
 import eu.chessdata.data.simplesql.ClubTable;
+import eu.chessdata.data.simplesql.ProfileSql;
+import eu.chessdata.data.simplesql.ProfileTable;
 import eu.chessdata.tools.MyGlobalSharedObjects;
 
 /**
@@ -134,7 +137,17 @@ public class ProfileService extends IntentService {
                     return;
                 }
 
-                //everything ok on server side
+                //create the profile on sqlite
+                ProfileSql profileSql = new ProfileSql(vipProfile);
+                Uri newUri = mContentResolver.insert(
+                        ProfileTable.CONTENT_URI,
+                        ProfileTable.getContentValues(profileSql,false)
+                );
+                if (ContentUris.parseId(newUri)<0){
+                    Log.d(TAG,"Not able to store Profile in the database");
+                }
+                Log.d(TAG,"newUri for ProfileTable uri: "+newUri.toString());
+
 
 
             } catch (IOException e) {

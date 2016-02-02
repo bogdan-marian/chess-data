@@ -109,6 +109,8 @@ public class ClubEndpoint {
         return illegalMember;
     }
 
+
+
     @ApiMethod(name = "debugClubMember", httpMethod = "post")
     public ClubMember debugClubMember(ClubMember clubMember) {
         ClubMember vipMember = new ClubMember();

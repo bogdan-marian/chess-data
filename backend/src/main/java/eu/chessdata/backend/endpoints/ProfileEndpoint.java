@@ -8,6 +8,7 @@ import com.google.appengine.api.datastore.Email;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.cmd.Query;
 
 import java.util.Date;
 
@@ -115,5 +116,35 @@ public class ProfileEndpoint {
         ofy().save().entity(clubMember).now();
 
         return virtualProfile;
+    }
+
+    /**
+     * use theas only immediately after you created a new virutal member
+     * to get it's synchronization id for clubMember entity
+     * @param idTokenString
+     * @param profileId
+     * @param clubId
+     * @return
+     */
+    public ClubMember getJustCreatedVirtualMember(@Named("idTokenString") String idTokenString,
+                                                  @Named("profileId") String profileId,
+                                                  @Named("clubId") Long clubId){
+
+        ClubMember illegalMember = new ClubMember();
+        MyEntry<Status, GoogleIdToken.Payload> secPair = MySecurityService.getProfile(idTokenString);
+        if (secPair.getKey() != Status.VALID_USER) {
+            illegalMember.setProfileId("Illegal request: No valid user");
+            return illegalMember;
+        }
+
+        Query<ClubMember> query = ofy().load().type(ClubMember.class);
+        query = query.filter("profileId", profileId);
+        query = query.filter("clubId",clubId);
+        ClubMember virtualMember = query.first().now();
+        if (virtualMember == null){
+            illegalMember.setProfileId("Illegal request: No able to locate the member info");
+            return illegalMember;
+        }
+        return virtualMember;
     }
 }
