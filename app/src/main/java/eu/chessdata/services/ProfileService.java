@@ -281,9 +281,9 @@ public class ProfileService extends IntentService {
         if(!(profileCursor != null && profileCursor.moveToFirst())){
             return "Not able to locate profile id: "+ profileId;
         }
-        int idx_profileId = profileCursor.getColumnIndex(ProfileTable.FIELD_PROFILEID);
+        int idx_profileName = profileCursor.getColumnIndex(ProfileTable.FIELD_NAME);
 
-        String name = profileCursor.getString(idx_profileId);
+        String name = profileCursor.getString(idx_profileName);
         profileCursor.close();
         return name;
 
