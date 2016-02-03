@@ -5,4 +5,4 @@ I hope that this approach will make communication easier and more fun.
 First... wee are focused on facilitating publishing the information about current round results and
 new round parings.
 
-bogdan
+bogdan marian oloeriu
