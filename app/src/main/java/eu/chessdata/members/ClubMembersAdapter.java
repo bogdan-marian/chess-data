@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import eu.chessdata.R;
 import eu.chessdata.data.simplesql.ClubMemberTable;
+import eu.chessdata.tools.MyGlobalSharedObjects;
 
 /**
  * Created by Bogdan Oloeriu on 01/02/2016.
@@ -36,7 +37,9 @@ public class ClubMembersAdapter extends CursorAdapter {
 
     private String getCursorData(Cursor cursor){
         int idxProfileName = cursor.getColumnIndex(ClubMemberTable.FIELD__ID);
-        String profileName ="id: " +cursor.getLong(idxProfileName);
-        return profileName;
+        int idxProfileId = cursor.getColumnIndex(ClubMemberTable.FIELD_PROFILEID);
+        String profileId =cursor.getString(idxProfileId);
+        String name = MyGlobalSharedObjects.getNameByProfileId(profileId);
+        return name;
     }
 }

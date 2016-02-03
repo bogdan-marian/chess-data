@@ -174,10 +174,10 @@ public class ProfileService extends IntentService {
                 //debug section
                 Cursor cursor = mContentResolver.query(
                         ClubMemberTable.CONTENT_URI,
-                        null,
-                        null,
-                        null,
-                        null
+                        null,//projection
+                        null,//selection
+                        null ,//selection args
+                        null //sort order
                 );
                 Log.d(TAG,"Total club members = " + cursor.getCount());
             } catch (IOException e) {
@@ -192,26 +192,31 @@ public class ProfileService extends IntentService {
      */
     private void handleActionUpdateAllMembersMap() {
         Log.d(TAG,"OK handleActionUpdateAllMembersMap: initialized");
+        // ClubMemberTable.FIELD_CLUBMEMBERID +" IS NOT NULL"
         Cursor membersCursor = mContentResolver.query(ClubMemberTable.CONTENT_URI,
-                null,
-                null,
-                null,
-                null);
+                null,//projection
+                ClubMemberTable.FIELD_CLUBMEMBERID +" IS NOT NULL",//selection
+                null ,//selection args
+                null //sort order
+        );
         if (membersCursor == null){
             Log.d(TAG,"no members found");
             return;
-        }else{
-            Log.d(TAG,"membersCursor OK (not null)");
         }
+        Log.d(TAG,"membersCursor OK (not null)");
+
+        int idx_id = membersCursor.getColumnIndex(ClubMemberTable.FIELD_PROFILEID);
         int i=0;
         while (membersCursor.moveToNext()){
 
-            int idx_id = membersCursor.getColumnIndex(ClubMemberTable.FIELD_PROFILEID);
+
             String id = membersCursor.getString(idx_id);
+            Log.d(TAG,"i = " + i+" id = "+ id);
             if (id != null) {
                 String name = getNameById(id);
                 MyGlobalSharedObjects.addToMembersSqlIdToProfileName(id, name);
             }
+            i++;
         }
         membersCursor.close();
     }
@@ -268,20 +273,20 @@ public class ProfileService extends IntentService {
         Cursor profileCursor = mContentResolver.query(
                 ProfileTable.CONTENT_URI,
                 null,
-                ProfileTable.FIELD_PROFILEID,
+                ProfileTable.FIELD_PROFILEID  +"= ?",
                 arguments,
                 null
         );
 
-        /*if(!(profileCursor != null && profileCursor.moveToFirst())){
+        if(!(profileCursor != null && profileCursor.moveToFirst())){
             return "Not able to locate profile id: "+ profileId;
         }
-        int idx_profileId = profileCursor.getColumnIndex(ProfileTable.FIELD_PROFILEID);
+        int idx_profileName = profileCursor.getColumnIndex(ProfileTable.FIELD_NAME);
 
-        String name = profileCursor.getString(idx_profileId);
+        String name = profileCursor.getString(idx_profileName);
         profileCursor.close();
-        return name;*/
+        return name;
 
-        return "no more crashes?";
+        //return "no more crashes?";
     }
 }
