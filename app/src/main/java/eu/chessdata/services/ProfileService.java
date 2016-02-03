@@ -18,7 +18,10 @@ import java.io.IOException;
 
 import eu.chessdata.R;
 import eu.chessdata.backend.profileEndpoint.ProfileEndpoint;
+import eu.chessdata.backend.profileEndpoint.model.ClubMember;
 import eu.chessdata.backend.profileEndpoint.model.Profile;
+import eu.chessdata.data.simplesql.ClubMemberSql;
+import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.data.simplesql.ProfileSql;
 import eu.chessdata.data.simplesql.ProfileTable;
@@ -145,11 +148,40 @@ public class ProfileService extends IntentService {
                 );
                 if (ContentUris.parseId(newUri)<0){
                     Log.d(TAG,"Not able to store Profile in the database");
+                    return;
                 }
                 Log.d(TAG,"newUri for ProfileTable uri: "+newUri.toString());
 
+                //get the member id from endpoints
+                ClubMember member = profileEndpoint.getJustCreatedVirtualMember
+                        (mIdTokenString,vipProfile.getProfileId(),mClubEndpointId).execute();
+                if (member.getProfileId().split(":").equals("Illegal request")){
+                    Log.d(TAG,"Something is not write" +member.getProfileId());
+                    return;
+                }
 
+                Log.d(TAG,"Wee have the member data"+member.getProfileId());
 
+                //store member in sqlite
+                ClubMemberSql memberSql = new ClubMemberSql(member);
+                Uri memberUri = mContentResolver.insert(
+                        ClubMemberTable.CONTENT_URI,
+                        ClubMemberTable.getContentValues(memberSql,false)
+                );
+                if (ContentUris.parseId(memberUri)<0){
+                    Log.d(TAG,"not able to store member data in sqlite");
+                    return;
+                }
+
+                //debug section
+                Cursor cursor = mContentResolver.query(
+                        ClubMemberTable.CONTENT_URI,
+                        null,
+                        null,
+                        null,
+                        null
+                );
+                Log.d(TAG,"Total club members = " + cursor.getCount());
             } catch (IOException e) {
                 Log.d(TAG, "Something when wrong: handleActionCreateVirtualProfile: ");
             }

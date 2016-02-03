@@ -126,6 +126,7 @@ public class ProfileEndpoint {
      * @param clubId
      * @return
      */
+    @ApiMethod(name = "getJustCreatedVirtualMember", httpMethod = "post")
     public ClubMember getJustCreatedVirtualMember(@Named("idTokenString") String idTokenString,
                                                   @Named("profileId") String profileId,
                                                   @Named("clubId") Long clubId){
