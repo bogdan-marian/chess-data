@@ -17,7 +17,9 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import eu.chessdata.R;
+import eu.chessdata.TournamentAdapter;
 import eu.chessdata.data.simplesql.ClubMemberTable;
+import eu.chessdata.data.simplesql.TournamentTable;
 
 /**
  * This is the fragment that lists all the chess players that somehow are affiliated to the club
@@ -76,22 +78,14 @@ public class MainMembersFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Cursor cursor = getContext().getContentResolver()
-                .query(ClubMemberTable.CONTENT_URI,
-                        null,
-                        null,
-                        null,
-                        null);
-        int count = cursor.getCount();
-
-
         Uri membersUri = ClubMemberTable.CONTENT_URI;
+        String sortOrder = ClubMemberTable.FIELD__ID + " DESC";
         return new CursorLoader(getContext(),
                 membersUri,
                 null,//projection
                 null,
                 null,
-                null );
+                sortOrder );
 
     }
 

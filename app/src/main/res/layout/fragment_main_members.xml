@@ -8,10 +8,10 @@
 
     <TextView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:text="Hello from main MainMembersFragment"/>
     <ListView
         android:id="@+id/listView_member"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></ListView>
+        android:layout_height="wrap_content"></ListView>
 </LinearLayout>

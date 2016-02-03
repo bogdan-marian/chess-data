@@ -1,5 +1,6 @@
 package eu.chessdata.tools;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -8,4 +9,10 @@ import java.util.Map;
 public class MyGlobalSharedObjects {
     public static final String ROOT_URL = "https://chess-data.appspot.com/_ah/api/";
     public static Map<String,Long>managedClubs;
+
+    /**
+     * first string is the profile id from datastore
+     * second string is the name of the profile
+     */
+    public static Map<String,String> memberSqlIdToProfileName = new HashMap<>();
 }
