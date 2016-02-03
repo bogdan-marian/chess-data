@@ -19,4 +19,7 @@ public class MyGlobalSharedObjects {
     public static void addToMembersSqlIdToProfileName(String id,String name){
         memberSqlIdToProfileName.put(id,name);
     }
+    public static String getNameByProfileId(String profileId){
+        return memberSqlIdToProfileName.get(profileId);
+    }
 }
