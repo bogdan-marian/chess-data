@@ -25,6 +25,7 @@ import java.util.Map;
 
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.members.MainMembersFragment;
+import eu.chessdata.services.ProfileService;
 import eu.chessdata.tools.MyGlobalSharedObjects;
 import eu.chessdata.tools.Params;
 
@@ -68,6 +69,9 @@ public class HomeActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        //update all members map
+        ProfileService.startActionUpdateAllMembersMap(getBaseContext());
 
         //Set the user name
         String defaultValue = getString(R.string.pref_profile_signedOut);

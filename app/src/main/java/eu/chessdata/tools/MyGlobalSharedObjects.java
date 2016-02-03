@@ -15,4 +15,8 @@ public class MyGlobalSharedObjects {
      * second string is the name of the profile
      */
     public static Map<String,String> memberSqlIdToProfileName = new HashMap<>();
+
+    public static void addToMembersSqlIdToProfileName(String id,String name){
+        memberSqlIdToProfileName.put(id,name);
+    }
 }
