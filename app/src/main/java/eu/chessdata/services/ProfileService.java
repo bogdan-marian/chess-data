@@ -191,6 +191,9 @@ public class ProfileService extends IntentService {
      * parameters.
      */
     private void handleActionUpdateAllMembersMap() {
+        if (sNamesUpdated){
+            return;
+        }
         Log.d(TAG,"OK handleActionUpdateAllMembersMap: initialized");
         // ClubMemberTable.FIELD_CLUBMEMBERID +" IS NOT NULL"
         Cursor membersCursor = mContentResolver.query(ClubMemberTable.CONTENT_URI,
@@ -203,7 +206,6 @@ public class ProfileService extends IntentService {
             Log.d(TAG,"no members found");
             return;
         }
-        Log.d(TAG,"membersCursor OK (not null)");
 
         int idx_id = membersCursor.getColumnIndex(ClubMemberTable.FIELD_PROFILEID);
         int i=0;
@@ -211,7 +213,6 @@ public class ProfileService extends IntentService {
 
 
             String id = membersCursor.getString(idx_id);
-            Log.d(TAG,"i = " + i+" id = "+ id);
             if (id != null) {
                 String name = getNameById(id);
                 MyGlobalSharedObjects.addToMembersSqlIdToProfileName(id, name);
@@ -219,6 +220,7 @@ public class ProfileService extends IntentService {
             i++;
         }
         membersCursor.close();
+        sNamesUpdated = true;
     }
 
     private static String serializeVirtualProfile(Profile virtualProfile) {
