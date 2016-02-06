@@ -26,25 +26,25 @@ public class Club {
 
     //constructors
     public Club(){}
-    public Club (String name,
-                 String shortName,
-                 Email email,
-                 String country,
-                 String city,
-                 Link homePage,
-                 String description){
-        this.name = name;
-        this.shortName = shortName;
-        this.email = email;
-        this.country = country;
-        this.city = city;
-        this.homePage = homePage;
-        this.description = description;
-
-        long date = new Date().getTime();
-        this.dateCreated = date;
-        this.updateStamp = date;
-    }
+//    public Club (String name,
+//                 String shortName,
+//                 Email email,
+//                 String country,
+//                 String city,
+//                 Link homePage,
+//                 String description){
+//        this.name = name;
+//        this.shortName = shortName;
+//        this.email = email;
+//        this.country = country;
+//        this.city = city;
+//        this.homePage = homePage;
+//        this.description = description;
+//
+//        long date = new Date().getTime();
+//        this.dateCreated = date;
+//        this.updateStamp = date;
+//    }
 
     //generated
     public Long getClubId() {
