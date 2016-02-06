@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -23,14 +24,18 @@ import android.widget.TextView;
 import java.util.HashMap;
 import java.util.Map;
 
+import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.members.MainMembersFragment;
 import eu.chessdata.services.ProfileService;
 import eu.chessdata.tools.MyGlobalSharedObjects;
 import eu.chessdata.tools.Params;
+import eu.chessdata.tournament.TournamentDetailsFragment;
 
 public class HomeActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        TournamentFragment.TournamentCallback,
+        MainMembersFragment.MainMembersCallback {
     private String TAG = "my-debug-tag";
     private SharedPreferences mSharedPref;
 
@@ -50,7 +55,7 @@ public class HomeActivity extends AppCompatActivity
             }
         });*/
 
-        if (savedInstanceState == null){
+        if (savedInstanceState == null) {
             QuoteFragment firstFragment = new QuoteFragment();
             // In case this activity was started with special instructions from an
             // Intent, pass the Intent's extras to the fragment as arguments
@@ -80,11 +85,11 @@ public class HomeActivity extends AppCompatActivity
         String displayName = mSharedPref.getString(
                 getString(R.string.pref_profile_display_name), defaultValue);
         View header = navigationView.getHeaderView(0);
-        ((TextView)header.findViewById(R.id.user_name)).setText(displayName);
+        ((TextView) header.findViewById(R.id.user_name)).setText(displayName);
 
         String email = mSharedPref.getString(
                 getString(R.string.pref_profile_email), defaultValue);
-        ((TextView)header.findViewById(R.id.user_email)).setText(email);
+        ((TextView) header.findViewById(R.id.user_email)).setText(email);
 
         //debug section
         String debugDefaultValue = "defaultValue";
@@ -126,12 +131,12 @@ public class HomeActivity extends AppCompatActivity
             //(new DeviceSetDefaultManagedClub()).show(getSupportFragmentManager(),"DeviceSetDefaultManagedClub");
             String debugDefaultValue = "defaultValue";
             String profileId = mSharedPref.getString(
-                    getString( R.string.pref_profile_profileId), debugDefaultValue);
+                    getString(R.string.pref_profile_profileId), debugDefaultValue);
             ContentResolver contentResolver = getContentResolver();
-            ManagedClub managedClub = new ManagedClub(getSupportFragmentManager(),profileId,contentResolver);
+            ManagedClub managedClub = new ManagedClub(getSupportFragmentManager(), profileId, contentResolver);
             managedClub.execute();
-        }else if(id==R.id.action_create_club){
-            (new ClubCreateDialogFragment()).show(getSupportFragmentManager(),"ClubCreateDialogFragment");
+        } else if (id == R.id.action_create_club) {
+            (new ClubCreateDialogFragment()).show(getSupportFragmentManager(), "ClubCreateDialogFragment");
         }
 
         return super.onOptionsItemSelected(item);
@@ -150,10 +155,10 @@ public class HomeActivity extends AppCompatActivity
             transaction.replace(R.id.fragment_container, tournamentFragment);
             transaction.addToBackStack(null);
             transaction.commit();
-        } else if (id == R.id.nav_members){
+        } else if (id == R.id.nav_members) {
             MainMembersFragment mainMembersFragment = new MainMembersFragment();
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.fragment_container,mainMembersFragment);
+            transaction.replace(R.id.fragment_container, mainMembersFragment);
             transaction.addToBackStack(null);
             transaction.commit();
         } else if (id == R.id.nav_gallery) {
@@ -177,13 +182,16 @@ public class HomeActivity extends AppCompatActivity
         return true;
     }
 
-    class ManagedClub extends AsyncTask<Void,Void,Void>{
+
+
+    class ManagedClub extends AsyncTask<Void, Void, Void> {
 
         private FragmentManager mFragmentManager;
         private String mProfileId;
         ContentResolver mContentResolver;
+
         public ManagedClub(FragmentManager fragmentManager, String profileId,
-                           ContentResolver contentResolver){
+                           ContentResolver contentResolver) {
             mFragmentManager = fragmentManager;
             mProfileId = profileId;
             mContentResolver = contentResolver;
@@ -191,7 +199,7 @@ public class HomeActivity extends AppCompatActivity
 
         @Override
         protected Void doInBackground(Void... nothing) {
-            Map <String,Long> map = new HashMap<>();
+            Map<String, Long> map = new HashMap<>();
 
             Params params = Params.getManagedClubs(mProfileId);
             Cursor cursor = mContentResolver.query(
@@ -206,10 +214,10 @@ public class HomeActivity extends AppCompatActivity
             String columnLongId = ClubTable.FIELD__ID;
             int sqlId = cursor.getColumnIndex(columnLongId);
 
-            while (cursor.moveToNext()){
+            while (cursor.moveToNext()) {
                 String name = cursor.getString(nameId);
                 long id = cursor.getLong(sqlId);
-                map.put(name,id);
+                map.put(name, id);
             }
             MyGlobalSharedObjects.managedClubs = map;
             cursor.close();
@@ -217,9 +225,24 @@ public class HomeActivity extends AppCompatActivity
         }
 
         @Override
-        protected void onPostExecute(Void result){
+        protected void onPostExecute(Void result) {
             DeviceSetDefaultManagedClub dialog = new DeviceSetDefaultManagedClub();
-            dialog.show(mFragmentManager,"somTag");
+            dialog.show(mFragmentManager, "somTag");
         }
+    }
+
+
+    @Override
+    public void onTournamentItemSelected(Uri tournamentUri) {
+        TournamentDetailsFragment fragment = new TournamentDetailsFragment();
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container,fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    @Override
+    public void onMainMembersCallback(Uri memberUri) {
+        Log.d(TAG,"Home activity: Time to replace fragments: "+memberUri);
     }
 }

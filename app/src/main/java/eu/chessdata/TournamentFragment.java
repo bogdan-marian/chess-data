@@ -7,12 +7,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import eu.chessdata.data.simplesql.TournamentTable;
@@ -32,6 +34,14 @@ public class TournamentFragment extends Fragment implements LoaderManager.Loader
     private static final int TOURNAMENT_LOADER = 0;
     private TournamentAdapter mTournamentAdapter;
 
+    /**
+     * A public interface that all activities containing this fragment must implement.
+     * This mechanism allows activities to be notified of item selections.
+     */
+    public interface TournamentCallback {
+        public void onTournamentItemSelected(Uri tournamentUri);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,6 +57,24 @@ public class TournamentFragment extends Fragment implements LoaderManager.Loader
         View fragmentView = inflater.inflate(R.layout.fragment_tournament, container, false);
         ListView listView = (ListView) fragmentView.findViewById(R.id.listView_tournament);
         listView.setAdapter(mTournamentAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+                if (cursor != null) {
+                    int idx_id = cursor.getColumnIndex(TournamentTable.FIELD__ID);
+                    int idx_name = cursor.getColumnIndex(TournamentTable.FIELD_NAME);
+                    Long sqlId = cursor.getLong(idx_id);
+                    String tournamentName = cursor.getString(idx_name);
+
+                    Uri uri = TournamentTable.CONTENT_URI;
+                    uri = Uri.withAppendedPath(uri,sqlId.toString());
+
+                    ((TournamentCallback) getActivity())
+                            .onTournamentItemSelected(uri);
+                }
+            }
+        });
         return fragmentView;
     }
 
@@ -64,8 +92,8 @@ public class TournamentFragment extends Fragment implements LoaderManager.Loader
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.action_create_tournament){
-            (new TournamentCreateFragment()).show(getFragmentManager(),"TournamentCreateFragment");
+        if (id == R.id.action_create_tournament) {
+            (new TournamentCreateFragment()).show(getFragmentManager(), "TournamentCreateFragment");
         }
         return super.onOptionsItemSelected(item);
     }
@@ -92,4 +120,6 @@ public class TournamentFragment extends Fragment implements LoaderManager.Loader
     public void onLoaderReset(Loader<Cursor> loader) {
         mTournamentAdapter.swapCursor(null);
     }
+
+
 }

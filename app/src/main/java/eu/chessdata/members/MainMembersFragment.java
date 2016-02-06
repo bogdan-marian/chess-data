@@ -14,6 +14,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import eu.chessdata.R;
@@ -35,6 +36,10 @@ public class MainMembersFragment extends Fragment implements LoaderManager.Loade
     private static final int MAIN_MEMBERS_LOADER = 1;
     private ClubMembersAdapter mClubMembersAdapter;
 
+    public interface MainMembersCallback{
+        public void onMainMembersCallback(Uri memberUri);
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,6 +56,19 @@ public class MainMembersFragment extends Fragment implements LoaderManager.Loade
         ListView listView = (ListView) fragmentView.findViewById(R.id.listView_member);
         listView.setAdapter(mClubMembersAdapter);
 
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+                if (cursor != null){
+                    int idx_id = cursor.getColumnIndex(ClubMemberTable.FIELD__ID);
+                    Long sqlId = cursor.getLong(idx_id);
+
+                    Uri uri = Uri.withAppendedPath(ClubMemberTable.CONTENT_URI,sqlId.toString());
+                    ((MainMembersCallback)getActivity()).onMainMembersCallback(uri);
+                }
+            }
+        });
         return fragmentView;
     }
 
