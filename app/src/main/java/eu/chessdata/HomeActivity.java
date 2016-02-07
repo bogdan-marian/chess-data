@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
+import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.members.MainMembersFragment;
 import eu.chessdata.services.ProfileService;
@@ -215,9 +216,24 @@ public class HomeActivity extends AppCompatActivity
             int sqlId = cursor.getColumnIndex(columnLongId);
 
             while (cursor.moveToNext()) {
-                String name = cursor.getString(nameId);
-                long id = cursor.getLong(sqlId);
-                map.put(name, id);
+                //verify if current user can manage
+                String selection = ClubMemberTable.FIELD_CLUBMEMBERID + " = ? AND " +
+                        ClubMemberTable.FIELD_MANAGERPROFILE + " = ?";
+                String arguments[] ={mProfileId,"0"};
+                Cursor managerCursor = mContentResolver.query(
+                        ClubMemberTable.CONTENT_URI,
+                        null,
+                        selection,
+                        arguments,
+                        null
+                );
+                if (managerCursor == null){
+                    Log.d(TAG,"Not able to find a managed club");
+                }else {
+                    String name = cursor.getString(nameId);
+                    long id = cursor.getLong(sqlId);
+                    map.put(name, id);
+                }
             }
             MyGlobalSharedObjects.managedClubs = map;
             cursor.close();

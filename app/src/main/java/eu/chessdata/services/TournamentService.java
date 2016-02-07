@@ -126,6 +126,12 @@ public class TournamentService extends IntentService {
                 Tournament vipTournament = sTournamentEndpoint.create(mIdTokenString, tournament)
                         .execute();
                 if (vipTournament != null) {
+                    String description = vipTournament.getDescription();
+                    String message = description.split(":")[0];
+                    if (message.equals("Not created")){
+                        Log.d(TAG,"Something happened: " + description);
+                        return;
+                    }
                     //insert in sqlite
                     TournamentSql tournamentSql = new TournamentSql(vipTournament);
                     Uri newUri = mContentResolver.insert(

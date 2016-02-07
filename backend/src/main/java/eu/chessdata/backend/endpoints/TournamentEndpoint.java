@@ -49,14 +49,12 @@ public class TournamentEndpoint {
                 MySecurityService.getProfile(idTokenString);
         Tournament ilegalTournament = new Tournament();
         if (secPair.getKey() != MySecurityService.Status.VALID_USER){
-            System.out.println("Illegal request " + idTokenString);
-            ilegalTournament.setDescription("Illegal idTokenString: " + idTokenString);
+            ilegalTournament.setDescription("Not created: Illegal idTokenString: " + idTokenString);
             return ilegalTournament;
         }
         String profileId =((GoogleIdToken.Payload) secPair.getValue()).getSubject();
         if (!MySecurityService.isClubManager(profileId, tournament.getClubId())){
-            System.out.println("ProfileId: " + profileId+ " / clubId: " + tournament.getClubId());
-            ilegalTournament.setDescription("Illegal not a club manager");
+            ilegalTournament.setDescription("Not created: Illegal not a club manager");
             return ilegalTournament;
         }
         final Key<Tournament> tournamentKey = factory().allocateId(Tournament.class);
@@ -71,15 +69,12 @@ public class TournamentEndpoint {
 
         //for each tournament create a round
         Long tournamentId = tournamentKey.getId();
-
         for (int roundNumber=1;roundNumber<=tournament.getTotalRounds();roundNumber++){
             final Key<Round> key = factory().allocateId(Round.class);
             Long roundId = key.getId();
             Round round = new Round(roundId,tournamentId,roundNumber,false,time);
             //store the round in datastore
-            System.out.println("attempt to store new round. id = " + round);
             ofy().save().entity(round).now();
-
         }
 
         return tournament;
