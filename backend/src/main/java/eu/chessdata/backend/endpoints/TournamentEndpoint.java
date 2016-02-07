@@ -7,8 +7,11 @@ import com.google.api.server.spi.config.Named;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.googlecode.objectify.Key;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import eu.chessdata.backend.entities.Round;
 import eu.chessdata.backend.entities.Tournament;
 import eu.chessdata.backend.tools.MyEntry;
 import eu.chessdata.backend.tools.MySecurityService;
@@ -56,6 +59,20 @@ public class TournamentEndpoint {
         tournament.setUpdateStamp(time);
         //store the entity in datastore
         ofy().save().entity(tournament).now();
+
+        //for each tournament create a round
+        Long tournamentId = tournamentKey.getId();
+
+        for (int roundNumber=1;roundNumber<=tournament.getTotalRounds();roundNumber++){
+            final Key<Round> key = factory().allocateId(Round.class);
+            Long roundId = key.getId();
+            Round round = new Round(roundId,tournamentId,roundNumber,false,time);
+            //store the round in datastore
+            System.out.println("attempt to store new round. id = " + round);
+            ofy().save().entity(round).now();
+
+        }
+
         return tournament;
     }
 }

@@ -15,12 +15,25 @@ public class Round {
     private Long tournamentId;
     @Index
     private int roundNumber;
-    private boolean isLoked;
+    private boolean isLocked;
+    private long updateStamp;
 
     //constructors
     public Round(){}
+    public Round(Long roundId,
+                 Long tournamentId,
+                 int roundNumber,
+                 boolean isLocked,
+                 long updateStamp){
+        this.roundId = roundId;
+        this.tournamentId = tournamentId;
+        this.roundNumber = roundNumber;
+        this.isLocked = isLocked;
+        this.updateStamp = updateStamp;
+    }
 
     //generated
+
     public Long getRoundId() {
         return roundId;
     }
@@ -45,11 +58,19 @@ public class Round {
         this.roundNumber = roundNumber;
     }
 
-    public boolean isLoked() {
-        return isLoked;
+    public boolean isLocked() {
+        return isLocked;
     }
 
-    public void setIsLoked(boolean isLoked) {
-        this.isLoked = isLoked;
+    public void setIsLocked(boolean isLocked) {
+        this.isLocked = isLocked;
+    }
+
+    public long getUpdateStamp() {
+        return updateStamp;
+    }
+
+    public void setUpdateStamp(long updateStamp) {
+        this.updateStamp = updateStamp;
     }
 }
