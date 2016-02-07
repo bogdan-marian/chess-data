@@ -34,6 +34,15 @@ import static eu.chessdata.backend.tools.OfyService.ofy;
 )
 public class TournamentEndpoint {
 
+    @ApiMethod(name="debugRound",httpMethod = "post")
+    public Round debugRound(){
+        final Key<Round> key = factory().allocateId(Round.class);
+        Long roundId = key.getId();
+        Round round = new Round(key.getId(),100l,1,false,1001l);
+        ofy().save().entity(round).now();
+        return round;
+    }
+
     @ApiMethod(name = "create", httpMethod = "post")
     public Tournament create(Tournament tournament, @Named("idTokenString") String idTokenString){
         MyEntry<MySecurityService.Status, GoogleIdToken.Payload> secPair =
