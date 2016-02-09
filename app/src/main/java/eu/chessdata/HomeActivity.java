@@ -21,9 +21,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import eu.chessdata.backend.profileEndpoint.model.ClubMember;
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
 import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubTable;
@@ -43,6 +46,8 @@ public class HomeActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
+
         setContentView(R.layout.activity_home);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -100,7 +105,6 @@ public class HomeActivity extends AppCompatActivity
                 getString(R.string.pref_profile_email), debugDefaultValue);
         String debugProfileIdToken = mSharedPref.getString(
                 getString(R.string.pref_profile_idToken), debugDefaultValue);
-        Log.d(TAG, "[name,email,id]=" + debugDisplayName + "," + debugEmail + "," + debugProfileIdToken);
     }
 
     @Override
@@ -184,7 +188,6 @@ public class HomeActivity extends AppCompatActivity
     }
 
 
-
     class ManagedClub extends AsyncTask<Void, Void, Void> {
 
         private FragmentManager mFragmentManager;
@@ -202,41 +205,50 @@ public class HomeActivity extends AppCompatActivity
         protected Void doInBackground(Void... nothing) {
             Map<String, Long> map = new HashMap<>();
 
-            Params params = Params.getManagedClubs(mProfileId);
-            Cursor cursor = mContentResolver.query(
-                    params.getUri(),
-                    params.getProjection(),
-                    params.getSelection(),
-                    params.getSelectionArgs(),
-                    params.getSortOrder());
+            //select members for current user and also club managers
+            String selectionClause = ClubMemberTable.FIELD_PROFILEID + " = ? "
+                    + "AND "+ClubMemberTable.FIELD_MANAGERPROFILE+" = ?";
+            String[] selectionArgs = {mProfileId,"1"};
+            Cursor memberCursor = mContentResolver.query(
+                    ClubMemberTable.CONTENT_URI,
+                    null,
+                    selectionClause,
+                    selectionArgs,
+                    null
+            );
+            Map<Long,String>clubIdToMember = new HashMap<>();
+            int memberCount = memberCursor.getCount();
+            int idx_clubId = memberCursor.getColumnIndex(ClubMemberTable.FIELD_CLUBID);
+            int idx_profileId = memberCursor.getColumnIndex(ClubMemberTable.FIELD_PROFILEID);
+            int idx_managerProfile = memberCursor.getColumnIndex(ClubMemberTable.FIELD_MANAGERPROFILE);
+            while(memberCursor.moveToNext()){
+                long clubId = memberCursor.getLong(idx_clubId);
+                String profileId = memberCursor.getString(idx_profileId);
+                int manager = memberCursor.getInt(idx_managerProfile);
+                clubIdToMember.put(clubId,profileId+"/"+manager);
 
-            String columnName = ClubTable.FIELD_NAME;
-            int nameId = cursor.getColumnIndex(columnName);
-            String columnLongId = ClubTable.FIELD__ID;
-            int sqlId = cursor.getColumnIndex(columnLongId);
-
-            while (cursor.moveToNext()) {
-                //verify if current user can manage
-                String selection = ClubMemberTable.FIELD_CLUBMEMBERID + " = ? AND " +
-                        ClubMemberTable.FIELD_MANAGERPROFILE + " = ?";
-                String arguments[] ={mProfileId,"0"};
-                Cursor managerCursor = mContentResolver.query(
-                        ClubMemberTable.CONTENT_URI,
+                //get clubSqlId and club name
+                String clubClause = ClubTable.FIELD_CLUBID + " = ?";
+                String[] clubArguments = {Long.toString(clubId)};
+                Cursor clubCursor = mContentResolver.query(
+                        ClubTable.CONTENT_URI,
                         null,
-                        selection,
-                        arguments,
+                        clubClause,
+                        clubArguments,
                         null
                 );
-                if (managerCursor == null){
-                    Log.d(TAG,"Not able to find a managed club");
-                }else {
-                    String name = cursor.getString(nameId);
-                    long id = cursor.getLong(sqlId);
-                    map.put(name, id);
+                int idx_clubSqlId = clubCursor.getColumnIndex(ClubTable.FIELD__ID);
+                int idx_clubName = clubCursor.getColumnIndex(ClubTable.FIELD_NAME);
+                while (clubCursor.moveToNext()){
+                    long clubSqlId = clubCursor.getLong(idx_clubSqlId);
+                    String clubName = clubCursor.getString(idx_clubName);
+                    map.put(clubName,clubSqlId);
                 }
+                clubCursor.close();
             }
+            memberCursor.close();
+
             MyGlobalSharedObjects.managedClubs = map;
-            cursor.close();
             return null;
         }
 
@@ -247,18 +259,36 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
+    public class ExceptionHandler implements java.lang.Thread.UncaughtExceptionHandler {
+        private final String LINE_SEPARATOR = "\n";
+
+        @SuppressWarnings("deprecation")
+        public void uncaughtException(Thread thread, Throwable exception) {
+            StringWriter stackTrace = new StringWriter();
+            exception.printStackTrace(new PrintWriter(stackTrace));
+
+            StringBuilder errorReport = new StringBuilder();
+            errorReport.append(stackTrace.toString());
+
+            Log.e(TAG, errorReport.toString());
+
+            android.os.Process.killProcess(android.os.Process.myPid());
+            System.exit(10);
+        }
+    }
+
 
     @Override
     public void onTournamentItemSelected(Uri tournamentUri) {
         TournamentDetailsFragment fragment = new TournamentDetailsFragment();
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container,fragment);
+        transaction.replace(R.id.fragment_container, fragment);
         transaction.addToBackStack(null);
         transaction.commit();
     }
 
     @Override
     public void onMainMembersCallback(Uri memberUri) {
-        Log.d(TAG,"Home activity: Time to replace fragments: "+memberUri);
+        Log.d(TAG, "Home activity: Time to replace fragments: " + memberUri);
     }
 }

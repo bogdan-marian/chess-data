@@ -266,6 +266,9 @@ public class ProfileService extends IntentService {
 
         Cursor cursor = mContentResolver.query(clubUri, projection, selection, selectionArguments, null);
         int count = cursor.getCount();
+        if (count <= 0){
+            return -1L;
+        }
         cursor.moveToFirst();
         long endPointId = cursor.getLong(COL_CLUBID);
         return endPointId;

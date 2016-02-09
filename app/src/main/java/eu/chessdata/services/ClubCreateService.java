@@ -142,13 +142,10 @@ public class ClubCreateService extends IntentService {
                 Uri memberUri = mContentResolver.insert(
                         ClubMemberTable.CONTENT_URI,
                         ClubMemberTable.getContentValues(
-                                new ClubMemberSql(), false
+                                new ClubMemberSql(vipClubMember), false
                         )
                 );
                 Log.d(TAG, "New member uri: " + memberUri.toString());
-
-
-
                 break;
             }
 

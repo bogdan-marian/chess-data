@@ -35,17 +35,6 @@ public class Params {
         return params;
     }
 
-    /**
-     * TODO change tis so in returns via a parameter the actual managed clubs
-     * @return
-     */
-    public static Params getManagedClubs(String profileId){
-        Params params = new Params();
-
-        params.uri = ClubTable.CONTENT_URI;
-        return params;
-    }
-
     //generated getters
     @NonNull
     public Uri getUri() {

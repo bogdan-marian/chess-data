@@ -74,6 +74,21 @@ public class TestSimpleProvider extends AndroidTestCase {
         );
         assertEquals("Error: Not able to delete from TournamentTable ", 0, cursor.getCount());
         cursor.close();
+        //========================================
+        mContext.getContentResolver().delete(
+                ClubMemberTable.CONTENT_URI,
+                null,
+                null
+        );
+        cursor = mContext.getContentResolver().query(
+                ClubMemberTable.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+        assertEquals("Error: Not able to delete from ClubMemberTable ", 0, cursor.getCount());
+        cursor.close();
     }
 
     public void test1ProfileInsertVip(){
