@@ -15,7 +15,6 @@ import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 
 import java.io.IOException;
-import java.util.Date;
 
 import eu.chessdata.R;
 import eu.chessdata.backend.profileEndpoint.ProfileEndpoint;
@@ -142,7 +141,7 @@ public class ProfileService extends IntentService {
                 ProfileSql profileSql = new ProfileSql(vipProfile);
                 Uri newUri = mContentResolver.insert(
                         ProfileTable.CONTENT_URI,
-                        ProfileTable.getContentValues(profileSql,false)
+                        ProfileTable.getContentValues(profileSql, false)
                 );
                 if (ContentUris.parseId(newUri)<0){
                     Log.d(TAG,"Not able to store Profile in the database");
@@ -164,12 +163,15 @@ public class ProfileService extends IntentService {
                 ClubMemberSql memberSql = new ClubMemberSql(member);
                 Uri memberUri = mContentResolver.insert(
                         ClubMemberTable.CONTENT_URI,
-                        ClubMemberTable.getContentValues(memberSql,false)
+                        ClubMemberTable.getContentValues(memberSql, false)
                 );
                 if (ContentUris.parseId(memberUri)<0){
                     Log.d(TAG,"not able to store member data in sqlite");
                     return;
                 }
+                //Updated the members map;
+                String name = getNameById(member.getProfileId());
+                MyGlobalSharedObjects.addToMembersSqlIdToProfileName(member.getProfileId(), name);
 
                 //debug section
                 Cursor cursor = mContentResolver.query(

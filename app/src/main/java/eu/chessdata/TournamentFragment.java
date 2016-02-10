@@ -1,5 +1,7 @@
 package eu.chessdata;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,7 +9,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,6 +34,7 @@ public class TournamentFragment extends Fragment implements LoaderManager.Loader
 
     private static final int TOURNAMENT_LOADER = 0;
     private TournamentAdapter mTournamentAdapter;
+    private String mProfileId;
 
     /**
      * A public interface that all activities containing this fragment must implement.
@@ -47,6 +49,11 @@ public class TournamentFragment extends Fragment implements LoaderManager.Loader
         super.onCreate(savedInstanceState);
         //notify that this fragment also needs to handle menu events
         setHasOptionsMenu(true);
+
+        //get the profileId;
+        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences(
+                getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+        mProfileId = sharedPreferences.getString(getString(R.string.pref_profile_profileId),"no value");
     }
 
     @Override
@@ -100,6 +107,7 @@ public class TournamentFragment extends Fragment implements LoaderManager.Loader
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+
         String sortOrder = TournamentTable.FIELD__ID + " DESC";
         Uri tournamentUri = TournamentTable.CONTENT_URI;
 

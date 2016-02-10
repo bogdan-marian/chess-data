@@ -35,7 +35,7 @@ public class DeviceSetDefaultManagedClub  extends DialogFragment    {
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Please slect default club");
+        builder.setTitle("Please select default club");
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
