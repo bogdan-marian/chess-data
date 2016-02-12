@@ -26,14 +26,11 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import eu.chessdata.backend.profileEndpoint.model.ClubMember;
-import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
 import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.members.MainMembersFragment;
 import eu.chessdata.services.ProfileService;
 import eu.chessdata.tools.MyGlobalSharedObjects;
-import eu.chessdata.tools.Params;
 import eu.chessdata.tournament.TournamentDetailsFragment;
 
 public class HomeActivity extends AppCompatActivity
@@ -280,7 +277,15 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     public void onTournamentItemSelected(Uri tournamentUri) {
+
+        //prepare the data
+        String uriString = tournamentUri.toString();
+        Bundle bundle = new Bundle();
+        bundle.putString(TournamentDetailsFragment.TOURNAMENT_URI,uriString);
+
         TournamentDetailsFragment fragment = new TournamentDetailsFragment();
+        fragment.setArguments(bundle);
+
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container, fragment);
         transaction.addToBackStack(null);
