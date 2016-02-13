@@ -293,6 +293,7 @@ public class HomeActivity extends AppCompatActivity
         transaction.commit();
     }
 
+
     @Override
     public void onMainMembersCallback(Uri memberUri) {
         Log.d(TAG, "Home activity: Time to replace fragments: " + memberUri);

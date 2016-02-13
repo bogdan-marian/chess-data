@@ -1,5 +1,6 @@
 package eu.chessdata.tournament;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -25,10 +26,36 @@ public class TournamentDetailsFragment extends Fragment {
     public static final String TOURNAMENT_URI = "tournamentDetailsFragment.tournament.uri";
     public static final String TOURNAMENT_NAME = "tournamentDetailsFragment.tournament.name";
 
+    public static final int CATEGORIES = 0;
+    public static final int PLAYERS = 1;
+    public static final int ROUNDS = 2;
+    public static final int RESULTS = 3;
+    public static final int GET_SOCIAL = 4;
+    /**
+     * This ones are tide tot he above int final strings.
+     * Consider writhing a function to initialize this from string.values file for better
+     * internationalization options.
+     */
+    String[] mValues = {"Categories", "Players", "Rounds", "Results", "Get social"};
+
     private String TAG = "my-debug-tag";
     private TextView mHeader;
     private ListView mListView;
     private ArrayAdapter<String> mArrayAdapter;
+
+
+    /**
+     * A public interface for activities that contain this fragment
+     */
+    public interface TournamentDetailsCallback {
+
+        /**
+         * This function identifies what item was pressed inside the @TournamentDetailsFragment
+         * @param selection     should be CATEGORIES, PLAYERS.. etc.
+         * @param tournamentUri the uri to the current tournament
+         */
+        public void onTournamentDetailsItemSelected(int selection, Uri tournamentUri);
+    }
 
     @Nullable
     @Override
@@ -38,14 +65,14 @@ public class TournamentDetailsFragment extends Fragment {
         Log.d(TAG, "Received Uri: " + stringUri);
 
         //set the header
-        View fragmentView = inflater.inflate(R.layout.fragment_tournament_details,container,false);
-        mHeader =(TextView) fragmentView.findViewById(R.id.tournament_details_header);
+        View fragmentView = inflater.inflate(R.layout.fragment_tournament_details, container, false);
+        mHeader = (TextView) fragmentView.findViewById(R.id.tournament_details_header);
         mHeader.setText("Tournament: " + name);
 
         //set the list items
         mListView = (ListView) fragmentView.findViewById(R.id.tournament_details_list_view);
-        String[]values = {"Players","Rounds","Results","Get social"};
-        List<String> tournamentOptions = new ArrayList<>(Arrays.asList(values));
+
+        List<String> tournamentOptions = new ArrayList<>(Arrays.asList(mValues));
         mArrayAdapter =
                 new ArrayAdapter<String>(
                         getActivity(),
@@ -57,8 +84,9 @@ public class TournamentDetailsFragment extends Fragment {
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String textItem = mArrayAdapter.getItem(position);
-                Log.d(TAG,"Clicked item: " + position +" / " + textItem);
+                /**
+                 * TODO: send the uri back to the HomeActivity and the selected position
+                 */
             }
         });
         return fragmentView;
