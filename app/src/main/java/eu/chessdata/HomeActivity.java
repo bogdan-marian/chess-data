@@ -276,12 +276,13 @@ public class HomeActivity extends AppCompatActivity
 
 
     @Override
-    public void onTournamentItemSelected(Uri tournamentUri) {
+    public void onTournamentItemSelected(Uri tournamentUri,  String tournamentName) {
 
         //prepare the data
         String uriString = tournamentUri.toString();
         Bundle bundle = new Bundle();
         bundle.putString(TournamentDetailsFragment.TOURNAMENT_URI,uriString);
+        bundle.putString(TournamentDetailsFragment.TOURNAMENT_NAME,tournamentName);
 
         TournamentDetailsFragment fragment = new TournamentDetailsFragment();
         fragment.setArguments(bundle);

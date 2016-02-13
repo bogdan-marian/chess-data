@@ -5,17 +5,12 @@
     android:layout_height="match_parent">
 
     <TextView
+        android:id="@+id/tournament_details_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Hello from tournament details"/>
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Rounds summary: ?? / ??"/>
-
-    </LinearLayout>
+    <ListView
+        android:id="@+id/tournament_details_list_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 </LinearLayout>

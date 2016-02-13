@@ -41,7 +41,7 @@ public class TournamentFragment extends Fragment implements LoaderManager.Loader
      * This mechanism allows activities to be notified of item selections.
      */
     public interface TournamentCallback {
-        public void onTournamentItemSelected(Uri tournamentUri);
+        public void onTournamentItemSelected(Uri tournamentUri, String tournamentName);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class TournamentFragment extends Fragment implements LoaderManager.Loader
                     uri = Uri.withAppendedPath(uri,sqlId.toString());
 
                     ((TournamentCallback) getActivity())
-                            .onTournamentItemSelected(uri);
+                            .onTournamentItemSelected(uri, tournamentName);
                 }
             }
         });
