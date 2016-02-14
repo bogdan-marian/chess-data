@@ -1,4 +1,4 @@
-package eu.chessdata.tournament;
+package eu.chessdata;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,8 +16,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import eu.chessdata.R;
 
 /**
  * Created by Bogdan Oloeriu on 06/02/2016.
@@ -51,6 +49,7 @@ public class TournamentDetailsFragment extends Fragment {
 
         /**
          * This function identifies what item was pressed inside the @TournamentDetailsFragment
+         *
          * @param selection     should be CATEGORIES, PLAYERS.. etc.
          * @param tournamentUri the uri to the current tournament
          */
@@ -60,7 +59,7 @@ public class TournamentDetailsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        String stringUri = getArguments().getString(TOURNAMENT_URI);
+        final String stringUri = getArguments().getString(TOURNAMENT_URI);
         String name = getArguments().getString(TOURNAMENT_NAME);
         Log.d(TAG, "Received Uri: " + stringUri);
 
@@ -84,9 +83,8 @@ public class TournamentDetailsFragment extends Fragment {
         mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                /**
-                 * TODO: send the uri back to the HomeActivity and the selected position
-                 */
+                ((TournamentDetailsCallback) getActivity()).onTournamentDetailsItemSelected(
+                        position, Uri.parse(stringUri));
             }
         });
         return fragmentView;

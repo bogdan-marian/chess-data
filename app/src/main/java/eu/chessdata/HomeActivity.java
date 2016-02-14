@@ -31,11 +31,11 @@ import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.members.MainMembersFragment;
 import eu.chessdata.services.ProfileService;
 import eu.chessdata.tools.MyGlobalSharedObjects;
-import eu.chessdata.tournament.TournamentDetailsFragment;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         TournamentFragment.TournamentCallback,
+        TournamentDetailsFragment.TournamentDetailsCallback,
         MainMembersFragment.MainMembersCallback {
     private String TAG = "my-debug-tag";
     private SharedPreferences mSharedPref;
@@ -204,8 +204,8 @@ public class HomeActivity extends AppCompatActivity
 
             //select members for current user and also club managers
             String selectionClause = ClubMemberTable.FIELD_PROFILEID + " = ? "
-                    + "AND "+ClubMemberTable.FIELD_MANAGERPROFILE+" = ?";
-            String[] selectionArgs = {mProfileId,"1"};
+                    + "AND " + ClubMemberTable.FIELD_MANAGERPROFILE + " = ?";
+            String[] selectionArgs = {mProfileId, "1"};
             Cursor memberCursor = mContentResolver.query(
                     ClubMemberTable.CONTENT_URI,
                     null,
@@ -213,16 +213,16 @@ public class HomeActivity extends AppCompatActivity
                     selectionArgs,
                     null
             );
-            Map<Long,String>clubIdToMember = new HashMap<>();
+            Map<Long, String> clubIdToMember = new HashMap<>();
             int memberCount = memberCursor.getCount();
             int idx_clubId = memberCursor.getColumnIndex(ClubMemberTable.FIELD_CLUBID);
             int idx_profileId = memberCursor.getColumnIndex(ClubMemberTable.FIELD_PROFILEID);
             int idx_managerProfile = memberCursor.getColumnIndex(ClubMemberTable.FIELD_MANAGERPROFILE);
-            while(memberCursor.moveToNext()){
+            while (memberCursor.moveToNext()) {
                 long clubId = memberCursor.getLong(idx_clubId);
                 String profileId = memberCursor.getString(idx_profileId);
                 int manager = memberCursor.getInt(idx_managerProfile);
-                clubIdToMember.put(clubId,profileId+"/"+manager);
+                clubIdToMember.put(clubId, profileId + "/" + manager);
 
                 //get clubSqlId and club name
                 String clubClause = ClubTable.FIELD_CLUBID + " = ?";
@@ -236,10 +236,10 @@ public class HomeActivity extends AppCompatActivity
                 );
                 int idx_clubSqlId = clubCursor.getColumnIndex(ClubTable.FIELD__ID);
                 int idx_clubName = clubCursor.getColumnIndex(ClubTable.FIELD_NAME);
-                while (clubCursor.moveToNext()){
+                while (clubCursor.moveToNext()) {
                     long clubSqlId = clubCursor.getLong(idx_clubSqlId);
                     String clubName = clubCursor.getString(idx_clubName);
-                    map.put(clubName,clubSqlId);
+                    map.put(clubName, clubSqlId);
                 }
                 clubCursor.close();
             }
@@ -276,13 +276,13 @@ public class HomeActivity extends AppCompatActivity
 
 
     @Override
-    public void onTournamentItemSelected(Uri tournamentUri,  String tournamentName) {
+    public void onTournamentItemSelected(Uri tournamentUri, String tournamentName) {
 
         //prepare the data
         String uriString = tournamentUri.toString();
         Bundle bundle = new Bundle();
-        bundle.putString(TournamentDetailsFragment.TOURNAMENT_URI,uriString);
-        bundle.putString(TournamentDetailsFragment.TOURNAMENT_NAME,tournamentName);
+        bundle.putString(TournamentDetailsFragment.TOURNAMENT_URI, uriString);
+        bundle.putString(TournamentDetailsFragment.TOURNAMENT_NAME, tournamentName);
 
         TournamentDetailsFragment fragment = new TournamentDetailsFragment();
         fragment.setArguments(bundle);
@@ -293,6 +293,14 @@ public class HomeActivity extends AppCompatActivity
         transaction.commit();
     }
 
+    @Override
+    public void onTournamentDetailsItemSelected(int selection, Uri tournamentUri) {
+        switch (selection) {
+            case TournamentDetailsFragment.PLAYERS:
+                Log.d(TAG, "Players " + tournamentUri.toString());
+                break;
+        }
+    }
 
     @Override
     public void onMainMembersCallback(Uri memberUri) {
