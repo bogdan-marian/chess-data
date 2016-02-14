@@ -31,6 +31,7 @@ import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.members.MainMembersFragment;
 import eu.chessdata.services.ProfileService;
 import eu.chessdata.tools.MyGlobalSharedObjects;
+import eu.chessdata.tournament.TournamentPlayersFragment;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -297,7 +298,12 @@ public class HomeActivity extends AppCompatActivity
     public void onTournamentDetailsItemSelected(int selection, Uri tournamentUri) {
         switch (selection) {
             case TournamentDetailsFragment.PLAYERS:
-                Log.d(TAG, "Players " + tournamentUri.toString());
+                TournamentPlayersFragment fragment = new TournamentPlayersFragment();
+
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragment_container,fragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
                 break;
         }
     }
