@@ -298,7 +298,13 @@ public class HomeActivity extends AppCompatActivity
     public void onTournamentDetailsItemSelected(int selection, Uri tournamentUri) {
         switch (selection) {
             case TournamentDetailsFragment.PLAYERS:
+
+                String uriString = tournamentUri.toString();
+                Bundle bundle = new Bundle();
+                bundle.putString(TournamentDetailsFragment.TOURNAMENT_URI, uriString);
                 TournamentPlayersFragment fragment = new TournamentPlayersFragment();
+                fragment.setArguments(bundle);
+
 
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.fragment_container,fragment);
