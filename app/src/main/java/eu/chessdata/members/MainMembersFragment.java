@@ -80,6 +80,7 @@ public class MainMembersFragment extends Fragment implements LoaderManager.Loade
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
         inflater.inflate(R.menu.main_members_fragment,menu);
     }
 

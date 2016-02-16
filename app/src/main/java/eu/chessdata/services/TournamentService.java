@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -14,6 +15,7 @@ import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 
 import java.io.IOException;
+import java.util.Map;
 
 import eu.chessdata.R;
 import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
@@ -44,11 +46,12 @@ public class TournamentService extends IntentService {
     // TODO: Rename actions, choose action names that describe tasks that this
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_CREATE_TOURNAMENT = "eu.chessdata.services.action.ACTION_CREATE_TOURNAMENT";
-    private static final String ACTION_BAZ = "eu.chessdata.services.action.BAZ";
+    private static final String ACTION_TOURNAMENT_ADD_PLAYER = "eu.chessdata.services.action.ACTION_TOURNAMENT_ADD_PLAYER";
 
     // TODO: Rename parameters
     private static final String EXTRA_JSON_TOURNAMENT = "eu.chessdata.services.extra.JSON_TOURNAMENT";
-    private static final String EXTRA_PARAM2 = "eu.chessdata.services.extra.PARAM2";
+    private static final String EXTRA_TOURNAMENT_SQL_ID = "eu.chessdata.services.EXTRA_TOURNAMENT_SQL_ID";
+    private static final String EXTRA_PLAYER_SQL_ID = "eu.chessdata.services.EXTRA_PLAYER_SQL_ID";
 
     public TournamentService() {
         super("TournamentService");
@@ -66,23 +69,18 @@ public class TournamentService extends IntentService {
         Intent intent = new Intent(context, TournamentService.class);
         intent.setAction(ACTION_CREATE_TOURNAMENT);
         intent.putExtra(EXTRA_JSON_TOURNAMENT, jsonTournament);
-//        intent.putExtra(EXTRA_PARAM2, param2);
         context.startService(intent);
     }
 
 
-    /**
-     * Starts this service to perform action Baz with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    // TODO: Customize helper method
-    public static void startActionBaz(Context context, String param1, String param2) {
+
+    public static void startActionTournamentAddPlayer(Context context, Long tournamentSqlId,
+                                                      Long playerSqlId) {
         Intent intent = new Intent(context, TournamentService.class);
-        intent.setAction(ACTION_BAZ);
-        intent.putExtra(EXTRA_JSON_TOURNAMENT, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
+        intent.setAction(ACTION_TOURNAMENT_ADD_PLAYER);
+        intent.putExtra(EXTRA_TOURNAMENT_SQL_ID, tournamentSqlId);
+        intent.putExtra(EXTRA_PLAYER_SQL_ID,playerSqlId);
+
         context.startService(intent);
     }
 
@@ -103,10 +101,10 @@ public class TournamentService extends IntentService {
             if (ACTION_CREATE_TOURNAMENT.equals(action)) {
                 final String jsonTournament = intent.getStringExtra(EXTRA_JSON_TOURNAMENT);
                 handleActionCreateTournament(jsonTournament);
-            } else if (ACTION_BAZ.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_JSON_TOURNAMENT);
-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-                handleActionBaz(param1, param2);
+            } else if (ACTION_TOURNAMENT_ADD_PLAYER.equals(action)) {
+                final Long tournamentSqlId = intent.getLongExtra(EXTRA_TOURNAMENT_SQL_ID,-1L);
+                final Long playerSqlId = intent.getLongExtra(EXTRA_PLAYER_SQL_ID, -1l);
+                handleActionTournamentAddPlayer(tournamentSqlId, playerSqlId);
             }
         }
     }
@@ -151,9 +149,9 @@ public class TournamentService extends IntentService {
      * Handle action Baz in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionBaz(String param1, String param2) {
+    private void handleActionTournamentAddPlayer(Long tournamentSqlId, Long playerSqlId) {
         // TODO: Handle action Baz
-        throw new UnsupportedOperationException("Not yet implemented");
+        Log.d(TAG,"handleActionTournamentAddPlayer: "+tournamentSqlId+" / "+ playerSqlId);
     }
 
 
@@ -207,4 +205,6 @@ public class TournamentService extends IntentService {
         long endPointId = cursor.getLong(COL_CLUBID);
         return endPointId;
     }
+
+
 }

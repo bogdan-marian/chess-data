@@ -64,5 +64,6 @@
     <string name="dialog.tournament.details">Tournament details</string>
     <string name="action_create_virtual_profile">Create virtual profile</string>
     <string name="dialog.virtualProfile.details">Virtual profile details</string>
+    <string name="action_add_player">Add player</string>
 
 </resources>

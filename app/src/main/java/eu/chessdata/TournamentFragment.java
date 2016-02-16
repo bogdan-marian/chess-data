@@ -93,6 +93,7 @@ public class TournamentFragment extends Fragment implements LoaderManager.Loader
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        menu.clear();
         inflater.inflate(R.menu.tournament_fragment, menu);
     }
 
