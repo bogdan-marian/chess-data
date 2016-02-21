@@ -7,6 +7,7 @@ import android.test.AndroidTestCase;
 import android.util.Log;
 
 import eu.chessdata.R;
+import eu.chessdata.backend.profileEndpoint.model.TournamentPlayer;
 import eu.chessdata.tools.Params;
 
 /**
@@ -89,6 +90,21 @@ public class TestSimpleProvider extends AndroidTestCase {
         );
         assertEquals("Error: Not able to delete from ClubMemberTable ", 0, cursor.getCount());
         cursor.close();
+        //===========================================
+        /*mContext.getContentResolver().delete(
+                TournamentPlayerTable.CONTENT_URI,
+                null,
+                null
+        );
+        cursor = mContext.getContentResolver().query(
+                TournamentPlayerTable.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+        assertEquals("Error: Not able to delete from TournamentPlayerTable ", 0, cursor.getCount());
+        cursor.close();*/
     }
 
     public void test1ProfileInsertVip(){
@@ -199,5 +215,16 @@ public class TestSimpleProvider extends AndroidTestCase {
         long endPointId = cursor.getLong(INDEX_CLUB_ID);
         Log.d(TAG,"Endpoint id = " + endPointId);
         assertTrue(endPointId == (long)vip.clubId);
+    }
+
+    public void test7TournamentPlayerInsert(){
+        TournamentPlayerSql vipTournamentPlayer = SimpleUtilities.createTournamentPlayerVipValues();
+        ContentResolver contentResolver = mContext.getContentResolver();
+
+        contentResolver.insert(TournamentPlayerTable.CONTENT_URI,TournamentPlayerTable.getContentValues(vipTournamentPlayer,false));
+        Cursor cursor = contentResolver.query(TournamentPlayerTable.CONTENT_URI,null,null,null,null);
+        TournamentPlayerSql tournamentPlayerSql = TournamentPlayerTable.getRow(cursor,true);
+        //SimpleUtilities.compareTournamentsNoId(vipTournamentPlayer, tournamentPlayerSql);
+
     }
 }
