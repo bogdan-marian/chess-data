@@ -9,6 +9,7 @@ import eu.chessdata.backend.entities.ClubMember;
 import eu.chessdata.backend.entities.Profile;
 import eu.chessdata.backend.entities.Round;
 import eu.chessdata.backend.entities.Tournament;
+import eu.chessdata.backend.entities.TournamentPlayer;
 import eu.chessdata.backend.entities.VirtualProfile;
 
 /**
@@ -23,6 +24,7 @@ public class OfyService {
         ObjectifyService.register(Tournament.class);
         ObjectifyService.register(VirtualProfile.class);
         ObjectifyService.register(Round.class);
+        ObjectifyService.register(TournamentPlayer.class);
     }
 
     public static Objectify ofy(){

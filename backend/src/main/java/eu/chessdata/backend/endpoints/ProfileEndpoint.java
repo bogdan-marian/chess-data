@@ -14,6 +14,7 @@ import java.util.Date;
 
 import eu.chessdata.backend.entities.ClubMember;
 import eu.chessdata.backend.entities.Profile;
+import eu.chessdata.backend.entities.TournamentPlayer;
 import eu.chessdata.backend.tools.MyEntry;
 import eu.chessdata.backend.tools.MySecurityService;
 import eu.chessdata.backend.tools.MySecurityService.Status;
@@ -147,5 +148,13 @@ public class ProfileEndpoint {
             return illegalMember;
         }
         return virtualMember;
+    }
+
+    public TournamentPlayer tournamentAddPlayer(@Named("idTokenString") String idTokenString,
+                                                TournamentPlayer tournamentPlayer){
+        TournamentPlayer vipTournamentPlayer = new TournamentPlayer();
+        vipTournamentPlayer.setProfileId("Illegal request: Time to implement this");
+
+        return vipTournamentPlayer;
     }
 }
