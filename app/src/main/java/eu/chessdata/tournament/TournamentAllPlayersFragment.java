@@ -21,11 +21,17 @@ import eu.chessdata.R;
 import eu.chessdata.TournamentDetailsFragment;
 
 /**
+ * It uses TournamentDetailsFragment.TOURNAMENT_URI to pass information
+ * to itself
+ *
  * Created by Bogdan Oloeriu on 14/02/2016.
  */
 public class TournamentAllPlayersFragment extends Fragment {
     String TAG = "my-debug-tag";
     Uri mUri;
+
+
+
 
     public static TournamentAllPlayersFragment newInstance(String stringUri) {
         TournamentAllPlayersFragment fragment = new TournamentAllPlayersFragment();
