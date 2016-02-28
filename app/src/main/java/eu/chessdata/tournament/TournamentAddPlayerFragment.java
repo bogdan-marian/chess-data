@@ -23,8 +23,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.chessdata.R;
+import eu.chessdata.TournamentDetailsFragment;
+import eu.chessdata.TournamentFragment;
 import eu.chessdata.data.simplesql.ProfileTable;
 import eu.chessdata.data.simplesql.TournamentPlayerTable;
+import eu.chessdata.services.TournamentService;
 import eu.chessdata.tools.MyGlobalSharedObjects;
 
 /**
@@ -38,12 +41,16 @@ public class TournamentAddPlayerFragment extends DialogFragment implements Adapt
     private static final int ADD_PLAYER_LOADER = 0;
     private TournamentAddPlayerAdapter mAdapter;
     private ContentResolver mContentResolver;
+    private long mSqlId;
 
-    //String[] tempItems = {"item a","item b", "item 3", "item 4","item 5","item 6","item 7","item 8","item 9"};
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        String stringUri = getArguments().getString(TournamentDetailsFragment.TOURNAMENT_URI);
+        String stringId = Uri.parse(stringUri).getLastPathSegment();
+        mSqlId = Long.parseLong(stringId);
+
         mContentResolver = getActivity().getContentResolver();
         mAdapter = new TournamentAddPlayerAdapter(getActivity(), null, 0);
 
@@ -62,8 +69,6 @@ public class TournamentAddPlayerFragment extends DialogFragment implements Adapt
         getLoaderManager().initLoader(ADD_PLAYER_LOADER, null, this);
 
         super.onActivityCreated(savedInstanceState);
-//        ArrayAdapter<String>adapter = new ArrayAdapter<String>(getActivity(),R.layout.list_item_text,tempItems);
-//        mListView.setAdapter(adapter);
         mListView.setOnItemClickListener(this);
     }
 
@@ -72,7 +77,7 @@ public class TournamentAddPlayerFragment extends DialogFragment implements Adapt
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         dismiss();
         //Toast.makeText(getActivity(),tempItems[position],Toast.LENGTH_SHORT).show();
-        Toast.makeText(getActivity(), "On todo for: " + position + "/" + id, Toast.LENGTH_SHORT).show();
+        TournamentService.startActionTournamentAddPlayer(getContext(),mSqlId,id);
     }
 
     @Override

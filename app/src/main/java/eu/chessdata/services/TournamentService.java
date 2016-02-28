@@ -43,12 +43,10 @@ public class TournamentService extends IntentService {
     private Long mClubEndpointId;
 
 
-    // TODO: Rename actions, choose action names that describe tasks that this
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_CREATE_TOURNAMENT = "eu.chessdata.services.action.ACTION_CREATE_TOURNAMENT";
     private static final String ACTION_TOURNAMENT_ADD_PLAYER = "eu.chessdata.services.action.ACTION_TOURNAMENT_ADD_PLAYER";
 
-    // TODO: Rename parameters
     private static final String EXTRA_JSON_TOURNAMENT = "eu.chessdata.services.extra.JSON_TOURNAMENT";
     private static final String EXTRA_TOURNAMENT_SQL_ID = "eu.chessdata.services.EXTRA_TOURNAMENT_SQL_ID";
     private static final String EXTRA_PLAYER_SQL_ID = "eu.chessdata.services.EXTRA_PLAYER_SQL_ID";
@@ -145,12 +143,9 @@ public class TournamentService extends IntentService {
         }
     }
 
-    /**
-     * Handle action Baz in the provided background thread with the provided
-     * parameters.
-     */
+
     private void handleActionTournamentAddPlayer(Long tournamentSqlId, Long playerSqlId) {
-        // TODO: Handle action Baz
+        // TODO: Handle action handleActionTournamentAddPlayer
         Log.d(TAG,"handleActionTournamentAddPlayer: "+tournamentSqlId+" / "+ playerSqlId);
     }
 
