@@ -1,5 +1,6 @@
 package eu.chessdata.tournament;
 
+import android.content.ContentResolver;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -18,26 +19,32 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import eu.chessdata.R;
 import eu.chessdata.data.simplesql.ProfileTable;
 import eu.chessdata.data.simplesql.TournamentPlayerTable;
+import eu.chessdata.tools.MyGlobalSharedObjects;
 
 /**
  * Created by Bogdan Oloeriu on 10/02/2016.
  */
 public class TournamentAddPlayerFragment extends DialogFragment implements AdapterView.OnItemClickListener,
-        android.support.v4.app.LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<Cursor> {
     private String TAG = "my-debug-tag";
     private AlertDialog mAlertDialog;
     private ListView mListView;
     private static final int ADD_PLAYER_LOADER = 0;
     private TournamentAddPlayerAdapter mAdapter;
+    private ContentResolver mContentResolver;
 
     //String[] tempItems = {"item a","item b", "item 3", "item 4","item 5","item 6","item 7","item 8","item 9"};
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mContentResolver = getActivity().getContentResolver();
         mAdapter = new TournamentAddPlayerAdapter(getActivity(), null, 0);
 
         View view = inflater.inflate(R.layout.fragment_tournament_add_player, null, false);
@@ -71,6 +78,24 @@ public class TournamentAddPlayerFragment extends DialogFragment implements Adapt
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         //TODO insert bundle arguments and log them for debug
+        Cursor cursor = mContentResolver.query(
+                ProfileTable.CONTENT_URI,
+                null,
+                null,
+                null,
+                null
+        );
+        int idx_profileSqlId = cursor.getColumnIndex(ProfileTable.FIELD__ID);
+        int idx_profileName = cursor.getColumnIndex(ProfileTable.FIELD_NAME);
+        Map<Long,String>profileMap = new HashMap<>();
+        while (cursor.moveToNext()){
+            long profileId = cursor.getLong(idx_profileSqlId);
+            String name = cursor.getString(idx_profileName);
+            profileMap.put(profileId,name);
+        }
+        cursor.close();
+        MyGlobalSharedObjects.profileNames = profileMap;
+
         Uri tournamentPlay;
         return new CursorLoader(getContext(),
                 ProfileTable.CONTENT_URI,

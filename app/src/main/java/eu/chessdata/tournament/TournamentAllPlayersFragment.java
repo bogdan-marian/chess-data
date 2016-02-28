@@ -33,7 +33,7 @@ public class TournamentAllPlayersFragment extends Fragment {
 
 
 
-    public static TournamentAllPlayersFragment newInstance(String stringUri) {
+    public static TournamentAllPlayersFragment newInstance(String stringUri, String name) {
         TournamentAllPlayersFragment fragment = new TournamentAllPlayersFragment();
         Bundle args = new Bundle();
         args.putString(TournamentDetailsFragment.TOURNAMENT_URI, stringUri);

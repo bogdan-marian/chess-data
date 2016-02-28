@@ -10,6 +10,7 @@ public class MyGlobalSharedObjects {
     public static final String ROOT_URL = "https://chess-data.appspot.com/_ah/api/";
 
     public static Map<String,Long>managedClubs;
+    public static Map<Long,String>profileNames;
 
     /**
      * first string is the profile id from datastore

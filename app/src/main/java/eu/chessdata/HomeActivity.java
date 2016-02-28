@@ -295,13 +295,14 @@ public class HomeActivity extends AppCompatActivity
     }
 
     @Override
-    public void onTournamentDetailsItemSelected(int selection, Uri tournamentUri) {
+    public void onTournamentDetailsItemSelected(int selection, String stringUri, String name) {
         switch (selection) {
             case TournamentDetailsFragment.PLAYERS:
 
-                String uriString = tournamentUri.toString();
+                String uriString = stringUri;
                 Bundle bundle = new Bundle();
                 bundle.putString(TournamentDetailsFragment.TOURNAMENT_URI, uriString);
+                bundle.putString(TournamentDetailsFragment.TOURNAMENT_NAME,name);
                 TournamentPlayersFragment fragment = new TournamentPlayersFragment();
                 fragment.setArguments(bundle);
 

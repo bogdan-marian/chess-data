@@ -52,14 +52,14 @@ public class TournamentDetailsFragment extends Fragment {
          * @param selection     should be CATEGORIES, PLAYERS.. etc.
          * @param tournamentUri the uri to the current tournament
          */
-        public void onTournamentDetailsItemSelected(int selection, Uri tournamentUri);
+        public void onTournamentDetailsItemSelected(int selection, String tournamentUri, String tournamentName);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final String stringUri = getArguments().getString(TOURNAMENT_URI);
-        String name = getArguments().getString(TOURNAMENT_NAME);
+        final String name = getArguments().getString(TOURNAMENT_NAME);
 
         //set the header
         View fragmentView = inflater.inflate(R.layout.fragment_tournament_details, container, false);
@@ -82,7 +82,7 @@ public class TournamentDetailsFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 ((TournamentDetailsCallback) getActivity()).onTournamentDetailsItemSelected(
-                        position, Uri.parse(stringUri));
+                        position, stringUri, name);
             }
         });
         return fragmentView;
