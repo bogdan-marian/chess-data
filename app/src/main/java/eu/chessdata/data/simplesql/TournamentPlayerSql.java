@@ -1,14 +1,18 @@
 package eu.chessdata.data.simplesql;
 
+import java.util.Date;
+
 import ckm.simple.sql_provider.annotation.SimpleSQLColumn;
 import ckm.simple.sql_provider.annotation.SimpleSQLTable;
 
 /**
+ * When date is created locally only the tournamentPlayerId will be left null. In order to synchronize
+ * you should query for null tournamentPlayerId;
  * Created by Bogdan Oloeriu on 21/02/2016.
  */
-@SimpleSQLTable(table="TournamentPlayer",provider = "SimpleProvider")
+@SimpleSQLTable(table = "TournamentPlayer", provider = "SimpleProvider")
 public class TournamentPlayerSql {
-    @SimpleSQLColumn(value="_id", primary = true)
+    @SimpleSQLColumn(value = "_id", primary = true)
     private long id;
 
     @SimpleSQLColumn(value = "tournamentPlayerId")
@@ -27,6 +31,13 @@ public class TournamentPlayerSql {
     private long updateStamp;
 
     //constructors
+    public TournamentPlayerSql (Long tournamentId, String profileId){
+        long date = new Date().getTime();
+        this.tournamentId = tournamentId;
+        this.profileId = profileId;
+        this.dateCreated = date;
+        this.updateStamp = date;
+    }
 
     //getters and setters
 
