@@ -30,7 +30,7 @@ import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.members.MainMembersFragment;
 import eu.chessdata.services.ProfileService;
-import eu.chessdata.tools.MyGlobalSharedObjects;
+import eu.chessdata.tools.MyGlobalTools;
 import eu.chessdata.tournament.TournamentPlayersFragment;
 
 public class HomeActivity extends AppCompatActivity
@@ -246,7 +246,7 @@ public class HomeActivity extends AppCompatActivity
             }
             memberCursor.close();
 
-            MyGlobalSharedObjects.managedClubs = map;
+            MyGlobalTools.managedClubs = map;
             return null;
         }
 

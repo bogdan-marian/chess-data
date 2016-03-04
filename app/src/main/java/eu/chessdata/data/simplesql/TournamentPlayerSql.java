@@ -31,7 +31,10 @@ public class TournamentPlayerSql {
     private long updateStamp;
 
     //constructors
-    public TournamentPlayerSql (Long tournamentId, String profileId){
+    public TournamentPlayerSql() {
+    }
+
+    public TournamentPlayerSql(Long tournamentId, String profileId) {
         long date = new Date().getTime();
         this.tournamentId = tournamentId;
         this.profileId = profileId;

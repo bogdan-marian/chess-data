@@ -23,7 +23,7 @@ import eu.chessdata.data.simplesql.ClubMemberSql;
 import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubSql;
 import eu.chessdata.data.simplesql.ClubTable;
-import eu.chessdata.tools.MyGlobalSharedObjects;
+import eu.chessdata.tools.MyGlobalTools;
 
 
 /**
@@ -210,7 +210,7 @@ public class ClubCreateService extends IntentService {
                         AndroidHttp.newCompatibleTransport(),
                         new AndroidJsonFactory(),
                         null
-                ).setRootUrl(MyGlobalSharedObjects.ROOT_URL);
+                ).setRootUrl(MyGlobalTools.ROOT_URL);
         return builder.build();
     }
 }

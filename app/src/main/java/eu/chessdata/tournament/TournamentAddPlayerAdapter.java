@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import eu.chessdata.R;
-import eu.chessdata.tools.MyGlobalSharedObjects;
+import eu.chessdata.tools.MyGlobalTools;
 
 /**
  * Created by Bogdan Oloeriu on 19/02/2016.
@@ -29,7 +29,7 @@ public class TournamentAddPlayerAdapter extends CursorAdapter{
     public void bindView(View view, Context context, Cursor cursor) {
         TextView textView = (TextView)view.findViewById(R.id.list_item_text_general_view);
         Long longId = cursor.getLong(0);
-        textView.setText(MyGlobalSharedObjects.profileNames.get(longId));
+        textView.setText(MyGlobalTools.profileNames.get(longId));
     }
 
 }

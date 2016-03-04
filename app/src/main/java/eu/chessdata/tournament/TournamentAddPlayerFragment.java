@@ -1,7 +1,6 @@
 package eu.chessdata.tournament;
 
 import android.content.ContentResolver;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -15,20 +14,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import eu.chessdata.R;
 import eu.chessdata.TournamentDetailsFragment;
-import eu.chessdata.TournamentFragment;
 import eu.chessdata.data.simplesql.ProfileTable;
-import eu.chessdata.data.simplesql.TournamentPlayerTable;
 import eu.chessdata.services.TournamentService;
-import eu.chessdata.tools.MyGlobalSharedObjects;
+import eu.chessdata.tools.MyGlobalTools;
 
 /**
  * Created by Bogdan Oloeriu on 10/02/2016.
@@ -99,7 +94,7 @@ public class TournamentAddPlayerFragment extends DialogFragment implements Adapt
             profileMap.put(profileId,name);
         }
         cursor.close();
-        MyGlobalSharedObjects.profileNames = profileMap;
+        MyGlobalTools.profileNames = profileMap;
 
         Uri tournamentPlay;
         return new CursorLoader(getContext(),

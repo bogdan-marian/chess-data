@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -15,16 +14,14 @@ import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 
 import java.io.IOException;
-import java.util.Map;
 
 import eu.chessdata.R;
 import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
 import eu.chessdata.data.simplesql.ClubTable;
-import eu.chessdata.data.simplesql.TournamentPlayerSql;
 import eu.chessdata.data.simplesql.TournamentSql;
 import eu.chessdata.data.simplesql.TournamentTable;
-import eu.chessdata.tools.MyGlobalSharedObjects;
+import eu.chessdata.tools.MyGlobalTools;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -148,7 +145,8 @@ public class TournamentService extends IntentService {
     private void handleActionTournamentAddPlayer(Long tournamentSqlId, Long playerSqlId) {
         // TODO: Handle action handleActionTournamentAddPlayer
         Log.d(TAG,"handleActionTournamentAddPlayer: "+tournamentSqlId+" / "+ playerSqlId);
-        //TournamentPlayerSql tournamentPlayerSql = new TournamentPlayerSql(tournamentSqlId, )
+        Long tournamentId = MyGlobalTools.getTournamentCloudIdBySqlId(tournamentSqlId,mContentResolver);
+        Log.d(TAG,"Pt Lacra: sqlid = " + tournamentSqlId+" / cloudId = " + tournamentId);
     }
 
 
@@ -181,7 +179,7 @@ public class TournamentService extends IntentService {
                         AndroidHttp.newCompatibleTransport(),
                         new AndroidJsonFactory(),
                         null
-                ).setRootUrl(MyGlobalSharedObjects.ROOT_URL);
+                ).setRootUrl(MyGlobalTools.ROOT_URL);
         return builder.build();
     }
 
