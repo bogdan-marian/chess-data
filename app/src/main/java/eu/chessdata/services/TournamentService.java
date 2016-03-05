@@ -19,6 +19,8 @@ import eu.chessdata.R;
 import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
 import eu.chessdata.data.simplesql.ClubTable;
+import eu.chessdata.data.simplesql.TournamentPlayerSql;
+import eu.chessdata.data.simplesql.TournamentPlayerTable;
 import eu.chessdata.data.simplesql.TournamentSql;
 import eu.chessdata.data.simplesql.TournamentTable;
 import eu.chessdata.tools.MyGlobalTools;
@@ -69,13 +71,12 @@ public class TournamentService extends IntentService {
     }
 
 
-
     public static void startActionTournamentAddPlayer(Context context, Long tournamentSqlId,
                                                       Long playerSqlId) {
         Intent intent = new Intent(context, TournamentService.class);
         intent.setAction(ACTION_TOURNAMENT_ADD_PLAYER);
         intent.putExtra(EXTRA_TOURNAMENT_SQL_ID, tournamentSqlId);
-        intent.putExtra(EXTRA_PLAYER_SQL_ID,playerSqlId);
+        intent.putExtra(EXTRA_PLAYER_SQL_ID, playerSqlId);
 
         context.startService(intent);
     }
@@ -98,7 +99,7 @@ public class TournamentService extends IntentService {
                 final String jsonTournament = intent.getStringExtra(EXTRA_JSON_TOURNAMENT);
                 handleActionCreateTournament(jsonTournament);
             } else if (ACTION_TOURNAMENT_ADD_PLAYER.equals(action)) {
-                final Long tournamentSqlId = intent.getLongExtra(EXTRA_TOURNAMENT_SQL_ID,-1L);
+                final Long tournamentSqlId = intent.getLongExtra(EXTRA_TOURNAMENT_SQL_ID, -1L);
                 final Long playerSqlId = intent.getLongExtra(EXTRA_PLAYER_SQL_ID, -1l);
                 handleActionTournamentAddPlayer(tournamentSqlId, playerSqlId);
             }
@@ -122,8 +123,8 @@ public class TournamentService extends IntentService {
                 if (vipTournament != null) {
                     String description = vipTournament.getDescription();
                     String message = description.split(":")[0];
-                    if (message.equals("Not created")){
-                        Log.d(TAG,"Something happened: " + description);
+                    if (message.equals("Not created")) {
+                        Log.d(TAG, "Something happened: " + description);
                         return;
                     }
                     //insert in sqlite
@@ -142,11 +143,29 @@ public class TournamentService extends IntentService {
     }
 
 
+    /**
+     * It creates the sqlite tournament player first and then tries to sink it with the cloud endpoints
+     *
+     * @param tournamentSqlId
+     * @param playerSqlId
+     */
     private void handleActionTournamentAddPlayer(Long tournamentSqlId, Long playerSqlId) {
         // TODO: Handle action handleActionTournamentAddPlayer
-        Log.d(TAG,"handleActionTournamentAddPlayer: "+tournamentSqlId+" / "+ playerSqlId);
-        Long tournamentId = MyGlobalTools.getTournamentCloudIdBySqlId(tournamentSqlId,mContentResolver);
-        Log.d(TAG,"Pt Lacra: sqlid = " + tournamentSqlId+" / cloudId = " + tournamentId);
+        Log.d(TAG, "handleActionTournamentAddPlayer: " + tournamentSqlId + " / " + playerSqlId);
+
+        Long tournamentId = MyGlobalTools.getTournamentCloudIdBySqlId(tournamentSqlId, mContentResolver);
+        String profileId = MyGlobalTools.getProfileCloudIdBySqlId(playerSqlId, mContentResolver);
+
+        //create the sql tournament first
+        TournamentPlayerSql tournamentPlayerSql = new TournamentPlayerSql(tournamentId, profileId);
+        Uri newUri = mContentResolver.insert(
+                TournamentPlayerTable.CONTENT_URI, TournamentPlayerTable.getContentValues(
+                        tournamentPlayerSql, false)
+        );
+
+
+
+        Log.d(TAG, "Pt Lacra: profileId = " + profileId + " / tournamentId = " + tournamentId);
     }
 
 

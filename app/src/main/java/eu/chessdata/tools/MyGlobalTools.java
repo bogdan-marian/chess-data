@@ -6,6 +6,8 @@ import android.database.Cursor;
 import java.util.HashMap;
 import java.util.Map;
 
+import eu.chessdata.data.simplesql.ProfileTable;
+import eu.chessdata.data.simplesql.TournamentPlayerTable;
 import eu.chessdata.data.simplesql.TournamentTable;
 
 /**
@@ -33,7 +35,7 @@ public class MyGlobalTools {
     }
 
     /**
-     * It looks in the sqllite database and returns the cloud tournament id
+     * It looks in the sqlite database and returns the cloud tournamentId
      *
      * @param tournamentSqlId
      * @param contentResolver
@@ -51,10 +53,54 @@ public class MyGlobalTools {
         );
         int idxTournamentId = cursor.getColumnIndex(TournamentTable.FIELD_TOURNAMENTID);
 
-
         cursor.moveToFirst();
         long tournamentId = cursor.getLong(idxTournamentId);
         cursor.close();
         return tournamentId;
+    }
+
+    /**
+     * It looks in the sqlite database and returns the cloud profileId
+     *
+     * @param profileSqlId
+     * @param contentResolver
+     * @return
+     */
+    public static String getProfileCloudIdBySqlId(Long profileSqlId, ContentResolver contentResolver) {
+        String selection = ProfileTable.FIELD__ID + " =?";
+        String[] selectionArguments = {profileSqlId.toString()};
+        Cursor cursor = contentResolver.query(
+                ProfileTable.CONTENT_URI,
+                null,
+                selection,
+                selectionArguments,
+                null
+        );
+        int idxProfileId = cursor.getColumnIndex(ProfileTable.FIELD_PROFILEID);
+        cursor.moveToFirst();
+        String profileId = cursor.getString(idxProfileId);
+        cursor.close();
+        return profileId;
+    }
+
+    /**
+     * It syncing local created tournament players.
+     * It looks in the database and tries to find tournament players that do not have
+     * {@code tournamentPlayerId } populated. This means that they are not synced to the cloud.
+     * After locating them it tries to populate them on the cloud.
+     */
+    public static void syncLocalTournamentPlayers(ContentResolver contentResolver) {
+        String selection = TournamentPlayerTable.FIELD_TOURNAMENTPLAYERID + " is null";
+        Cursor cursor = contentResolver.query(
+                TournamentPlayerTable.CONTENT_URI,
+                null,
+                selection,
+                null,
+                null
+        );
+
+        while (cursor.moveToNext()){
+
+        }
     }
 }
