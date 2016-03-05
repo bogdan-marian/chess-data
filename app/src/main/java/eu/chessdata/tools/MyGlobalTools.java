@@ -84,12 +84,21 @@ public class MyGlobalTools {
     }
 
     /**
+     * Very long running task.
      * It syncing local created tournament players.
      * It looks in the database and tries to find tournament players that do not have
      * {@code tournamentPlayerId } populated. This means that they are not synced to the cloud.
      * After locating them it tries to populate them on the cloud.
      */
     public static void syncLocalTournamentPlayers(ContentResolver contentResolver) {
+        String[] TOURNAMENTPLAYER_COLUMNS = {
+                TournamentPlayerTable.FIELD__ID,
+                TournamentPlayerTable.FIELD_TOURNAMENTPLAYERID,
+                TournamentPlayerTable.FIELD_TOURNAMENTID,
+                TournamentPlayerTable.FIELD_PROFILEID,
+                TournamentPlayerTable.FIELD_DATECREATED,
+                TournamentPlayerTable.FIELD_UPDATESTAMP
+        };
         String selection = TournamentPlayerTable.FIELD_TOURNAMENTPLAYERID + " is null";
         Cursor cursor = contentResolver.query(
                 TournamentPlayerTable.CONTENT_URI,
@@ -98,7 +107,6 @@ public class MyGlobalTools {
                 null,
                 null
         );
-
         while (cursor.moveToNext()){
 
         }
