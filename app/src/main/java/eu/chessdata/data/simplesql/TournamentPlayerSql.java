@@ -4,6 +4,7 @@ import java.util.Date;
 
 import ckm.simple.sql_provider.annotation.SimpleSQLColumn;
 import ckm.simple.sql_provider.annotation.SimpleSQLTable;
+import eu.chessdata.backend.tournamentEndpoint.model.TournamentPlayer;
 
 /**
  * When date is created locally only the tournamentPlayerId will be left null. In order to synchronize

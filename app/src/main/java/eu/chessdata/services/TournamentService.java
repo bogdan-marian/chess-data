@@ -135,6 +135,7 @@ public class TournamentService extends IntentService {
                             )
                     );
                     Log.d(TAG, "Tournament uri: " + newUri.toString());
+
                 }
             } catch (IOException e) {
                 Log.d(TAG, "Not able to create vipTournament from: " + tournament);

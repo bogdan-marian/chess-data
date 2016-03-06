@@ -7,12 +7,11 @@ import com.google.api.server.spi.config.Named;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.googlecode.objectify.Key;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import eu.chessdata.backend.entities.Round;
 import eu.chessdata.backend.entities.Tournament;
+import eu.chessdata.backend.entities.TournamentPlayer;
 import eu.chessdata.backend.tools.MyEntry;
 import eu.chessdata.backend.tools.MySecurityService;
 
@@ -24,7 +23,7 @@ import static eu.chessdata.backend.tools.OfyService.ofy;
  */
 
 @Api(
-        name="tournamentEndpoint",
+        name = "tournamentEndpoint",
         version = "v1",
         namespace = @ApiNamespace(
                 ownerDomain = "backend.chessdata.eu",
@@ -34,28 +33,28 @@ import static eu.chessdata.backend.tools.OfyService.ofy;
 )
 public class TournamentEndpoint {
 
-    @ApiMethod(name="debugRound",httpMethod = "post")
-    public Round debugRound(){
+    @ApiMethod(name = "debugRound", httpMethod = "post")
+    public Round debugRound() {
         final Key<Round> key = factory().allocateId(Round.class);
         Long roundId = key.getId();
-        Round round = new Round(key.getId(),100l,1,false,1001l);
+        Round round = new Round(key.getId(), 100l, 1, false, 1001l);
         ofy().save().entity(round).now();
         return round;
     }
 
     @ApiMethod(name = "create", httpMethod = "post")
-    public Tournament create(Tournament tournament, @Named("idTokenString") String idTokenString){
+    public Tournament create(Tournament tournament, @Named("idTokenString") String idTokenString) {
         MyEntry<MySecurityService.Status, GoogleIdToken.Payload> secPair =
                 MySecurityService.getProfile(idTokenString);
-        Tournament ilegalTournament = new Tournament();
-        if (secPair.getKey() != MySecurityService.Status.VALID_USER){
-            ilegalTournament.setDescription("Not created: Illegal idTokenString: " + idTokenString);
-            return ilegalTournament;
+        Tournament illegalTournament = new Tournament();
+        if (secPair.getKey() != MySecurityService.Status.VALID_USER) {
+            illegalTournament.setDescription("Not created: Illegal idTokenString: " + idTokenString);
+            return illegalTournament;
         }
-        String profileId =((GoogleIdToken.Payload) secPair.getValue()).getSubject();
-        if (!MySecurityService.isClubManager(profileId, tournament.getClubId())){
-            ilegalTournament.setDescription("Not created: Illegal not a club manager");
-            return ilegalTournament;
+        String profileId = ((GoogleIdToken.Payload) secPair.getValue()).getSubject();
+        if (!MySecurityService.isClubManager(profileId, tournament.getClubId())) {
+            illegalTournament.setDescription("Not created: Illegal not a club manager");
+            return illegalTournament;
         }
         final Key<Tournament> tournamentKey = factory().allocateId(Tournament.class);
         tournament.setTournamentId(tournamentKey.getId());
@@ -69,14 +68,20 @@ public class TournamentEndpoint {
 
         //for each tournament create a round
         Long tournamentId = tournamentKey.getId();
-        for (int roundNumber=1;roundNumber<=tournament.getTotalRounds();roundNumber++){
+        for (int roundNumber = 1; roundNumber <= tournament.getTotalRounds(); roundNumber++) {
             final Key<Round> key = factory().allocateId(Round.class);
             Long roundId = key.getId();
-            Round round = new Round(roundId,tournamentId,roundNumber,false,time);
+            Round round = new Round(roundId, tournamentId, roundNumber, false, time);
             //store the round in datastore
             ofy().save().entity(round).now();
         }
 
         return tournament;
+    }
+
+    @ApiMethod(name = "tournamentAddPlayer", httpMethod = "post")
+    public TournamentPlayer tournamentAddPlayer(TournamentPlayer tournamentPlayer, @Named("idTokenString") String idTokenString) {
+        tournamentPlayer.setProfileId("Not created: Time to implement this");
+        return tournamentPlayer;
     }
 }

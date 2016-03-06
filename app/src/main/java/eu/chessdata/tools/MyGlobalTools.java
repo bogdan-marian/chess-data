@@ -1,12 +1,21 @@
 package eu.chessdata.tools;
 
 import android.content.ContentResolver;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.util.Log;
 
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.extensions.android.json.AndroidJsonFactory;
+
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
+import eu.chessdata.backend.tournamentEndpoint.model.TournamentPlayer;
 import eu.chessdata.data.simplesql.ProfileTable;
+import eu.chessdata.data.simplesql.TournamentPlayerSql;
 import eu.chessdata.data.simplesql.TournamentPlayerTable;
 import eu.chessdata.data.simplesql.TournamentTable;
 
@@ -16,15 +25,15 @@ import eu.chessdata.data.simplesql.TournamentTable;
  */
 public class MyGlobalTools {
     public static final String ROOT_URL = "https://chess-data.appspot.com/_ah/api/";
-
     public static Map<String, Long> managedClubs;
     public static Map<Long, String> profileNames;
-
     /**
      * first string is the profile id from datastore
      * second string is the name of the profile
      */
     public static Map<String, String> memberSqlIdToProfileName = new HashMap<>();
+    private static String TAG = "my-debug-tat";
+    private static TournamentEndpoint tournamentEndpoint = buildTournamentEndpoint();
 
     public static void addToMembersSqlIdToProfileName(String id, String name) {
         memberSqlIdToProfileName.put(id, name);
@@ -90,7 +99,7 @@ public class MyGlobalTools {
      * {@code tournamentPlayerId } populated. This means that they are not synced to the cloud.
      * After locating them it tries to populate them on the cloud.
      */
-    public static void syncLocalTournamentPlayers(ContentResolver contentResolver) {
+    public static void syncLocalTournamentPlayers(ContentResolver contentResolver, SharedPreferences sharedPreferences) {
         String[] TOURNAMENTPLAYER_COLUMNS = {
                 TournamentPlayerTable.FIELD__ID,
                 TournamentPlayerTable.FIELD_TOURNAMENTPLAYERID,
@@ -99,6 +108,13 @@ public class MyGlobalTools {
                 TournamentPlayerTable.FIELD_DATECREATED,
                 TournamentPlayerTable.FIELD_UPDATESTAMP
         };
+
+        int IDX_TOURNAMENT_PLAYER_ID = 1;
+        int IDX_TOURNAMENT_ID = 2;
+        int IDX_PROFILE_ID = 3;
+        int IDX_DATE_CREATED = 4;
+        int IDX_UPDATE_STAMP = 5;
+
         String selection = TournamentPlayerTable.FIELD_TOURNAMENTPLAYERID + " is null";
         Cursor cursor = contentResolver.query(
                 TournamentPlayerTable.CONTENT_URI,
@@ -107,8 +123,42 @@ public class MyGlobalTools {
                 null,
                 null
         );
-        while (cursor.moveToNext()){
+        while (cursor.moveToNext()) {
+            //now wee have a tournament player that wee need to send to the endpoints
+            TournamentPlayer tournamentPlayer = new TournamentPlayer();
+            tournamentPlayer.setTournamentId(cursor.getLong(IDX_TOURNAMENT_ID));
+            tournamentPlayer.setProfileId(cursor.getString(IDX_PROFILE_ID));
+            tournamentPlayer.setDateCreated(cursor.getLong(IDX_DATE_CREATED));
+            tournamentPlayer.setUpdateStamp(cursor.getLong(IDX_UPDATE_STAMP));
 
+            try {
+                TournamentPlayer vipPlayer = tournamentEndpoint.tournamentAddPlayer("idTokenString",
+                        tournamentPlayer).execute();
+                if (vipPlayer != null) {
+                    String hackMessage = vipPlayer.getProfileId();
+                    String message = hackMessage.split(":")[0];
+                    if (message.equals("Not created")) {
+                        Log.d(TAG, "Something happened: " + hackMessage);
+                        //TODO delete the selected player from local sqlite
+                        continue;
+                    }
+                    //TODO update the current tournamentPlayer
+
+                }
+            } catch (IOException e) {
+                Log.d(TAG,"Not able to update to cloud local tournamentPlayer: " + e );
+            }
         }
+        cursor.close();
+    }
+
+    private static TournamentEndpoint buildTournamentEndpoint() {
+        TournamentEndpoint.Builder builder =
+                new TournamentEndpoint.Builder(
+                        AndroidHttp.newCompatibleTransport(),
+                        new AndroidJsonFactory(),
+                        null
+                ).setRootUrl(MyGlobalTools.ROOT_URL);
+        return builder.build();
     }
 }
