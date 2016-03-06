@@ -1,6 +1,7 @@
 package eu.chessdata.tools;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.util.Log;
@@ -15,7 +16,6 @@ import java.util.Map;
 import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
 import eu.chessdata.backend.tournamentEndpoint.model.TournamentPlayer;
 import eu.chessdata.data.simplesql.ProfileTable;
-import eu.chessdata.data.simplesql.TournamentPlayerSql;
 import eu.chessdata.data.simplesql.TournamentPlayerTable;
 import eu.chessdata.data.simplesql.TournamentTable;
 
@@ -142,11 +142,23 @@ public class MyGlobalTools {
                         //TODO delete the selected player from local sqlite
                         continue;
                     }
-                    //TODO update the current tournamentPlayer
-
+                    //update the current tournamentPlayer
+                    ContentValues contentValues = new ContentValues();
+                    contentValues.put(TournamentPlayerTable.FIELD_TOURNAMENTPLAYERID, vipPlayer.getTournamentPlayerId());
+                    String selectionB = TournamentPlayerTable.FIELD__ID + " =?";
+                    Long myId = cursor.getLong(0);
+                    String selectionArgsB[] = {myId.toString()};
+                    int rowsUpdated = contentResolver.update(
+                            TournamentPlayerTable.CONTENT_URI,
+                            contentValues,
+                            selectionB,
+                            selectionArgsB);
+                    if (rowsUpdated != 1){
+                        Log.d(TAG,"You should only update one row :)");
+                    }
                 }
             } catch (IOException e) {
-                Log.d(TAG,"Not able to update to cloud local tournamentPlayer: " + e );
+                Log.d(TAG, "Not able to update to cloud local tournamentPlayer: " + e);
             }
         }
         cursor.close();
