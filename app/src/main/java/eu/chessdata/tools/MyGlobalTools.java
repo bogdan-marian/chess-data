@@ -99,7 +99,8 @@ public class MyGlobalTools {
      * {@code tournamentPlayerId } populated. This means that they are not synced to the cloud.
      * After locating them it tries to populate them on the cloud.
      */
-    public static void syncLocalTournamentPlayers(ContentResolver contentResolver, SharedPreferences sharedPreferences) {
+    public static void syncLocalTournamentPlayers(ContentResolver contentResolver, String idTokenString) {
+
         String[] TOURNAMENTPLAYER_COLUMNS = {
                 TournamentPlayerTable.FIELD__ID,
                 TournamentPlayerTable.FIELD_TOURNAMENTPLAYERID,
@@ -132,7 +133,7 @@ public class MyGlobalTools {
             tournamentPlayer.setUpdateStamp(cursor.getLong(IDX_UPDATE_STAMP));
 
             try {
-                TournamentPlayer vipPlayer = tournamentEndpoint.tournamentAddPlayer("idTokenString",
+                TournamentPlayer vipPlayer = tournamentEndpoint.tournamentAddPlayer(idTokenString,
                         tournamentPlayer).execute();
                 if (vipPlayer != null) {
                     String hackMessage = vipPlayer.getProfileId();
@@ -153,8 +154,8 @@ public class MyGlobalTools {
                             contentValues,
                             selectionB,
                             selectionArgsB);
-                    if (rowsUpdated != 1){
-                        Log.d(TAG,"You should only update one row :)");
+                    if (rowsUpdated != 1) {
+                        Log.d(TAG, "Error You should only update one row :)");
                     }
                 }
             } catch (IOException e) {

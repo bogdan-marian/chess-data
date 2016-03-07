@@ -36,7 +36,7 @@ public class TournamentAddPlayerFragment extends DialogFragment implements Adapt
     private static final int ADD_PLAYER_LOADER = 0;
     private TournamentAddPlayerAdapter mAdapter;
     private ContentResolver mContentResolver;
-    private long mSqlId;
+    private long mTournamentSqlId;
 
 
     @Nullable
@@ -44,7 +44,7 @@ public class TournamentAddPlayerFragment extends DialogFragment implements Adapt
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         String stringUri = getArguments().getString(TournamentDetailsFragment.TOURNAMENT_URI);
         String stringId = Uri.parse(stringUri).getLastPathSegment();
-        mSqlId = Long.parseLong(stringId);
+        mTournamentSqlId = Long.parseLong(stringId);
 
         mContentResolver = getActivity().getContentResolver();
         mAdapter = new TournamentAddPlayerAdapter(getActivity(), null, 0);
@@ -72,7 +72,8 @@ public class TournamentAddPlayerFragment extends DialogFragment implements Adapt
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         dismiss();
         //Toast.makeText(getActivity(),tempItems[position],Toast.LENGTH_SHORT).show();
-        TournamentService.startActionTournamentAddPlayer(getContext(),mSqlId,id);
+        long profileSqlId = id;
+        TournamentService.startActionTournamentAddPlayer(getContext(), mTournamentSqlId,profileSqlId);
     }
 
     @Override

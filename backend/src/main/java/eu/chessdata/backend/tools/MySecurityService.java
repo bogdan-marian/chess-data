@@ -74,4 +74,8 @@ public class MySecurityService {
         }
         return false;
     }
+
+    public static boolean canAddPlayerToTournament(String profileId, Long tournamentId){
+        return false;
+    }
 }

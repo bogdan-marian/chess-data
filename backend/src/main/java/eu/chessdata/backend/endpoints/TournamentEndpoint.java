@@ -82,6 +82,14 @@ public class TournamentEndpoint {
     @ApiMethod(name = "tournamentAddPlayer", httpMethod = "post")
     public TournamentPlayer tournamentAddPlayer(TournamentPlayer tournamentPlayer, @Named("idTokenString") String idTokenString) {
         tournamentPlayer.setProfileId("Not created: Time to implement this");
+        MyEntry<MySecurityService.Status, GoogleIdToken.Payload> secPair =
+                MySecurityService.getProfile(idTokenString);
+        TournamentPlayer illegalPlayer = new TournamentPlayer();
+        if (secPair.getKey() != MySecurityService.Status.VALID_USER){
+            illegalPlayer.setProfileId("Not created: Illegal idTokenString: " + idTokenString);
+            return illegalPlayer;
+        }
+
         return tournamentPlayer;
     }
 }
