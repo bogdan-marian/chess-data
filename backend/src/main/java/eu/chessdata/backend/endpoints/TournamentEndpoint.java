@@ -80,16 +80,28 @@ public class TournamentEndpoint {
     }
 
     @ApiMethod(name = "tournamentAddPlayer", httpMethod = "post")
-    public TournamentPlayer tournamentAddPlayer(TournamentPlayer tournamentPlayer, @Named("idTokenString") String idTokenString) {
-        tournamentPlayer.setProfileId("Not created: Time to implement this");
+    public TournamentPlayer tournamentAddPlayer(TournamentPlayer tournamentPlayer,
+                                                @Named("idTokenString") String idTokenString) {
+
         MyEntry<MySecurityService.Status, GoogleIdToken.Payload> secPair =
                 MySecurityService.getProfile(idTokenString);
         TournamentPlayer illegalPlayer = new TournamentPlayer();
-        if (secPair.getKey() != MySecurityService.Status.VALID_USER){
+        if (secPair.getKey() != MySecurityService.Status.VALID_USER) {
             illegalPlayer.setProfileId("Not created: Illegal idTokenString: " + idTokenString);
             return illegalPlayer;
         }
-
+        //find the tournament
+        Tournament tournament = ofy().load().type(Tournament.class).id(tournamentPlayer.getTournamentId()).now();
+        if (tournament == null){
+            illegalPlayer.setProfileId("Not created: Not able to locate tournament: " + tournamentPlayer.getTournamentId());
+        }
+        //first wee look by unique key id
+        String profileId = ((GoogleIdToken.Payload) secPair.getValue()).getSubject();
+        if (!MySecurityService.isClubManager(profileId, tournament.getClubId())) {
+            illegalPlayer.setProfileId("Not created: Illegal request not a club manager");
+            return illegalPlayer;
+        }
+        tournamentPlayer.setProfileId("Not created: All good so far. Keep going");
         return tournamentPlayer;
     }
 }

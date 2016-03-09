@@ -151,7 +151,6 @@ public class TournamentService extends IntentService {
      * @param playerSqlId
      */
     private void handleActionTournamentAddPlayer(Long tournamentSqlId, Long playerSqlId) {
-        Log.d(TAG, "handleActionTournamentAddPlayer: " + tournamentSqlId + " / " + playerSqlId);
 
         Long tournamentId = MyGlobalTools.getTournamentCloudIdBySqlId(tournamentSqlId, mContentResolver);
         String profileId = MyGlobalTools.getProfileCloudIdBySqlId(playerSqlId, mContentResolver);
@@ -164,7 +163,6 @@ public class TournamentService extends IntentService {
         );
 
 
-        Log.d(TAG, "Pt Lacra: profileId = " + profileId + " / tournamentId = " + tournamentId);
         MyGlobalTools.syncLocalTournamentPlayers(mContentResolver, mIdTokenString);
     }
 
