@@ -6,6 +6,7 @@ import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.config.Named;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.cmd.Query;
 
 import java.util.Date;
 
@@ -66,7 +67,7 @@ public class TournamentEndpoint {
         //store the entity in datastore
         ofy().save().entity(tournament).now();
 
-        //for each tournament create a round
+        //for each tournament round create a round
         Long tournamentId = tournamentKey.getId();
         for (int roundNumber = 1; roundNumber <= tournament.getTotalRounds(); roundNumber++) {
             final Key<Round> key = factory().allocateId(Round.class);
@@ -95,13 +96,30 @@ public class TournamentEndpoint {
         if (tournament == null){
             illegalPlayer.setProfileId("Not created: Not able to locate tournament: " + tournamentPlayer.getTournamentId());
         }
-        //first wee look by unique key id
+
+        //check if current user is a club manager
         String profileId = ((GoogleIdToken.Payload) secPair.getValue()).getSubject();
         if (!MySecurityService.isClubManager(profileId, tournament.getClubId())) {
             illegalPlayer.setProfileId("Not created: Illegal request not a club manager");
             return illegalPlayer;
         }
-        tournamentPlayer.setProfileId("Not created: All good so far. Keep going");
+
+        //check if new player is not already playing in the tournament
+        Query<TournamentPlayer>q = ofy().load().type(TournamentPlayer.class);
+        q = q.filter("tournamentId =", tournamentPlayer.getTournamentId());
+        q = q.filter("profileId =", tournamentPlayer.getProfileId());
+        for(TournamentPlayer player: q){
+            return player;
+        }
+
+        //new tournament player so wee persist the data
+        final Key<TournamentPlayer> tournamentPlayerKey = factory().allocateId(TournamentPlayer.class);
+        tournamentPlayer.setTournamentPlayerId(tournamentPlayerKey.getId());
+        Long time = (new Date()).getTime();
+        tournamentPlayer.setDateCreated(time);
+        tournamentPlayer.setUpdateStamp(time);
+        ofy().save().entity(tournamentPlayer).now();
+
         return tournamentPlayer;
     }
 }

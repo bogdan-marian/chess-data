@@ -2,7 +2,6 @@ package eu.chessdata.tools;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
-import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.util.Log;
 
@@ -143,9 +142,12 @@ public class MyGlobalTools {
                         //TODO delete the selected player from local sqlite
                         continue;
                     }
+
                     //update the current tournamentPlayer
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(TournamentPlayerTable.FIELD_TOURNAMENTPLAYERID, vipPlayer.getTournamentPlayerId());
+                    contentValues.put(TournamentPlayerTable.FIELD_DATECREATED, vipPlayer.getDateCreated());
+                    contentValues.put(TournamentPlayerTable.FIELD_UPDATESTAMP, vipPlayer.getUpdateStamp());
                     String selectionB = TournamentPlayerTable.FIELD__ID + " =?";
                     Long myId = cursor.getLong(0);
                     String selectionArgsB[] = {myId.toString()};
