@@ -21,12 +21,13 @@ import android.widget.ListView;
 
 import eu.chessdata.R;
 import eu.chessdata.TournamentDetailsFragment;
+import eu.chessdata.data.simplesql.TournamentPlayerSql;
 import eu.chessdata.data.simplesql.TournamentPlayerTable;
 
 /**
  * It uses TournamentDetailsFragment.TOURNAMENT_URI to pass information
  * to itself
- *
+ * <p/>
  * Created by Bogdan Oloeriu on 14/02/2016.
  */
 public class TournamentAllPlayersFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -41,7 +42,7 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
-        getLoaderManager().initLoader(ALL_PLAYERS_LOADER,null,this);
+        getLoaderManager().initLoader(ALL_PLAYERS_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
 
@@ -66,10 +67,10 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
         Uri uri = Uri.parse(mStringUri);
         mTournamentSqlId = uri.getLastPathSegment();
         mName = getArguments().getString(TournamentDetailsFragment.TOURNAMENT_NAME);
-        mTournamentAllPlayersAdapter = new TournamentAllPlayersAdapter(getActivity(),null,0);
+        mTournamentAllPlayersAdapter = new TournamentAllPlayersAdapter(getActivity(), null, 0);
 
         View view = inflater.inflate(R.layout.fragment_tournament_all_players, container, false);
-        ListView listView = (ListView)view.findViewById(R.id.listView_allPlayers);
+        ListView listView = (ListView) view.findViewById(R.id.listView_allPlayers);
         listView.setAdapter(mTournamentAllPlayersAdapter);
         return view;
     }
@@ -85,12 +86,12 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
         if (item.getItemId() == R.id.action_add_player) {
             FragmentManager fragmentManager = getFragmentManager();
             Bundle bundle = new Bundle();
-            bundle.putString(TournamentDetailsFragment.TOURNAMENT_URI,mStringUri);
-            bundle.putString(TournamentDetailsFragment.TOURNAMENT_NAME,mName);
+            bundle.putString(TournamentDetailsFragment.TOURNAMENT_URI, mStringUri);
+            bundle.putString(TournamentDetailsFragment.TOURNAMENT_NAME, mName);
 
             TournamentAddPlayerFragment fragment = new TournamentAddPlayerFragment();
             fragment.setArguments(bundle);
-            fragment.show(fragmentManager,"TournamentAddPlayerFragment");
+            fragment.show(fragmentManager, "TournamentAddPlayerFragment");
         }
         return super.onOptionsItemSelected(item);
     }
@@ -100,18 +101,20 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri uri = TournamentPlayerTable.CONTENT_URI;
 
-        String selection = TournamentPlayerTable.FIELD_TOURNAMENTID+" =?";
-        String selectionArgs[]={mTournamentSqlId};
+        String selection = TournamentPlayerTable.FIELD_TOURNAMENTID + " =?";
+        String selectionArgs[] = {mTournamentSqlId};
 
-        Loader<Cursor> cursorLoader = new CursorLoader(getContext(),
-                uri,
-                null,
-                selection,
-                selectionArgs,
-                null);
 
         //<debug>
         ContentResolver contentResolver = getContext().getContentResolver();
+        String debugId = "bogdan debug id";
+        TournamentPlayerSql debugPlayer = new TournamentPlayerSql(Long.parseLong(mTournamentSqlId), debugId);
+        Uri playerUri = contentResolver.insert(
+                TournamentPlayerTable.CONTENT_URI, TournamentPlayerTable.getContentValues(
+                        debugPlayer, false
+                )
+        );
+
         Cursor cursor = contentResolver.query(
                 uri,
                 null,
@@ -119,11 +122,19 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
                 selectionArgs,
                 null
         );
-
-        while(cursor.moveToNext()){
+        int count = 0;
+        while (cursor.moveToNext()) {
+            count++;
             Log.d(TAG, "tournament player id: " + cursor.getLong(0));
         }
+        cursor.close();
         //</debug>
+        Loader<Cursor> cursorLoader = new CursorLoader(getContext(),
+                uri,
+                null,
+                selection,
+                selectionArgs,
+                null);
 
         return cursorLoader;
     }
