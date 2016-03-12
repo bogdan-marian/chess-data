@@ -162,29 +162,6 @@ public class TournamentService extends IntentService {
                         tournamentPlayerSql, false)
         );
 
-        //<debug>
-        String debugId = "bogdan debug id";
-        Uri uri = TournamentPlayerTable.CONTENT_URI;
-
-        String selection = TournamentPlayerTable.FIELD_TOURNAMENTID + " =?";
-        String selectionArgs[] = {tournamentId.toString()};
-
-        Cursor cursor = mContentResolver.query(
-                TournamentPlayerTable.CONTENT_URI,
-                null,
-                selection,
-                selectionArgs,
-                null
-        );
-        int count = 0;
-        while (cursor.moveToNext()) {
-            count++;
-            Log.d(TAG, "tournament player id: " + cursor.getLong(0));
-        }
-        cursor.close();
-        //</debug>
-
-
         MyGlobalTools.syncLocalTournamentPlayers(mContentResolver, mIdTokenString);
     }
 
