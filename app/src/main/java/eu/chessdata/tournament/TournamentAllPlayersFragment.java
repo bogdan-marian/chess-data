@@ -1,5 +1,6 @@
 package eu.chessdata.tournament;
 
+import android.content.ContentResolver;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -107,6 +109,21 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
                 selection,
                 selectionArgs,
                 null);
+
+        //<debug>
+        ContentResolver contentResolver = getContext().getContentResolver();
+        Cursor cursor = contentResolver.query(
+                uri,
+                null,
+                selection,
+                selectionArgs,
+                null
+        );
+
+        while(cursor.moveToNext()){
+            Log.d(TAG, "tournament player id: " + cursor.getLong(0));
+        }
+        //</debug>
 
         return cursorLoader;
     }
