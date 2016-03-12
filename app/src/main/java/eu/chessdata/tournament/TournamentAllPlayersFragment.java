@@ -1,24 +1,25 @@
 package eu.chessdata.tournament;
 
+import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.util.HashMap;
-import java.util.Map;
+import android.widget.ListView;
 
 import eu.chessdata.R;
 import eu.chessdata.TournamentDetailsFragment;
+import eu.chessdata.data.simplesql.TournamentPlayerTable;
 
 /**
  * It uses TournamentDetailsFragment.TOURNAMENT_URI to pass information
@@ -26,14 +27,21 @@ import eu.chessdata.TournamentDetailsFragment;
  *
  * Created by Bogdan Oloeriu on 14/02/2016.
  */
-public class TournamentAllPlayersFragment extends Fragment {
+public class TournamentAllPlayersFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     String TAG = "my-debug-tag";
-    Uri mUri;
+
     String mStringUri;
     String mName;
 
+    private static final int ALL_PLAYERS_LOADER = 1;
+    private TournamentAllPlayersAdapter mTournamentAllPlayersAdapter;
+    private String mTournamentSqlId;
 
-
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        getLoaderManager().initLoader(ALL_PLAYERS_LOADER,null,this);
+        super.onActivityCreated(savedInstanceState);
+    }
 
     public static TournamentAllPlayersFragment newInstance(String stringUri, String name) {
         TournamentAllPlayersFragment fragment = new TournamentAllPlayersFragment();
@@ -52,9 +60,15 @@ public class TournamentAllPlayersFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_tournament_all_players, container, false);
         mStringUri = getArguments().getString(TournamentDetailsFragment.TOURNAMENT_URI);
+        Uri uri = Uri.parse(mStringUri);
+        mTournamentSqlId = uri.getLastPathSegment();
         mName = getArguments().getString(TournamentDetailsFragment.TOURNAMENT_NAME);
+        mTournamentAllPlayersAdapter = new TournamentAllPlayersAdapter(getActivity(),null,0);
+
+        View view = inflater.inflate(R.layout.fragment_tournament_all_players, container, false);
+        ListView listView = (ListView)view.findViewById(R.id.listView_allPlayers);
+        listView.setAdapter(mTournamentAllPlayersAdapter);
         return view;
     }
 
@@ -80,4 +94,30 @@ public class TournamentAllPlayersFragment extends Fragment {
     }
 
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Uri uri = TournamentPlayerTable.CONTENT_URI;
+
+        String selection = TournamentPlayerTable.FIELD_TOURNAMENTID+" =?";
+        String selectionArgs[]={mTournamentSqlId};
+
+        Loader<Cursor> cursorLoader = new CursorLoader(getContext(),
+                uri,
+                null,
+                selection,
+                selectionArgs,
+                null);
+
+        return cursorLoader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mTournamentAllPlayersAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mTournamentAllPlayersAdapter.swapCursor(null);
+    }
 }
