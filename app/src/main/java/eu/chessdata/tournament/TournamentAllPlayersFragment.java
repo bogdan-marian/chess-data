@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,8 +20,8 @@ import android.widget.ListView;
 
 import eu.chessdata.R;
 import eu.chessdata.TournamentDetailsFragment;
-import eu.chessdata.data.simplesql.TournamentPlayerSql;
 import eu.chessdata.data.simplesql.TournamentPlayerTable;
+import eu.chessdata.tools.MyGlobalTools;
 
 /**
  * It uses TournamentDetailsFragment.TOURNAMENT_URI to pass information
@@ -39,6 +38,7 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
     private static final int ALL_PLAYERS_LOADER = 1;
     private TournamentAllPlayersAdapter mTournamentAllPlayersAdapter;
     private String mTournamentSqlId;
+    private String mTournamentId;
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -66,6 +66,10 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
         mStringUri = getArguments().getString(TournamentDetailsFragment.TOURNAMENT_URI);
         Uri uri = Uri.parse(mStringUri);
         mTournamentSqlId = uri.getLastPathSegment();
+        ContentResolver contentResolver = getContext().getContentResolver();
+        Long tournamentSqlId = Long.parseLong(mTournamentSqlId);
+        mTournamentId = MyGlobalTools.getTournamentCloudIdBySqlId(tournamentSqlId, contentResolver).toString();
+
         mName = getArguments().getString(TournamentDetailsFragment.TOURNAMENT_NAME);
         mTournamentAllPlayersAdapter = new TournamentAllPlayersAdapter(getActivity(), null, 0);
 
@@ -102,13 +106,13 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
         Uri uri = TournamentPlayerTable.CONTENT_URI;
 
         String selection = TournamentPlayerTable.FIELD_TOURNAMENTID + " =?";
-        String selectionArgs[] = {mTournamentSqlId};
+        String selectionArgs[] = {mTournamentId};
 
 
         //<debug>
-        ContentResolver contentResolver = getContext().getContentResolver();
+       /* ContentResolver contentResolver = getContext().getContentResolver();
         String debugId = "bogdan debug id";
-        TournamentPlayerSql debugPlayer = new TournamentPlayerSql(Long.parseLong(mTournamentSqlId), debugId);
+        TournamentPlayerSql debugPlayer = new TournamentPlayerSql(Long.parseLong(mTournamentId), debugId);
         Uri playerUri = contentResolver.insert(
                 TournamentPlayerTable.CONTENT_URI, TournamentPlayerTable.getContentValues(
                         debugPlayer, false
@@ -127,7 +131,7 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
             count++;
             Log.d(TAG, "tournament player id: " + cursor.getLong(0));
         }
-        cursor.close();
+        cursor.close();*/
         //</debug>
         Loader<Cursor> cursorLoader = new CursorLoader(getContext(),
                 uri,
