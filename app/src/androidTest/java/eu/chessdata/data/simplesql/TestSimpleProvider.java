@@ -219,8 +219,10 @@ public class TestSimpleProvider extends AndroidTestCase {
     public void test7TournamentPlayerInsert() {
         TournamentPlayerSql vipTournamentPlayer = SimpleUtilities.createTournamentPlayerVipValues();
         ContentResolver contentResolver = mContext.getContentResolver();
+        ContentValues contentValues = TournamentPlayerTable.getContentValues(vipTournamentPlayer, false);
 
-        contentResolver.insert(TournamentPlayerTable.CONTENT_URI, TournamentPlayerTable.getContentValues(vipTournamentPlayer, false));
+        contentResolver.insert(TournamentPlayerTable.CONTENT_URI, contentValues);
+
         Cursor cursor = contentResolver.query(TournamentPlayerTable.CONTENT_URI, null, null, null, null);
         TournamentPlayerSql tournamentPlayerSql = TournamentPlayerTable.getRow(cursor, true);
 

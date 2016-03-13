@@ -154,9 +154,10 @@ public class TournamentService extends IntentService {
 
         Long tournamentId = MyGlobalTools.getTournamentCloudIdBySqlId(tournamentSqlId, mContentResolver);
         String profileId = MyGlobalTools.getProfileCloudIdBySqlId(playerSqlId, mContentResolver);
+        String profileName = MyGlobalTools.getNameByProfileId(profileId);
 
         //create the sql tournament first
-        TournamentPlayerSql tournamentPlayerSql = new TournamentPlayerSql(tournamentId, profileId);
+        TournamentPlayerSql tournamentPlayerSql = new TournamentPlayerSql(tournamentId, profileId, profileName);
         Uri newUri = mContentResolver.insert(
                 TournamentPlayerTable.CONTENT_URI, TournamentPlayerTable.getContentValues(
                         tournamentPlayerSql, false)
