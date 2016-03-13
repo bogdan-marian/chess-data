@@ -22,11 +22,13 @@ public class ChessProviderConfig implements ProviderConfig{
 
     @Override
     public UpgradeScript[] getUpdateScripts() {
-        UpgradeScript from1 = new UpgradeScript();
+        return new UpgradeScript[0];
+
+        /*UpgradeScript from1 = new UpgradeScript();
         from1.oldVersion = 2;
         from1.sqlScriptResource = R.raw.simplesql_updatefrom_01;
 
         Log.d(TAG, "Update script will remove all tables");
-        return new UpgradeScript[]{from1};
+        return new UpgradeScript[]{from1};*/
     }
 }

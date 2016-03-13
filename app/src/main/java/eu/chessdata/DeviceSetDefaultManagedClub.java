@@ -10,7 +10,7 @@ import android.support.v7.app.AlertDialog;
 
 import java.util.Map;
 
-import eu.chessdata.tools.MyGlobalSharedObjects;
+import eu.chessdata.tools.MyGlobalTools;
 
 /**
  * Created by bogda on 18/01/2016.
@@ -27,7 +27,7 @@ public class DeviceSetDefaultManagedClub  extends DialogFragment    {
         );
         final SharedPreferences.Editor editor = mSharedPreferences.edit();
 
-        final Map<String,Long> map = MyGlobalSharedObjects.managedClubs;
+        final Map<String,Long> map = MyGlobalTools.managedClubs;
         final String[]items = new String[map.size()];
         int i =0;
         for (Map.Entry<String,Long> item:map.entrySet()){

@@ -1,33 +1,52 @@
 package eu.chessdata.tournament;
 
+import android.content.ContentResolver;
+import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
-import java.util.HashMap;
-import java.util.Map;
+import android.widget.ListView;
 
 import eu.chessdata.R;
 import eu.chessdata.TournamentDetailsFragment;
+import eu.chessdata.data.simplesql.TournamentPlayerTable;
+import eu.chessdata.tools.MyGlobalTools;
 
 /**
+ * It uses TournamentDetailsFragment.TOURNAMENT_URI to pass information
+ * to itself
+ * <p/>
  * Created by Bogdan Oloeriu on 14/02/2016.
  */
-public class TournamentAllPlayersFragment extends Fragment {
+public class TournamentAllPlayersFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     String TAG = "my-debug-tag";
-    Uri mUri;
 
-    public static TournamentAllPlayersFragment newInstance(String stringUri) {
+    String mStringUri;
+    String mName;
+
+    private static final int ALL_PLAYERS_LOADER = 1;
+    private TournamentAllPlayersAdapter mTournamentAllPlayersAdapter;
+    private String mTournamentSqlId;
+    private String mTournamentId;
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        getLoaderManager().initLoader(ALL_PLAYERS_LOADER, null, this);
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    public static TournamentAllPlayersFragment newInstance(String stringUri, String name) {
         TournamentAllPlayersFragment fragment = new TournamentAllPlayersFragment();
         Bundle args = new Bundle();
         args.putString(TournamentDetailsFragment.TOURNAMENT_URI, stringUri);
@@ -44,10 +63,19 @@ public class TournamentAllPlayersFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mStringUri = getArguments().getString(TournamentDetailsFragment.TOURNAMENT_URI);
+        Uri uri = Uri.parse(mStringUri);
+        mTournamentSqlId = uri.getLastPathSegment();
+        ContentResolver contentResolver = getContext().getContentResolver();
+        Long tournamentSqlId = Long.parseLong(mTournamentSqlId);
+        mTournamentId = MyGlobalTools.getTournamentCloudIdBySqlId(tournamentSqlId, contentResolver).toString();
+
+        mName = getArguments().getString(TournamentDetailsFragment.TOURNAMENT_NAME);
+        mTournamentAllPlayersAdapter = new TournamentAllPlayersAdapter(getActivity(), null, 0);
+
         View view = inflater.inflate(R.layout.fragment_tournament_all_players, container, false);
-        String stringUri = getArguments().getString(TournamentDetailsFragment.TOURNAMENT_URI);
-        mUri = Uri.parse(stringUri);
-        Log.d(TAG, "All Players: " + mUri.toString());
+        ListView listView = (ListView) view.findViewById(R.id.listView_allPlayers);
+        listView.setAdapter(mTournamentAllPlayersAdapter);
         return view;
     }
 
@@ -60,46 +88,68 @@ public class TournamentAllPlayersFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_add_player) {
-            String sqlId = mUri.getLastPathSegment();
-            PopulatePlayersList populatePlayersList = new PopulatePlayersList(getFragmentManager());
-            populatePlayersList.execute();
+            FragmentManager fragmentManager = getFragmentManager();
+            Bundle bundle = new Bundle();
+            bundle.putString(TournamentDetailsFragment.TOURNAMENT_URI, mStringUri);
+            bundle.putString(TournamentDetailsFragment.TOURNAMENT_NAME, mName);
+
+            TournamentAddPlayerFragment fragment = new TournamentAddPlayerFragment();
+            fragment.setArguments(bundle);
+            fragment.show(fragmentManager, "TournamentAddPlayerFragment");
         }
         return super.onOptionsItemSelected(item);
     }
 
-    class PopulatePlayersList extends AsyncTask<Void,Void,Map<String,Long>> {
-        private FragmentManager mFragmentManager;
 
-        public PopulatePlayersList(FragmentManager fragmentManager){
-            mFragmentManager = fragmentManager;
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Uri uri = TournamentPlayerTable.CONTENT_URI;
+
+        String selection = TournamentPlayerTable.FIELD_TOURNAMENTID + " =?";
+        String selectionArgs[] = {mTournamentId};
+
+
+        //<debug>
+       /* ContentResolver contentResolver = getContext().getContentResolver();
+        String debugId = "bogdan debug id";
+        TournamentPlayerSql debugPlayer = new TournamentPlayerSql(Long.parseLong(mTournamentId), debugId);
+        Uri playerUri = contentResolver.insert(
+                TournamentPlayerTable.CONTENT_URI, TournamentPlayerTable.getContentValues(
+                        debugPlayer, false
+                )
+        );
+
+        Cursor cursor = contentResolver.query(
+                uri,
+                null,
+                selection,
+                selectionArgs,
+                null
+        );
+        int count = 0;
+        while (cursor.moveToNext()) {
+            count++;
+            Log.d(TAG, "tournament player id: " + cursor.getLong(0));
         }
+        cursor.close();*/
+        //</debug>
+        Loader<Cursor> cursorLoader = new CursorLoader(getContext(),
+                uri,
+                null,
+                selection,
+                selectionArgs,
+                null);
 
-        @Override
-        protected Map<String, Long> doInBackground(Void... params) {
-            Long tournamentSqlId = Long.parseLong(mUri.getLastPathSegment());
-            Log.d(TAG,"SQL ID: " + tournamentSqlId);
-            Map<String,Long> map = new HashMap<>();
-            map.put("Bogdan " , 1001L);
-            map.put("Lacra ", 2002l);
-            final String[]items = new String[map.size()];
-            int i = 0;
-            for (Map.Entry<String,Long> item:map.entrySet()){
-                items[i++]= item.getKey();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Map<String, Long> map) {
-            Bundle bundle = new Bundle();
-            bundle.putString(TournamentDetailsFragment.TOURNAMENT_URI,mUri.toString());
-
-            TournamentAddPlayerFragment fragment = new TournamentAddPlayerFragment();
-            fragment.setArguments(bundle);
-
-            fragment.show(mFragmentManager, "TournamentAddPlayerFragment");
-        }
+        return cursorLoader;
     }
 
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mTournamentAllPlayersAdapter.swapCursor(data);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mTournamentAllPlayersAdapter.swapCursor(null);
+    }
 }

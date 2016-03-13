@@ -1,13 +1,12 @@
 package eu.chessdata.data.simplesql;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
-import eu.chessdata.R;
-import eu.chessdata.backend.profileEndpoint.model.TournamentPlayer;
 import eu.chessdata.tools.Params;
 
 /**
@@ -91,7 +90,7 @@ public class TestSimpleProvider extends AndroidTestCase {
         assertEquals("Error: Not able to delete from ClubMemberTable ", 0, cursor.getCount());
         cursor.close();
         //===========================================
-        /*mContext.getContentResolver().delete(
+        mContext.getContentResolver().delete(
                 TournamentPlayerTable.CONTENT_URI,
                 null,
                 null
@@ -104,21 +103,21 @@ public class TestSimpleProvider extends AndroidTestCase {
                 null
         );
         assertEquals("Error: Not able to delete from TournamentPlayerTable ", 0, cursor.getCount());
-        cursor.close();*/
+        cursor.close();
     }
 
-    public void test1ProfileInsertVip(){
+    public void test1ProfileInsertVip() {
         ProfileSql vip = SimpleUtilities.createProfileVipValues();
         ContentResolver contentResolver = mContext.getContentResolver();
 
         contentResolver.insert(ProfileTable.CONTENT_URI, ProfileTable.getContentValues(vip, false));
 
-        Cursor cursor = contentResolver.query(ProfileTable.CONTENT_URI,null,null,null,null);
+        Cursor cursor = contentResolver.query(ProfileTable.CONTENT_URI, null, null, null, null);
         ProfileSql profile1 = ProfileTable.getRow(cursor, true);
         SimpleUtilities.compareProfilesNoId(vip, profile1);
     }
 
-    public void test2ReadProfile(){
+    public void test2ReadProfile() {
         test1ProfileInsertVip();
         ProfileSql vip = SimpleUtilities.createProfileVipValues();
         ContentResolver contentResolver = mContext.getContentResolver();
@@ -127,9 +126,9 @@ public class TestSimpleProvider extends AndroidTestCase {
         String[] mSelectionArgs = {""};
 
         String mSelectionClause = ProfileTable.FIELD_PROFILEID + " = ?";
-        mSelectionArgs[0]= vip.profileId;
+        mSelectionArgs[0] = vip.profileId;
 
-        String mSortOrder =  ProfileTable.FIELD__ID +" ASC";
+        String mSortOrder = ProfileTable.FIELD__ID + " ASC";
 
         Cursor cursor = contentResolver.query(ProfileTable.CONTENT_URI,
                 null,
@@ -138,11 +137,11 @@ public class TestSimpleProvider extends AndroidTestCase {
                 null);
         assertNotNull("Cursor is null ", cursor);
         int count = cursor.getCount();
-        Log.d(TAG,"Cursor count = " + count);
+        Log.d(TAG, "Cursor count = " + count);
         assertTrue("Cursor query did not returned values ", cursor.getCount() > 0);
     }
 
-    public void test3ReadProfileUsingToolsParams(){
+    public void test3ReadProfileUsingToolsParams() {
         test1ProfileInsertVip();
         ProfileSql vip = SimpleUtilities.createProfileVipValues();
         ContentResolver contentResolver = mContext.getContentResolver();
@@ -158,7 +157,7 @@ public class TestSimpleProvider extends AndroidTestCase {
         assertTrue("Cursor query did not returned values ", cursor.getCount() > 0);
     }
 
-    public void test4TournamentInsert(){
+    public void test4TournamentInsert() {
         TournamentSql vipTournament = SimpleUtilities.createTournamentVipValues();
         ContentResolver contentResolver = mContext.getContentResolver();
 
@@ -168,7 +167,7 @@ public class TestSimpleProvider extends AndroidTestCase {
         SimpleUtilities.compareTournamentsNoId(vipTournament, tournament1);
     }
 
-    public void test5ClubInsert(){
+    public void test5ClubInsert() {
         ClubSql vip = SimpleUtilities.createClubVipValues();
         ContentResolver contentResolver = mContext.getContentResolver();
 
@@ -179,7 +178,7 @@ public class TestSimpleProvider extends AndroidTestCase {
         SimpleUtilities.compareClubsNoId(vip, club1);
     }
 
-    public void test6TestClubSelectQuery(){
+    public void test6TestClubSelectQuery() {
         ClubSql vip = SimpleUtilities.createClubVipValues();
         ContentResolver contentResolver = mContext.getContentResolver();
 
@@ -211,20 +210,45 @@ public class TestSimpleProvider extends AndroidTestCase {
                 null
         );
         cursor.moveToFirst();
-        Log.d(TAG,"Cursor size = " + cursor.getCount());
+        Log.d(TAG, "Cursor size = " + cursor.getCount());
         long endPointId = cursor.getLong(INDEX_CLUB_ID);
-        Log.d(TAG,"Endpoint id = " + endPointId);
-        assertTrue(endPointId == (long)vip.clubId);
+        Log.d(TAG, "Endpoint id = " + endPointId);
+        assertTrue(endPointId == (long) vip.clubId);
     }
 
-    public void test7TournamentPlayerInsert(){
+    public void test7TournamentPlayerInsert() {
         TournamentPlayerSql vipTournamentPlayer = SimpleUtilities.createTournamentPlayerVipValues();
         ContentResolver contentResolver = mContext.getContentResolver();
 
-        contentResolver.insert(TournamentPlayerTable.CONTENT_URI,TournamentPlayerTable.getContentValues(vipTournamentPlayer,false));
-        Cursor cursor = contentResolver.query(TournamentPlayerTable.CONTENT_URI,null,null,null,null);
-        TournamentPlayerSql tournamentPlayerSql = TournamentPlayerTable.getRow(cursor,true);
-        //SimpleUtilities.compareTournamentsNoId(vipTournamentPlayer, tournamentPlayerSql);
+        contentResolver.insert(TournamentPlayerTable.CONTENT_URI, TournamentPlayerTable.getContentValues(vipTournamentPlayer, false));
+        Cursor cursor = contentResolver.query(TournamentPlayerTable.CONTENT_URI, null, null, null, null);
+        TournamentPlayerSql tournamentPlayerSql = TournamentPlayerTable.getRow(cursor, true);
 
+        cursor = contentResolver.query(TournamentPlayerTable.CONTENT_URI, null, null, null, null);
+        cursor.moveToFirst();
+        long id = cursor.getLong(0);
+
+        //change the tournamentPlayerId
+        ContentValues values = new ContentValues();
+        values.put(TournamentPlayerTable.FIELD_TOURNAMENTPLAYERID, "801");
+        String selection = TournamentPlayerTable.FIELD__ID + " =?";
+        String selectionArgs[] = {Long.toString(id)};
+
+        int rowsUpdated = contentResolver.update(
+                TournamentPlayerTable.CONTENT_URI,
+                values,
+                selection,
+                selectionArgs);
+
+        assertTrue("Should be one record", rowsUpdated == 1);
+
+        cursor = contentResolver.query(TournamentPlayerTable.CONTENT_URI, null, null, null, null);
+        cursor.moveToFirst();
+        int idx_tournamentPlayerId = cursor.getColumnIndex(TournamentPlayerTable.FIELD_TOURNAMENTPLAYERID);
+        int idx_tournamentId = cursor.getColumnIndex(TournamentPlayerTable.FIELD_TOURNAMENTID);
+        long tournamentPlayerId = cursor.getLong(idx_tournamentPlayerId);
+        long tournamentId = cursor.getLong(idx_tournamentId);
+        assertTrue("Should be the intended value 801", tournamentPlayerId == 801L);
+        assertTrue("Should be the original value 701", tournamentId == 701L);
     }
 }

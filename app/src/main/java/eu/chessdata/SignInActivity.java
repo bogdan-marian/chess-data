@@ -38,7 +38,7 @@ import eu.chessdata.backend.quoteEndpoint.QuoteEndpoint;
 import eu.chessdata.backend.quoteEndpoint.model.Quote;
 import eu.chessdata.data.simplesql.ProfileSql;
 import eu.chessdata.data.simplesql.ProfileTable;
-import eu.chessdata.tools.MyGlobalSharedObjects;
+import eu.chessdata.tools.MyGlobalTools;
 import eu.chessdata.tools.Params;
 
 
@@ -517,7 +517,7 @@ public class SignInActivity extends AppCompatActivity implements
                             AndroidHttp.newCompatibleTransport(),
                             new AndroidJsonFactory(),
                             null)
-                            .setRootUrl(MyGlobalSharedObjects.ROOT_URL);
+                            .setRootUrl(MyGlobalTools.ROOT_URL);
             ProfileEndpoint profileEndpoint = builder.build();
             String idTokenString = paramsVar[0];
             try {

@@ -2,35 +2,22 @@ package eu.chessdata;
 
 import android.app.Dialog;
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.extensions.android.json.AndroidJsonFactory;
-
-import java.io.IOException;
-
-import eu.chessdata.backend.clubEndpoint.ClubEndpoint;
 import eu.chessdata.backend.clubEndpoint.model.Club;
 import eu.chessdata.backend.clubEndpoint.model.Email;
 import eu.chessdata.backend.clubEndpoint.model.Link;
-import eu.chessdata.data.simplesql.ClubSql;
-import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.services.ClubCreateService;
-import eu.chessdata.tools.MyGlobalSharedObjects;
 
 /**
  * Created by bogda on 17/12/2015.

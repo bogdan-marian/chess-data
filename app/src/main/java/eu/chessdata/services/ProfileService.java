@@ -25,7 +25,7 @@ import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.data.simplesql.ProfileSql;
 import eu.chessdata.data.simplesql.ProfileTable;
-import eu.chessdata.tools.MyGlobalSharedObjects;
+import eu.chessdata.tools.MyGlobalTools;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -171,7 +171,7 @@ public class ProfileService extends IntentService {
                 }
                 //Updated the members map;
                 String name = getNameById(member.getProfileId());
-                MyGlobalSharedObjects.addToMembersSqlIdToProfileName(member.getProfileId(), name);
+                MyGlobalTools.addToMembersSqlIdToProfileName(member.getProfileId(), name);
 
                 //debug section
                 Cursor cursor = mContentResolver.query(
@@ -217,7 +217,7 @@ public class ProfileService extends IntentService {
             String id = membersCursor.getString(idx_id);
             if (id != null) {
                 String name = getNameById(id);
-                MyGlobalSharedObjects.addToMembersSqlIdToProfileName(id, name);
+                MyGlobalTools.addToMembersSqlIdToProfileName(id, name);
             }
             i++;
         }
@@ -251,7 +251,7 @@ public class ProfileService extends IntentService {
                         AndroidHttp.newCompatibleTransport(),
                         new AndroidJsonFactory(),
                         null
-                ).setRootUrl(MyGlobalSharedObjects.ROOT_URL);
+                ).setRootUrl(MyGlobalTools.ROOT_URL);
         return builder.build();
     }
 

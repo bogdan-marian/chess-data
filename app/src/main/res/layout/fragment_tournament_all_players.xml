@@ -9,5 +9,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="all players manual text"/>
+    <ListView
+        android:id="@+id/listView_allPlayers"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"></ListView>
 
 </LinearLayout>

@@ -20,6 +20,7 @@ import eu.chessdata.TournamentDetailsFragment;
 public class TournamentPlayersFragment extends Fragment {
     private ViewPager mViewPager;
     private String mStringUri;
+    private String mName;
 
     @Nullable
     @Override
@@ -27,6 +28,7 @@ public class TournamentPlayersFragment extends Fragment {
         View fragmentView = inflater.inflate(R.layout.fragment_tournament_players, container, false);
 
         mStringUri = getArguments().getString(TournamentDetailsFragment.TOURNAMENT_URI);
+        mName = getArguments().getString(TournamentDetailsFragment.TOURNAMENT_NAME);
 
         SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
         mViewPager = (ViewPager) fragmentView.findViewById(R.id.container);
@@ -64,7 +66,7 @@ public class TournamentPlayersFragment extends Fragment {
 
             switch (position) {
                 case 0:
-                    return TournamentAllPlayersFragment.newInstance(mStringUri);
+                    return TournamentAllPlayersFragment.newInstance(mStringUri,mName);
                 default:
                     return new PlaceholderFragment();
             }
