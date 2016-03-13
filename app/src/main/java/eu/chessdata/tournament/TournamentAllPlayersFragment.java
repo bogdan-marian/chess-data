@@ -98,9 +98,9 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
             TournamentAddPlayerFragment fragment = new TournamentAddPlayerFragment();
             fragment.setArguments(bundle);
             fragment.show(fragmentManager, "TournamentAddPlayerFragment");
-            return false;
+            return true;
         }
-        return false;
+        return true;
     }
 
     public void dismissDialog() {
