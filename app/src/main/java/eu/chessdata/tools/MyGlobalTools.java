@@ -93,7 +93,7 @@ public class MyGlobalTools {
 
     /**
      * Very long running task.
-     * It syncing local created tournament players.
+     * Its syncing local created tournament players.
      * It looks in the database and tries to find tournament players that do not have
      * {@code tournamentPlayerId } populated. This means that they are not synced to the cloud.
      * After locating them it tries to populate them on the cloud.

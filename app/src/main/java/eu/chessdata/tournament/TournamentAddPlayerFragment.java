@@ -74,6 +74,7 @@ public class TournamentAddPlayerFragment extends DialogFragment implements Adapt
         //Toast.makeText(getActivity(),tempItems[position],Toast.LENGTH_SHORT).show();
         long profileSqlId = id;
         TournamentService.startActionTournamentAddPlayer(getContext(), mTournamentSqlId,profileSqlId);
+        dismiss();
     }
 
     @Override
