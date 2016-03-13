@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
@@ -88,6 +89,7 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.action_add_player) {
+            dismissDialog();
             FragmentManager fragmentManager = getFragmentManager();
             Bundle bundle = new Bundle();
             bundle.putString(TournamentDetailsFragment.TOURNAMENT_URI, mStringUri);
@@ -101,6 +103,14 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
         return false;
     }
 
+    public void dismissDialog() {
+        while (getFragmentManager().findFragmentByTag("TournamentAddPlayerFragment") != null) {
+            Fragment prev = getFragmentManager().findFragmentByTag("TournamentAddPlayerFragment");
+            DialogFragment df = (DialogFragment) prev;
+            df.dismiss();
+        }
+    }
+
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -108,7 +118,7 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
 
         String selection = TournamentPlayerTable.FIELD_TOURNAMENTID + " =?";
         String selectionArgs[] = {mTournamentId};
-        String sortOrder = TournamentPlayerTable.FIELD_PROFILENAME+" ASC";
+        String sortOrder = TournamentPlayerTable.FIELD_PROFILENAME + " ASC";
 
         Loader<Cursor> cursorLoader = new CursorLoader(getContext(),
                 uri,
