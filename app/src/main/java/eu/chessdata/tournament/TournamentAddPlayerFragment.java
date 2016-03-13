@@ -1,15 +1,14 @@
 package eu.chessdata.tournament;
 
 import android.content.ContentResolver;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AlertDialog;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +30,6 @@ import eu.chessdata.tools.MyGlobalTools;
 public class TournamentAddPlayerFragment extends DialogFragment implements AdapterView.OnItemClickListener,
         LoaderManager.LoaderCallbacks<Cursor> {
     private String TAG = "my-debug-tag";
-    private AlertDialog mAlertDialog;
     private ListView mListView;
     private static final int ADD_PLAYER_LOADER = 0;
     private TournamentAddPlayerAdapter mAdapter;
@@ -52,7 +50,7 @@ public class TournamentAddPlayerFragment extends DialogFragment implements Adapt
         View view = inflater.inflate(R.layout.fragment_tournament_add_player, null, false);
         mListView = (ListView) view.findViewById(R.id.list_view_players);
         mListView.setAdapter(mAdapter);
-        getDialog().getWindow().setTitle("Select player");
+        getDialog().getWindow().setTitle("Select player for id = "+mTournamentSqlId);
 
         return view;
 
@@ -70,11 +68,10 @@ public class TournamentAddPlayerFragment extends DialogFragment implements Adapt
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        dismiss();
         //Toast.makeText(getActivity(),tempItems[position],Toast.LENGTH_SHORT).show();
         long profileSqlId = id;
         TournamentService.startActionTournamentAddPlayer(getContext(), mTournamentSqlId,profileSqlId);
-        dismiss();
+        this.dismiss();
     }
 
     @Override

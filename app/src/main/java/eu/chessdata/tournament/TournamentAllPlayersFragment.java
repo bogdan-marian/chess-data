@@ -96,8 +96,9 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
             TournamentAddPlayerFragment fragment = new TournamentAddPlayerFragment();
             fragment.setArguments(bundle);
             fragment.show(fragmentManager, "TournamentAddPlayerFragment");
+            return false;
         }
-        return super.onOptionsItemSelected(item);
+        return false;
     }
 
 
@@ -107,38 +108,14 @@ public class TournamentAllPlayersFragment extends Fragment implements LoaderMana
 
         String selection = TournamentPlayerTable.FIELD_TOURNAMENTID + " =?";
         String selectionArgs[] = {mTournamentId};
+        String sortOrder = TournamentPlayerTable.FIELD_PROFILENAME+" ASC";
 
-
-        //<debug>
-       /* ContentResolver contentResolver = getContext().getContentResolver();
-        String debugId = "bogdan debug id";
-        TournamentPlayerSql debugPlayer = new TournamentPlayerSql(Long.parseLong(mTournamentId), debugId);
-        Uri playerUri = contentResolver.insert(
-                TournamentPlayerTable.CONTENT_URI, TournamentPlayerTable.getContentValues(
-                        debugPlayer, false
-                )
-        );
-
-        Cursor cursor = contentResolver.query(
-                uri,
-                null,
-                selection,
-                selectionArgs,
-                null
-        );
-        int count = 0;
-        while (cursor.moveToNext()) {
-            count++;
-            Log.d(TAG, "tournament player id: " + cursor.getLong(0));
-        }
-        cursor.close();*/
-        //</debug>
         Loader<Cursor> cursorLoader = new CursorLoader(getContext(),
                 uri,
                 null,
                 selection,
                 selectionArgs,
-                null);
+                sortOrder);
 
         return cursorLoader;
     }

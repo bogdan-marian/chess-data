@@ -4,7 +4,6 @@ import android.test.AndroidTestCase;
 
 import java.util.Date;
 
-import eu.chessdata.backend.profileEndpoint.model.TournamentPlayer;
 
 /**
  * Created by bogda on 07/12/2015.
@@ -87,6 +86,7 @@ public class SimpleUtilities extends AndroidTestCase{
         tournamentPlayerSql.setTournamentPlayerId(701L);
         tournamentPlayerSql.setTournamentId(701L);
         tournamentPlayerSql.setProfileId("debugProfile701L");
+        tournamentPlayerSql.setProfileName("debugProfile701L");
         tournamentPlayerSql.setDateCreated(time);
         tournamentPlayerSql.setUpdateStamp(time);
         return tournamentPlayerSql;

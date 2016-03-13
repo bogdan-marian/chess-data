@@ -4,7 +4,6 @@ import java.util.Date;
 
 import ckm.simple.sql_provider.annotation.SimpleSQLColumn;
 import ckm.simple.sql_provider.annotation.SimpleSQLTable;
-import eu.chessdata.backend.tournamentEndpoint.model.TournamentPlayer;
 
 /**
  * When date is created locally only the tournamentPlayerId will be left null. In order to synchronize
@@ -25,6 +24,9 @@ public class TournamentPlayerSql {
     @SimpleSQLColumn(value = "profileId")
     private String profileId;
 
+    @SimpleSQLColumn(value = "profileName")
+    private String profileName;
+
     @SimpleSQLColumn(value = "dateCreated")
     private long dateCreated;
 
@@ -35,15 +37,23 @@ public class TournamentPlayerSql {
     public TournamentPlayerSql() {
     }
 
-    public TournamentPlayerSql(Long tournamentId, String profileId) {
+    public TournamentPlayerSql(Long tournamentId, String profileId, String profileName) {
         long date = new Date().getTime();
         this.tournamentId = tournamentId;
         this.profileId = profileId;
+        this.profileName = profileName;
         this.dateCreated = date;
         this.updateStamp = date;
     }
 
     //getters and setters
+    public String getProfileName() {
+        return profileName;
+    }
+
+    public void setProfileName(String profileName) {
+        this.profileName = profileName;
+    }
 
     public long getId() {
         return id;
