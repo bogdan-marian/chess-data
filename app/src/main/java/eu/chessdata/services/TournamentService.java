@@ -46,6 +46,7 @@ public class TournamentService extends IntentService {
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_CREATE_TOURNAMENT = "eu.chessdata.services.action.ACTION_CREATE_TOURNAMENT";
     private static final String ACTION_TOURNAMENT_ADD_PLAYER = "eu.chessdata.services.action.ACTION_TOURNAMENT_ADD_PLAYER";
+    private static final String ACTION_SYNCHRONIZE_ALL = "eu.chessdata.services.action.ACTION_SYNCHRONIZE_ALL";
 
     private static final String EXTRA_JSON_TOURNAMENT = "eu.chessdata.services.extra.JSON_TOURNAMENT";
     private static final String EXTRA_TOURNAMENT_SQL_ID = "eu.chessdata.services.EXTRA_TOURNAMENT_SQL_ID";
@@ -67,6 +68,12 @@ public class TournamentService extends IntentService {
         Intent intent = new Intent(context, TournamentService.class);
         intent.setAction(ACTION_CREATE_TOURNAMENT);
         intent.putExtra(EXTRA_JSON_TOURNAMENT, jsonTournament);
+        context.startService(intent);
+    }
+
+    public static void startActionSynchronizeAll(Context context){
+        Intent intent = new Intent(context, TournamentService.class);
+        intent.setAction(ACTION_SYNCHRONIZE_ALL);
         context.startService(intent);
     }
 
@@ -102,12 +109,25 @@ public class TournamentService extends IntentService {
                 final Long tournamentSqlId = intent.getLongExtra(EXTRA_TOURNAMENT_SQL_ID, -1L);
                 final Long playerSqlId = intent.getLongExtra(EXTRA_PLAYER_SQL_ID, -1l);
                 handleActionTournamentAddPlayer(tournamentSqlId, playerSqlId);
+            }else if (ACTION_SYNCHRONIZE_ALL.equals(action)){
+                handleActionSynchronizeAll();
             }
         }
     }
 
+    private void handleActionSynchronizeAll() {
+        synchronizeClubs();
+    }
+
     /**
-     * Handle action Foo in the provided background thread with the providedm
+     * gets all the clubs from the server and updates data locally
+     */
+    private void synchronizeClubs(){
+        //TODO implement on server side getAllClubs
+    }
+
+    /**
+     * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
     private void handleActionCreateTournament(String jsonTournament) {

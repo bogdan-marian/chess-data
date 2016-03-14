@@ -8,8 +8,11 @@ import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oau
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.cmd.Query;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import eu.chessdata.backend.entities.Club;
 import eu.chessdata.backend.entities.Round;
 import eu.chessdata.backend.entities.Tournament;
 import eu.chessdata.backend.entities.TournamentPlayer;
@@ -121,5 +124,10 @@ public class TournamentEndpoint {
         ofy().save().entity(tournamentPlayer).now();
 
         return tournamentPlayer;
+    }
+
+    public List<Club> getAllClubsUserIsMember(@Named("idTokenString") String idTokenString){
+        List<Club> clubList = new ArrayList<>();
+        return  clubList;
     }
 }
