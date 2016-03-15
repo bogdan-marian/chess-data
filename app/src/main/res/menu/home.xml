@@ -9,4 +9,8 @@
         android:id="@+id/action_change_managed_club"
         android:title="@string/change_managed_club"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_sync_data_cloud_to_device"
+        android:title="Synchronize data cloud to device"
+        app:showAsAction="never"/>
 </menu>

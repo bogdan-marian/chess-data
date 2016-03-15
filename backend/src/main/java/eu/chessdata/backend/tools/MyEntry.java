@@ -3,7 +3,7 @@ package eu.chessdata.backend.tools;
 import java.util.Map;
 
 /**
- * Created by bogda on 29/11/2015.
+ * Created by bogdan on 29/11/2015.
  */
 public class MyEntry<K, V> implements Map.Entry {
     private final K key;

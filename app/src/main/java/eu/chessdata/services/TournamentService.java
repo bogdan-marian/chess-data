@@ -14,9 +14,12 @@ import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 
 import java.io.IOException;
+import java.util.List;
 
 import eu.chessdata.R;
 import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
+import eu.chessdata.backend.tournamentEndpoint.model.Club;
+import eu.chessdata.backend.tournamentEndpoint.model.ClubCollection;
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.data.simplesql.TournamentPlayerSql;
@@ -71,7 +74,7 @@ public class TournamentService extends IntentService {
         context.startService(intent);
     }
 
-    public static void startActionSynchronizeAll(Context context){
+    public static void startActionSynchronizeAll(Context context) {
         Intent intent = new Intent(context, TournamentService.class);
         intent.setAction(ACTION_SYNCHRONIZE_ALL);
         context.startService(intent);
@@ -109,7 +112,7 @@ public class TournamentService extends IntentService {
                 final Long tournamentSqlId = intent.getLongExtra(EXTRA_TOURNAMENT_SQL_ID, -1L);
                 final Long playerSqlId = intent.getLongExtra(EXTRA_PLAYER_SQL_ID, -1l);
                 handleActionTournamentAddPlayer(tournamentSqlId, playerSqlId);
-            }else if (ACTION_SYNCHRONIZE_ALL.equals(action)){
+            } else if (ACTION_SYNCHRONIZE_ALL.equals(action)) {
                 handleActionSynchronizeAll();
             }
         }
@@ -122,8 +125,28 @@ public class TournamentService extends IntentService {
     /**
      * gets all the clubs from the server and updates data locally
      */
-    private void synchronizeClubs(){
-        //TODO implement on server side getAllClubs
+    private void synchronizeClubs() {
+        try {
+            ClubCollection collection = sTournamentEndpoint.getAllClubsUserIsMember(mIdTokenString).execute();
+            if (collection == null){
+                return;
+            }
+            List<Club> clubs = collection.getItems();
+            if (clubs.size()== 0){
+                return;
+            }
+            Club illegalClub = clubs.get(0);
+            String message = illegalClub.getName();
+            String illegalMessage = message.split(":")[0];
+            if (illegalMessage.equals("Something is wrong")){
+                Log.d(TAG, message);
+                return;
+            }
+            //todo Wee have the clubs. next step is to update the club in the sqlite
+            Log.d(TAG,"Total clubs on server side: " + clubs.size());
+        } catch (IOException e) {
+            Log.d(TAG,"Not able to send request synchronizeClubs");
+        }
     }
 
     /**

@@ -7,12 +7,14 @@ import com.google.api.server.spi.config.Named;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.cmd.Query;
+import com.googlecode.objectify.cmd.SimpleQuery;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import eu.chessdata.backend.entities.Club;
+import eu.chessdata.backend.entities.ClubMember;
 import eu.chessdata.backend.entities.Round;
 import eu.chessdata.backend.entities.Tournament;
 import eu.chessdata.backend.entities.TournamentPlayer;
@@ -96,7 +98,7 @@ public class TournamentEndpoint {
         }
         //find the tournament
         Tournament tournament = ofy().load().type(Tournament.class).id(tournamentPlayer.getTournamentId()).now();
-        if (tournament == null){
+        if (tournament == null) {
             illegalPlayer.setProfileId("Not created: Not able to locate tournament: " + tournamentPlayer.getTournamentId());
         }
 
@@ -108,10 +110,10 @@ public class TournamentEndpoint {
         }
 
         //check if new player is not already playing in the tournament
-        Query<TournamentPlayer>q = ofy().load().type(TournamentPlayer.class);
+        Query<TournamentPlayer> q = ofy().load().type(TournamentPlayer.class);
         q = q.filter("tournamentId =", tournamentPlayer.getTournamentId());
         q = q.filter("profileId =", tournamentPlayer.getProfileId());
-        for(TournamentPlayer player: q){
+        for (TournamentPlayer player : q) {
             return player;
         }
 
@@ -126,8 +128,40 @@ public class TournamentEndpoint {
         return tournamentPlayer;
     }
 
-    public List<Club> getAllClubsUserIsMember(@Named("idTokenString") String idTokenString){
+    @ApiMethod(name = "getAllClubsUserIsMember", httpMethod = "post")
+    public List<Club> getAllClubsUserIsMember(@Named("idTokenString") String idTokenString) {
+        MyEntry<MySecurityService.Status, GoogleIdToken.Payload> secPair =
+                MySecurityService.getProfile(idTokenString);
+        List<Club> illegalList = new ArrayList<>();
+        Club illegalClub = new Club();
+        illegalList.add(illegalClub);
+        if (secPair.getKey() != MySecurityService.Status.VALID_USER) {
+            illegalClub.setName("Something is wrong: Illegal idTokenString: " + idTokenString);
+            return illegalList;
+        }
+
+
+        String profileId = ((GoogleIdToken.Payload) secPair.getValue()).getSubject();
+        //find the id list
+        List<Long> clubIds = new ArrayList<>();
+        List<Key<Club>> clubKeys = new ArrayList<>();
+        Query<ClubMember> q = ofy().load().type(ClubMember.class);
+        q = q.filter("profileId =", profileId);
+
+        for (ClubMember member : q) {
+            long clubId = member.getClubId();
+            Key<Club> clubKey = Key.create(Club.class,clubId);
+            clubKeys.add(clubKey);
+            clubIds.add(member.getClubId());
+        }
+
+
+        //find the club list
+        SimpleQuery<Club> clubQuery = ofy().load().type(Club.class).filterKey("in", clubKeys);
         List<Club> clubList = new ArrayList<>();
-        return  clubList;
+        for (Club club : clubQuery) {
+            clubList.add(club);
+        }
+        return clubList;
     }
 }
