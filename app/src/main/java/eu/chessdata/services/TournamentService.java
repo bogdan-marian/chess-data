@@ -2,6 +2,7 @@ package eu.chessdata.services;
 
 import android.app.IntentService;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -21,6 +22,7 @@ import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
 import eu.chessdata.backend.tournamentEndpoint.model.Club;
 import eu.chessdata.backend.tournamentEndpoint.model.ClubCollection;
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
+import eu.chessdata.data.simplesql.ClubSql;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.data.simplesql.TournamentPlayerSql;
 import eu.chessdata.data.simplesql.TournamentPlayerTable;
@@ -32,7 +34,6 @@ import eu.chessdata.tools.MyGlobalTools;
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
  * <p/>
- * TODO: Customize class - update intent actions, extra parameters and static
  * helper methods.
  */
 public class TournamentService extends IntentService {
@@ -45,14 +46,18 @@ public class TournamentService extends IntentService {
     private String mIdTokenString;
     private Long mClubEndpointId;
 
-
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    private static final String ACTION_CREATE_TOURNAMENT = "eu.chessdata.services.action.ACTION_CREATE_TOURNAMENT";
-    private static final String ACTION_TOURNAMENT_ADD_PLAYER = "eu.chessdata.services.action.ACTION_TOURNAMENT_ADD_PLAYER";
-    private static final String ACTION_SYNCHRONIZE_ALL = "eu.chessdata.services.action.ACTION_SYNCHRONIZE_ALL";
+    private static final String ACTION_CREATE_TOURNAMENT = "eu.chessdata.services.action" + "" +
+            ".ACTION_CREATE_TOURNAMENT";
+    private static final String ACTION_TOURNAMENT_ADD_PLAYER = "eu.chessdata.services.action" + "" +
+            ".ACTION_TOURNAMENT_ADD_PLAYER";
+    private static final String ACTION_SYNCHRONIZE_ALL = "eu.chessdata.services.action" + "" +
+            ".ACTION_SYNCHRONIZE_ALL";
 
-    private static final String EXTRA_JSON_TOURNAMENT = "eu.chessdata.services.extra.JSON_TOURNAMENT";
-    private static final String EXTRA_TOURNAMENT_SQL_ID = "eu.chessdata.services.EXTRA_TOURNAMENT_SQL_ID";
+    private static final String EXTRA_JSON_TOURNAMENT = "eu.chessdata.services.extra" + "" +
+            ".JSON_TOURNAMENT";
+    private static final String EXTRA_TOURNAMENT_SQL_ID = "eu.chessdata.services" + "" +
+            ".EXTRA_TOURNAMENT_SQL_ID";
     private static final String EXTRA_PLAYER_SQL_ID = "eu.chessdata.services.EXTRA_PLAYER_SQL_ID";
 
     public TournamentService() {
@@ -65,7 +70,6 @@ public class TournamentService extends IntentService {
      *
      * @see IntentService
      */
-    // TODO: Customize helper method
     public static void startActionCreateTournament(Context context, Tournament tournament) {
         String jsonTournament = serializeToJson(tournament);
         Intent intent = new Intent(context, TournamentService.class);
@@ -80,9 +84,8 @@ public class TournamentService extends IntentService {
         context.startService(intent);
     }
 
-
-    public static void startActionTournamentAddPlayer(Context context, Long tournamentSqlId,
-                                                      Long playerSqlId) {
+    public static void startActionTournamentAddPlayer(Context context, Long tournamentSqlId, Long
+            playerSqlId) {
         Intent intent = new Intent(context, TournamentService.class);
         intent.setAction(ACTION_TOURNAMENT_ADD_PLAYER);
         intent.putExtra(EXTRA_TOURNAMENT_SQL_ID, tournamentSqlId);
@@ -94,14 +97,14 @@ public class TournamentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
-            mSharedPreferences = getSharedPreferences(
-                    getString(R.string.preference_file_key), Context.MODE_PRIVATE);
+            mSharedPreferences = getSharedPreferences(getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE);
             mContentResolver = getContentResolver();
-            mIdTokenString = mSharedPreferences.getString(
-                    getString(R.string.pref_security_id_token_string), "defaultValue");
+            mIdTokenString = mSharedPreferences.getString(getString(R.string
+                    .pref_security_id_token_string), "defaultValue");
 
-            long clubSqlId = mSharedPreferences.getLong(
-                    getString(R.string.pref_managed_club_sqlId), 0L);
+            long clubSqlId = mSharedPreferences.getLong(getString(R.string
+                    .pref_managed_club_sqlId), 0L);
             mClubEndpointId = getClubEndpointId(clubSqlId);
 
             final String action = intent.getAction();
@@ -127,25 +130,80 @@ public class TournamentService extends IntentService {
      */
     private void synchronizeClubs() {
         try {
-            ClubCollection collection = sTournamentEndpoint.getAllClubsUserIsMember(mIdTokenString).execute();
-            if (collection == null){
+            ClubCollection collection = sTournamentEndpoint.getAllClubsUserIsMember
+                    (mIdTokenString).execute();
+            if (collection == null) {
                 return;
             }
             List<Club> clubs = collection.getItems();
-            if (clubs.size()== 0){
+            if (clubs.size() == 0) {
+
                 return;
             }
             Club illegalClub = clubs.get(0);
             String message = illegalClub.getName();
             String illegalMessage = message.split(":")[0];
-            if (illegalMessage.equals("Something is wrong")){
+            if (illegalMessage.equals("Something is wrong")) {
                 Log.d(TAG, message);
                 return;
             }
-            //todo Wee have the clubs. next step is to update the club in the sqlite
-            Log.d(TAG,"Total clubs on server side: " + clubs.size());
+            //todo Wee have the clubs. next step is to update the clubs in the sqlite
+
+            for (Club club : clubs) {
+                Uri uri = ClubTable.CONTENT_URI;
+                String selection = ClubTable.FIELD_CLUBID + " =?";
+                String selectionArgs[] = {club.getClubId().toString()};
+
+                Cursor cursor = mContentResolver.query(uri, null, selection, selectionArgs, null);
+                if (cursor.getCount() > 1) {
+                    Log.e(TAG, "More then one club with the same id: " + club.getShortName());
+                    throw new IllegalStateException("Should not have more then one club with the same id in sqlite");
+                } else if (cursor.getCount() == 0) {
+                    //time to insert the club in sqlite
+                    mContentResolver.insert(ClubTable.CONTENT_URI, ClubTable.getContentValues(new ClubSql(club), false));
+                } else if (cursor.getCount() == 1) {
+                    int idx_updateStamp = cursor.getColumnIndex(ClubTable.FIELD_UPDATESTAMP);
+                    long stampLocal = cursor.getLong(idx_updateStamp);
+                    long stampCloud = club.getUpdateStamp();
+
+
+                    if (stampLocal < stampCloud) {
+                        //time to check time stamp and decide
+                        ContentValues contentValues = new ContentValues();
+                        contentValues.put(ClubTable.FIELD_NAME, club.getName());
+                        contentValues.put(ClubTable.FIELD_SHORTNAME, club.getShortName());
+                        contentValues.put(ClubTable.FIELD_EMAIL, club.getEmail().getEmail());
+                        contentValues.put(ClubTable.FIELD_COUNTRY, club.getCountry());
+                        contentValues.put(ClubTable.FIELD_CITY, club.getCity());
+                        contentValues.put(ClubTable.FIELD_HOMEPAGE, club.getHomePage().getValue());
+                        contentValues.put(ClubTable.FIELD_DESCRIPTION, club.getDescription());
+                        contentValues.put(ClubTable.FIELD_UPDATESTAMP, club.getUpdateStamp());
+
+                        String updateSelection = ClubTable.FIELD__ID + " =?";
+                        Long myId = cursor.getLong(0);
+                        String selectionAgs[] = {myId.toString()};
+                        int rowsUpdated = mContentResolver.update(
+                                ClubTable.CONTENT_URI,
+                                contentValues,
+                                updateSelection,
+                                selectionArgs
+                        );
+                        if (rowsUpdated != 1){
+                            Log.e(TAG, "You should update only one row");
+                            throw new IllegalStateException("You should update only one row");
+                        }
+                    } else if(stampLocal > stampCloud){
+                        //TODO implement some edit functions to update data in the cloud
+                        Log.d(TAG, "Please implement this. code = 001");
+                    }
+                }
+                cursor.close();
+            }
+
         } catch (IOException e) {
-            Log.d(TAG,"Not able to send request synchronizeClubs");
+            Log.d(TAG, "Not able to send request synchronizeClubs");
+            throw new IllegalStateException("Not able to send/process request to/on server side"
+                    + e);
         }
     }
 
@@ -172,11 +230,8 @@ public class TournamentService extends IntentService {
                     }
                     //insert in sqlite
                     TournamentSql tournamentSql = new TournamentSql(vipTournament);
-                    Uri newUri = mContentResolver.insert(
-                            TournamentTable.CONTENT_URI, TournamentTable.getContentValues(
-                                    tournamentSql, false
-                            )
-                    );
+                    Uri newUri = mContentResolver.insert(TournamentTable.CONTENT_URI,
+                            TournamentTable.getContentValues(tournamentSql, false));
                     Log.d(TAG, "Tournament uri: " + newUri.toString());
 
                 }
@@ -186,29 +241,28 @@ public class TournamentService extends IntentService {
         }
     }
 
-
     /**
-     * It creates the sqlite tournament player first and then tries to sink it with the cloud endpoints
+     * It creates the sqlite tournament player first and then tries to sink it with the cloud
+     * endpoints
      *
      * @param tournamentSqlId
      * @param playerSqlId
      */
     private void handleActionTournamentAddPlayer(Long tournamentSqlId, Long playerSqlId) {
 
-        Long tournamentId = MyGlobalTools.getTournamentCloudIdBySqlId(tournamentSqlId, mContentResolver);
+        Long tournamentId = MyGlobalTools.getTournamentCloudIdBySqlId(tournamentSqlId,
+                mContentResolver);
         String profileId = MyGlobalTools.getProfileCloudIdBySqlId(playerSqlId, mContentResolver);
         String profileName = MyGlobalTools.getNameByProfileId(profileId);
 
         //create the sql tournament first
-        TournamentPlayerSql tournamentPlayerSql = new TournamentPlayerSql(tournamentId, profileId, profileName);
-        Uri newUri = mContentResolver.insert(
-                TournamentPlayerTable.CONTENT_URI, TournamentPlayerTable.getContentValues(
-                        tournamentPlayerSql, false)
-        );
+        TournamentPlayerSql tournamentPlayerSql = new TournamentPlayerSql(tournamentId,
+                profileId, profileName);
+        Uri newUri = mContentResolver.insert(TournamentPlayerTable.CONTENT_URI,
+                TournamentPlayerTable.getContentValues(tournamentPlayerSql, false));
 
         MyGlobalTools.syncLocalTournamentPlayers(mContentResolver, mIdTokenString);
     }
-
 
     /**
      * creates json from tournament
@@ -234,27 +288,22 @@ public class TournamentService extends IntentService {
     }
 
     private static TournamentEndpoint buildTournamentEndpoint() {
-        TournamentEndpoint.Builder builder =
-                new TournamentEndpoint.Builder(
-                        AndroidHttp.newCompatibleTransport(),
-                        new AndroidJsonFactory(),
-                        null
-                ).setRootUrl(MyGlobalTools.ROOT_URL);
+        TournamentEndpoint.Builder builder = new TournamentEndpoint.Builder(AndroidHttp
+                .newCompatibleTransport(), new AndroidJsonFactory(), null).setRootUrl
+                (MyGlobalTools.ROOT_URL);
         return builder.build();
     }
 
     private Long getClubEndpointId(long clubSqlId) {
         Uri clubUri = ClubTable.CONTENT_URI;
-        String[] projection = {
-                ClubTable.FIELD__ID,
-                ClubTable.FIELD_CLUBID
-        };
+        String[] projection = {ClubTable.FIELD__ID, ClubTable.FIELD_CLUBID};
         int COL_CLUBID = 1;
         String selection = ClubTable.FIELD__ID + " = ?";
         String stringClubSqlId = Long.toString(clubSqlId);
         String[] selectionArguments = {stringClubSqlId};
 
-        Cursor cursor = mContentResolver.query(clubUri, projection, selection, selectionArguments, null);
+        Cursor cursor = mContentResolver.query(clubUri, projection, selection,
+                selectionArguments, null);
         int count = cursor.getCount();
         cursor.moveToFirst();
         long endPointId = cursor.getLong(COL_CLUBID);
