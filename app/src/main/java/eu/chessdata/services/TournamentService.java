@@ -162,6 +162,7 @@ public class TournamentService extends IntentService {
                     //time to insert the club in sqlite
                     mContentResolver.insert(ClubTable.CONTENT_URI, ClubTable.getContentValues(new ClubSql(club), false));
                 } else if (cursor.getCount() == 1) {
+                    cursor.moveToFirst();
                     int idx_updateStamp = cursor.getColumnIndex(ClubTable.FIELD_UPDATESTAMP);
                     long stampLocal = cursor.getLong(idx_updateStamp);
                     long stampCloud = club.getUpdateStamp();
@@ -304,9 +305,12 @@ public class TournamentService extends IntentService {
 
         Cursor cursor = mContentResolver.query(clubUri, projection, selection,
                 selectionArguments, null);
+        while (cursor.moveToNext()){
+            long endPointId = cursor.getLong(COL_CLUBID);
+            return endPointId;
+        }
         int count = cursor.getCount();
         cursor.moveToFirst();
-        long endPointId = cursor.getLong(COL_CLUBID);
-        return endPointId;
+
     }
 }

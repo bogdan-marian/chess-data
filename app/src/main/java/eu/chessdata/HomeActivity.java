@@ -217,6 +217,7 @@ public class HomeActivity extends AppCompatActivity
                     selectionArgs,
                     null
             );
+
             Map<Long, String> clubIdToMember = new HashMap<>();
             int memberCount = memberCursor.getCount();
             int idx_clubId = memberCursor.getColumnIndex(ClubMemberTable.FIELD_CLUBID);
