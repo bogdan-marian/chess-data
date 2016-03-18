@@ -37,15 +37,6 @@ import eu.chessdata.tools.MyGlobalTools;
  * helper methods.
  */
 public class TournamentService extends IntentService {
-    private static TournamentEndpoint sTournamentEndpoint = buildTournamentEndpoint();
-    private static GsonFactory sGsonFactory = new GsonFactory();
-
-    private String TAG = "my-debug-tag";
-    private SharedPreferences mSharedPreferences;
-    private ContentResolver mContentResolver;
-    private String mIdTokenString;
-    private Long mClubEndpointId;
-
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_CREATE_TOURNAMENT = "eu.chessdata.services.action" + "" +
             ".ACTION_CREATE_TOURNAMENT";
@@ -53,12 +44,18 @@ public class TournamentService extends IntentService {
             ".ACTION_TOURNAMENT_ADD_PLAYER";
     private static final String ACTION_SYNCHRONIZE_ALL = "eu.chessdata.services.action" + "" +
             ".ACTION_SYNCHRONIZE_ALL";
-
     private static final String EXTRA_JSON_TOURNAMENT = "eu.chessdata.services.extra" + "" +
             ".JSON_TOURNAMENT";
     private static final String EXTRA_TOURNAMENT_SQL_ID = "eu.chessdata.services" + "" +
             ".EXTRA_TOURNAMENT_SQL_ID";
     private static final String EXTRA_PLAYER_SQL_ID = "eu.chessdata.services.EXTRA_PLAYER_SQL_ID";
+    private static TournamentEndpoint sTournamentEndpoint = buildTournamentEndpoint();
+    private static GsonFactory sGsonFactory = new GsonFactory();
+    private String TAG = "my-debug-tag";
+    private SharedPreferences mSharedPreferences;
+    private ContentResolver mContentResolver;
+    private String mIdTokenString;
+    private Long mClubEndpointId;
 
     public TournamentService() {
         super("TournamentService");
@@ -94,6 +91,36 @@ public class TournamentService extends IntentService {
         context.startService(intent);
     }
 
+    /**
+     * creates json from tournament
+     *
+     * @param tournament
+     * @return
+     */
+    private static String serializeToJson(Tournament tournament) {
+        try {
+            String jsonTournament = sGsonFactory.toString(tournament);
+            return jsonTournament;
+        } catch (IOException e) {
+            throw new IllegalStateException("Not able to create json");
+        }
+    }
+
+    private static Tournament deserializeFromJson(String jsonString) {
+        try {
+            return sGsonFactory.fromString(jsonString, Tournament.class);
+        } catch (IOException e) {
+            throw new IllegalStateException("Not able to deserialize json");
+        }
+    }
+
+    private static TournamentEndpoint buildTournamentEndpoint() {
+        TournamentEndpoint.Builder builder = new TournamentEndpoint.Builder(AndroidHttp
+                .newCompatibleTransport(), new AndroidJsonFactory(), null).setRootUrl
+                (MyGlobalTools.ROOT_URL);
+        return builder.build();
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
@@ -123,6 +150,12 @@ public class TournamentService extends IntentService {
 
     private void handleActionSynchronizeAll() {
         synchronizeClubs();
+        synchronizeClubMembers();
+    }
+
+    private void synchronizeClubMembers() {
+        //select all the local clubs
+        //Cursor cursor = mContentResolver.query()
     }
 
     /**
@@ -150,18 +183,22 @@ public class TournamentService extends IntentService {
             //todo Wee have the clubs. next step is to update the clubs in the sqlite
 
             for (Club club : clubs) {
+                Log.d(TAG, "debug all clubs " + club.getClubId() + " " + club.getShortName());
                 Uri uri = ClubTable.CONTENT_URI;
                 String selection = ClubTable.FIELD_CLUBID + " =?";
                 String selectionArgs[] = {club.getClubId().toString()};
 
                 Cursor cursor = mContentResolver.query(uri, null, selection, selectionArgs, null);
-                if (cursor.getCount() > 1) {
+                int count = cursor.getCount();
+                Log.d(TAG, "debug all clubs " + club.getClubId() + " " + club.getShortName() + " / cursor count = " + count);
+                if (count > 1) {
                     Log.e(TAG, "More then one club with the same id: " + club.getShortName());
                     throw new IllegalStateException("Should not have more then one club with the same id in sqlite");
-                } else if (cursor.getCount() == 0) {
+                } else if (count == 0) {
                     //time to insert the club in sqlite
+                    Log.d(TAG, "Inserting one more club in the database: " + club.getClubId());
                     mContentResolver.insert(ClubTable.CONTENT_URI, ClubTable.getContentValues(new ClubSql(club), false));
-                } else if (cursor.getCount() == 1) {
+                } else if (count == 1) {
                     cursor.moveToFirst();
                     int idx_updateStamp = cursor.getColumnIndex(ClubTable.FIELD_UPDATESTAMP);
                     long stampLocal = cursor.getLong(idx_updateStamp);
@@ -183,22 +220,25 @@ public class TournamentService extends IntentService {
                         String updateSelection = ClubTable.FIELD__ID + " =?";
                         Long myId = cursor.getLong(0);
                         String selectionAgs[] = {myId.toString()};
+                        Log.d(TAG, "Updating row for club id: " + club.getClubId());
                         int rowsUpdated = mContentResolver.update(
                                 ClubTable.CONTENT_URI,
                                 contentValues,
                                 updateSelection,
                                 selectionArgs
                         );
-                        if (rowsUpdated != 1){
+                        if (rowsUpdated != 1) {
                             Log.e(TAG, "You should update only one row");
                             throw new IllegalStateException("You should update only one row");
                         }
-                    } else if(stampLocal > stampCloud){
-                        //TODO implement some edit functions to update data in the cloud
+                    } else if (stampLocal > stampCloud) {
                         Log.d(TAG, "Please implement this. code = 001");
+                    } else if (stampLocal == stampCloud) {
+                        Log.d(TAG, "Nothing to update. club up to date! " + club.getClubId());
                     }
                 }
                 cursor.close();
+                Log.d(TAG, "Cursor closed" + club.getClubId());
             }
 
         } catch (IOException e) {
@@ -265,36 +305,6 @@ public class TournamentService extends IntentService {
         MyGlobalTools.syncLocalTournamentPlayers(mContentResolver, mIdTokenString);
     }
 
-    /**
-     * creates json from tournament
-     *
-     * @param tournament
-     * @return
-     */
-    private static String serializeToJson(Tournament tournament) {
-        try {
-            String jsonTournament = sGsonFactory.toString(tournament);
-            return jsonTournament;
-        } catch (IOException e) {
-            throw new IllegalStateException("Not able to create json");
-        }
-    }
-
-    private static Tournament deserializeFromJson(String jsonString) {
-        try {
-            return sGsonFactory.fromString(jsonString, Tournament.class);
-        } catch (IOException e) {
-            throw new IllegalStateException("Not able to deserialize json");
-        }
-    }
-
-    private static TournamentEndpoint buildTournamentEndpoint() {
-        TournamentEndpoint.Builder builder = new TournamentEndpoint.Builder(AndroidHttp
-                .newCompatibleTransport(), new AndroidJsonFactory(), null).setRootUrl
-                (MyGlobalTools.ROOT_URL);
-        return builder.build();
-    }
-
     private Long getClubEndpointId(long clubSqlId) {
         Uri clubUri = ClubTable.CONTENT_URI;
         String[] projection = {ClubTable.FIELD__ID, ClubTable.FIELD_CLUBID};
@@ -305,12 +315,13 @@ public class TournamentService extends IntentService {
 
         Cursor cursor = mContentResolver.query(clubUri, projection, selection,
                 selectionArguments, null);
-        while (cursor.moveToNext()){
+        while (cursor.moveToNext()) {
             long endPointId = cursor.getLong(COL_CLUBID);
             return endPointId;
         }
         int count = cursor.getCount();
-        cursor.moveToFirst();
+        Log.d(TAG, "Not able to find club: getClubEndpointId: " + clubSqlId);
+        return -1L;
 
     }
 }
