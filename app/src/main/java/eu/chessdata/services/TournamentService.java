@@ -15,12 +15,15 @@ import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import eu.chessdata.R;
 import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
 import eu.chessdata.backend.tournamentEndpoint.model.Club;
 import eu.chessdata.backend.tournamentEndpoint.model.ClubCollection;
+import eu.chessdata.backend.tournamentEndpoint.model.ClubMember;
+import eu.chessdata.backend.tournamentEndpoint.model.ClubMemberCollection;
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
 import eu.chessdata.data.simplesql.ClubSql;
 import eu.chessdata.data.simplesql.ClubTable;
@@ -155,7 +158,34 @@ public class TournamentService extends IntentService {
 
     private void synchronizeClubMembers() {
         //select all the local clubs
-        //Cursor cursor = mContentResolver.query()
+        Uri uri = ClubTable.CONTENT_URI;
+        String[] projection = {ClubTable.FIELD_CLUBID};
+        int idx_clubId = 0;
+        Cursor cursor = mContentResolver.query(uri, projection, null, null, null);
+        List<Long> clubIds = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            clubIds.add(cursor.getLong(idx_clubId));
+        }
+        Log.d(TAG, "Clubs id list: " + clubIds);
+        try {
+            ClubMemberCollection collection = sTournamentEndpoint.getAllMembers(clubIds).execute();
+
+            List<ClubMember> members = collection.getItems();
+            if (members.size()==0){
+                return;
+            }
+            ClubMember illegalMember = members.get(0);
+            String message = illegalMember.getProfileId();
+            String illegalMessage = message.split(":")[0];
+            if (illegalMessage.equals("Something is wrong")){
+                Log.e(TAG,message);
+                return;
+            }
+            Log.d(TAG,"Continue coding");
+        } catch (IOException e) {
+            Log.e(TAG, "Some error on server side: " + e);
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -177,26 +207,23 @@ public class TournamentService extends IntentService {
             String message = illegalClub.getName();
             String illegalMessage = message.split(":")[0];
             if (illegalMessage.equals("Something is wrong")) {
-                Log.d(TAG, message);
+                Log.e(TAG, message);
                 return;
             }
-            //todo Wee have the clubs. next step is to update the clubs in the sqlite
 
+            //Wee have the clubs. next step is to update the clubs in the sqlite
             for (Club club : clubs) {
-                Log.d(TAG, "debug all clubs " + club.getClubId() + " " + club.getShortName());
                 Uri uri = ClubTable.CONTENT_URI;
                 String selection = ClubTable.FIELD_CLUBID + " =?";
                 String selectionArgs[] = {club.getClubId().toString()};
 
                 Cursor cursor = mContentResolver.query(uri, null, selection, selectionArgs, null);
                 int count = cursor.getCount();
-                Log.d(TAG, "debug all clubs " + club.getClubId() + " " + club.getShortName() + " / cursor count = " + count);
                 if (count > 1) {
                     Log.e(TAG, "More then one club with the same id: " + club.getShortName());
                     throw new IllegalStateException("Should not have more then one club with the same id in sqlite");
                 } else if (count == 0) {
                     //time to insert the club in sqlite
-                    Log.d(TAG, "Inserting one more club in the database: " + club.getClubId());
                     mContentResolver.insert(ClubTable.CONTENT_URI, ClubTable.getContentValues(new ClubSql(club), false));
                 } else if (count == 1) {
                     cursor.moveToFirst();
@@ -220,7 +247,6 @@ public class TournamentService extends IntentService {
                         String updateSelection = ClubTable.FIELD__ID + " =?";
                         Long myId = cursor.getLong(0);
                         String selectionAgs[] = {myId.toString()};
-                        Log.d(TAG, "Updating row for club id: " + club.getClubId());
                         int rowsUpdated = mContentResolver.update(
                                 ClubTable.CONTENT_URI,
                                 contentValues,
@@ -232,17 +258,16 @@ public class TournamentService extends IntentService {
                             throw new IllegalStateException("You should update only one row");
                         }
                     } else if (stampLocal > stampCloud) {
-                        Log.d(TAG, "Please implement this. code = 001");
+                        Log.e(TAG, "Please implement this. code = 001");
                     } else if (stampLocal == stampCloud) {
-                        Log.d(TAG, "Nothing to update. club up to date! " + club.getClubId());
+                        //Nothing to update. club up to date!
                     }
                 }
                 cursor.close();
-                Log.d(TAG, "Cursor closed" + club.getClubId());
             }
 
         } catch (IOException e) {
-            Log.d(TAG, "Not able to send request synchronizeClubs");
+            Log.e(TAG, "Not able to send request synchronizeClubs");
             throw new IllegalStateException("Not able to send/process request to/on server side"
                     + e);
         }

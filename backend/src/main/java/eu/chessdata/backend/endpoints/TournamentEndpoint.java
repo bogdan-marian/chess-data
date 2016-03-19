@@ -4,6 +4,7 @@ import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.config.Named;
+import com.google.api.server.spi.config.Nullable;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.cmd.Query;
@@ -150,7 +151,7 @@ public class TournamentEndpoint {
 
         for (ClubMember member : q) {
             long clubId = member.getClubId();
-            Key<Club> clubKey = Key.create(Club.class,clubId);
+            Key<Club> clubKey = Key.create(Club.class, clubId);
             clubKeys.add(clubKey);
             clubIds.add(member.getClubId());
         }
@@ -163,5 +164,18 @@ public class TournamentEndpoint {
             clubList.add(club);
         }
         return clubList;
+    }
+
+    @ApiMethod(name = "getAllMembers", httpMethod = "post")
+    public List<ClubMember> getAllMembers( @Named("clubIds") List<Long> clubIds) {
+        List<ClubMember> illegalList = new ArrayList<>();
+        ClubMember illegalMember = new ClubMember();
+        illegalList.add(illegalMember);
+        if (clubIds.size()==0){
+            illegalMember.setProfileId("Something is wrong: supplied list was empty");
+            return illegalList;
+        }
+        illegalMember.setProfileId("Something is wrong: list is not empty");
+        return illegalList;
     }
 }
