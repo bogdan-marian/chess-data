@@ -16,13 +16,13 @@ import com.google.api.client.json.gson.GsonFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import eu.chessdata.R;
 import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
 import eu.chessdata.backend.tournamentEndpoint.model.Club;
 import eu.chessdata.backend.tournamentEndpoint.model.ClubCollection;
-import eu.chessdata.backend.tournamentEndpoint.model.ClubMember;
 import eu.chessdata.backend.tournamentEndpoint.model.ClubMemberCollection;
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
 import eu.chessdata.data.simplesql.ClubSql;
@@ -167,8 +167,17 @@ public class TournamentService extends IntentService {
             clubIds.add(cursor.getLong(idx_clubId));
         }
         Log.d(TAG, "Clubs id list: " + clubIds);
+        Long longArray[] = {101L, 102L, 103L, 104l};
+        List<Long> longList = Arrays.asList(longArray);
         try {
-            ClubMemberCollection collection = sTournamentEndpoint.getAllMembers(clubIds).execute();
+            ClubMemberCollection clubMemberCollection = sTournamentEndpoint.testLongLists(longList).execute();
+            Log.d(TAG, "Received members = "+ clubMemberCollection.toString());
+        } catch (IOException e) {
+            Log.e(TAG, "Some error on server side: " + e);
+            e.printStackTrace();
+        }
+    }
+/*ClubMemberCollection collection = sTournamentEndpoint.getAllMembers(clubIds).execute();
 
             List<ClubMember> members = collection.getItems();
             if (members.size()==0){
@@ -180,13 +189,7 @@ public class TournamentService extends IntentService {
             if (illegalMessage.equals("Something is wrong")){
                 Log.e(TAG,message);
                 return;
-            }
-            Log.d(TAG,"Continue coding");
-        } catch (IOException e) {
-            Log.e(TAG, "Some error on server side: " + e);
-            e.printStackTrace();
-        }
-    }
+            }*/
 
     /**
      * gets all the clubs from the server and updates data locally

@@ -4,7 +4,6 @@ import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.ApiNamespace;
 import com.google.api.server.spi.config.Named;
-import com.google.api.server.spi.config.Nullable;
 import com.google.appengine.repackaged.com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.cmd.Query;
@@ -168,6 +167,7 @@ public class TournamentEndpoint {
 
     @ApiMethod(name = "getAllMembers", httpMethod = "post")
     public List<ClubMember> getAllMembers( @Named("clubIds") List<Long> clubIds) {
+        System.out.println("Received list: " + clubIds);
         List<ClubMember> illegalList = new ArrayList<>();
         ClubMember illegalMember = new ClubMember();
         illegalList.add(illegalMember);
@@ -177,5 +177,16 @@ public class TournamentEndpoint {
         }
         illegalMember.setProfileId("Something is wrong: list is not empty");
         return illegalList;
+    }
+
+    @ApiMethod(name="testLongLists",httpMethod = "post")
+    public List<ClubMember> testLongLists(@Named("idList") List<Long> idList){
+        List<ClubMember> clubMembers = new ArrayList<>();
+        for(Long id: idList){
+            ClubMember member = new ClubMember();
+            member.setClubMemberId(id);
+            clubMembers.add(member);
+        }
+        return clubMembers;
     }
 }
