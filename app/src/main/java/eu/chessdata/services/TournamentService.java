@@ -16,15 +16,18 @@ import com.google.api.client.json.gson.GsonFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import eu.chessdata.R;
 import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
 import eu.chessdata.backend.tournamentEndpoint.model.Club;
 import eu.chessdata.backend.tournamentEndpoint.model.ClubCollection;
+import eu.chessdata.backend.tournamentEndpoint.model.ClubMember;
 import eu.chessdata.backend.tournamentEndpoint.model.ClubMemberCollection;
+import eu.chessdata.backend.tournamentEndpoint.model.SupportObject;
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
+import eu.chessdata.data.simplesql.ClubMemberSql;
+import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubSql;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.data.simplesql.TournamentPlayerSql;
@@ -166,30 +169,70 @@ public class TournamentService extends IntentService {
         while (cursor.moveToNext()) {
             clubIds.add(cursor.getLong(idx_clubId));
         }
-        Log.d(TAG, "Clubs id list: " + clubIds);
-        Long longArray[] = {101L, 102L, 103L, 104l};
-        List<Long> longList = Arrays.asList(longArray);
+        cursor.close();
+        if (clubIds.size() == 0) {
+            Log.d(TAG, "No clubs to sync members for");
+            return;
+        }
+        SupportObject supportObject = new SupportObject();
+        supportObject.setMessage("Get club members");
+        supportObject.setLongList(clubIds);
+
         try {
-            ClubMemberCollection clubMemberCollection = sTournamentEndpoint.testLongLists(longList).execute();
-            Log.d(TAG, "Received members = "+ clubMemberCollection.toString());
+            ClubMemberCollection supportMemberCollection = sTournamentEndpoint.getAllMembers(supportObject).execute();
+            List<ClubMember> clubMembers = supportMemberCollection.getItems();
+            if (clubMembers.size() == 0) {
+                return;
+            }
+            ClubMember illegalMember = clubMembers.get(0);
+            String message = illegalMember.getProfileId();
+            String illegalMessage = message.split(":")[0];
+            if (illegalMessage.equals("Something is wrong")) {
+                Log.e(TAG, "synchronizeClubMembers " + message);
+                return;
+            }
+            Log.d(TAG, "Received members = " + clubMembers.size());
+            //wee have the members. Next step is update sql members
+            for (ClubMember member : clubMembers) {
+                Uri uriMembers = ClubMemberTable.CONTENT_URI;
+                String selectionMembers = ClubMemberTable.FIELD_CLUBMEMBERID + " =?";
+                String selectionMembersArgs[] = {member.getClubMemberId().toString()};
+                Cursor memberCursor = mContentResolver.query(uriMembers, null, selectionMembers, selectionMembersArgs, null);
+                int count = memberCursor.getCount();
+                if (count > 1) {
+                    Log.e(TAG, "More then one member with the same id: " + member.getProfileId());
+                    throw new IllegalStateException("More then one member with the same id: " + member.getProfileId());
+                } else if (count == 0) {
+                    //time to insert the member
+                    mContentResolver.insert(ClubMemberTable.CONTENT_URI, ClubMemberTable.getContentValues(new ClubMemberSql(member), false));
+                } else if (count == 1) {
+                    cursor.moveToFirst();
+                    int idx_updateStamp = cursor.getColumnIndex(ClubTable.FIELD_UPDATESTAMP);
+                    long stampLocal = cursor.getLong(idx_updateStamp);
+                    long stampCloud = member.getUpdateStamp();
+                    //time to compare time stamps and decide
+                    if (stampLocal < stampCloud) {
+                        //update local
+                        int rowsUpdated = mContentResolver.update(ClubMemberTable.CONTENT_URI,
+                                ClubMemberTable.getContentValues(new ClubMemberSql(member), false),
+                                selectionMembers, selectionMembersArgs);
+                        if (rowsUpdated != 1) {
+                            Log.e(TAG, "You should update only one row");
+                            throw new IllegalStateException("You should update only one row");
+                        }
+                    }else if(stampLocal > stampCloud){
+                        Log.e(TAG, "Please implement this. code = 002");
+                    }else if (stampLocal == stampCloud){
+                        Log.d(TAG, "Nothing to update for this member");
+                    }
+                }
+                memberCursor.close();
+            }
         } catch (IOException e) {
             Log.e(TAG, "Some error on server side: " + e);
             e.printStackTrace();
         }
     }
-/*ClubMemberCollection collection = sTournamentEndpoint.getAllMembers(clubIds).execute();
-
-            List<ClubMember> members = collection.getItems();
-            if (members.size()==0){
-                return;
-            }
-            ClubMember illegalMember = members.get(0);
-            String message = illegalMember.getProfileId();
-            String illegalMessage = message.split(":")[0];
-            if (illegalMessage.equals("Something is wrong")){
-                Log.e(TAG,message);
-                return;
-            }*/
 
     /**
      * gets all the clubs from the server and updates data locally

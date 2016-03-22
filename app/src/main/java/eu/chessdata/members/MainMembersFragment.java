@@ -18,9 +18,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import eu.chessdata.R;
-import eu.chessdata.TournamentAdapter;
 import eu.chessdata.data.simplesql.ClubMemberTable;
-import eu.chessdata.data.simplesql.TournamentTable;
 
 /**
  * This is the fragment that lists all the chess players that somehow are affiliated to the club
@@ -105,7 +103,6 @@ public class MainMembersFragment extends Fragment implements LoaderManager.Loade
                 null,
                 null,
                 sortOrder );
-
     }
 
     @Override

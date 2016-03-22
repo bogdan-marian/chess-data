@@ -49,6 +49,17 @@ public class ClubMemberSql {
         this.updateStamp = clubMember.getUpdateStamp();
     }
 
+    public ClubMemberSql(eu.chessdata.backend.tournamentEndpoint.model.ClubMember clubMember){
+        this.clubMemberId = clubMember.getClubMemberId();
+        this.profileId = clubMember.getProfileId();
+        this.clubId = clubMember.getClubId();
+        this.guestProfile = clubMember.getGuestProfile();
+        this.managerProfile = clubMember.getManagerProfile();
+        this.archived = clubMember.getArchived();
+        this.dateCreated = clubMember.getDateCreated();
+        this.updateStamp = clubMember.getUpdateStamp();
+    }
+
     public ClubMemberSql(eu.chessdata.backend.profileEndpoint.model.ClubMember clubMember){
         this.clubMemberId = clubMember.getClubMemberId();
         this.profileId = clubMember.getProfileId();

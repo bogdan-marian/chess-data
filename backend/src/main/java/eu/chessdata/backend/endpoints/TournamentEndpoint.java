@@ -166,40 +166,29 @@ public class TournamentEndpoint {
         return clubList;
     }
 
+    /**
+     * Builds and returns a list of ClubMembers
+     *
+     * @param supportObject contains a list of club ids for witch the members will be loaded
+     * @return List of club members
+     */
     @ApiMethod(name = "getAllMembers", httpMethod = "post")
-    public List<ClubMember> getAllMembers( @Named("clubIds") List<Long> clubIds) {
-        System.out.println("Received list: " + clubIds);
+    public List<ClubMember> getAllMembers(SupportObject supportObject) {
+        List<Long> clubIds = supportObject.getLongList();
         List<ClubMember> illegalList = new ArrayList<>();
         ClubMember illegalMember = new ClubMember();
         illegalList.add(illegalMember);
-        if (clubIds.size()==0){
-            illegalMember.setProfileId("Something is wrong: supplied list was empty");
-            return illegalList;
+        if (clubIds.size() == 0) {
+            return new ArrayList<>();
         }
-        illegalMember.setProfileId("Something is wrong: list is not empty");
-        return illegalList;
+
+        //find the members
+        SimpleQuery<ClubMember> memberQuery = ofy().load().type(ClubMember.class).filter("clubId in", clubIds);
+        List<ClubMember> members = new ArrayList<>();
+        for (ClubMember member: memberQuery){
+            members.add(member);
+        }
+        return members;
     }
 
-    @ApiMethod(name="testLongLists",httpMethod = "post")
-    public List<ClubMember> testLongLists(@Named("idList") List<Long> idList){
-        List<ClubMember> clubMembers = new ArrayList<>();
-        for(Long id: idList){
-            ClubMember member = new ClubMember();
-            member.setClubMemberId(id);
-            clubMembers.add(member);
-        }
-        return clubMembers;
-    }
-
-    @ApiMethod(name = "testSupportObjectLongList", httpMethod = "post")
-    public List<ClubMember> testSupportObjectLongList(SupportObject supportObject){
-        List<ClubMember> clubMembers = new ArrayList<>();
-        for(Long id: supportObject.getLongList()){
-            ClubMember member = new ClubMember();
-            member.setClubMemberId(id);
-            member.setProfileId("manualProfileId "+ id);
-            clubMembers.add(member);
-        }
-        return clubMembers;
-    }
 }
