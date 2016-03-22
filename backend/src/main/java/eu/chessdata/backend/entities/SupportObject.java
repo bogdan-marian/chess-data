@@ -11,6 +11,7 @@ import java.util.List;
 public class SupportObject {
     private String message;
     private List<Long> longList;
+    private List<String> stringList;
 
     //getters and setters
 
@@ -28,5 +29,13 @@ public class SupportObject {
 
     public void setLongList(List<Long> longList) {
         this.longList = longList;
+    }
+
+    public List<String> getStringList() {
+        return stringList;
+    }
+
+    public void setStringList(List<String> stringList) {
+        this.stringList = stringList;
     }
 }

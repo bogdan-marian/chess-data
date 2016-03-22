@@ -24,12 +24,16 @@ import eu.chessdata.backend.tournamentEndpoint.model.Club;
 import eu.chessdata.backend.tournamentEndpoint.model.ClubCollection;
 import eu.chessdata.backend.tournamentEndpoint.model.ClubMember;
 import eu.chessdata.backend.tournamentEndpoint.model.ClubMemberCollection;
+import eu.chessdata.backend.tournamentEndpoint.model.Profile;
+import eu.chessdata.backend.tournamentEndpoint.model.ProfileCollection;
 import eu.chessdata.backend.tournamentEndpoint.model.SupportObject;
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
 import eu.chessdata.data.simplesql.ClubMemberSql;
 import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubSql;
 import eu.chessdata.data.simplesql.ClubTable;
+import eu.chessdata.data.simplesql.ProfileSql;
+import eu.chessdata.data.simplesql.ProfileTable;
 import eu.chessdata.data.simplesql.TournamentPlayerSql;
 import eu.chessdata.data.simplesql.TournamentPlayerTable;
 import eu.chessdata.data.simplesql.TournamentSql;
@@ -157,6 +161,7 @@ public class TournamentService extends IntentService {
     private void handleActionSynchronizeAll() {
         synchronizeClubs();
         synchronizeClubMembers();
+        synchronizeProfiles();
     }
 
     private void synchronizeClubMembers() {
@@ -206,9 +211,9 @@ public class TournamentService extends IntentService {
                     //time to insert the member
                     mContentResolver.insert(ClubMemberTable.CONTENT_URI, ClubMemberTable.getContentValues(new ClubMemberSql(member), false));
                 } else if (count == 1) {
-                    cursor.moveToFirst();
-                    int idx_updateStamp = cursor.getColumnIndex(ClubTable.FIELD_UPDATESTAMP);
-                    long stampLocal = cursor.getLong(idx_updateStamp);
+                    memberCursor.moveToFirst();
+                    int idx_updateStamp = memberCursor.getColumnIndex(ClubTable.FIELD_UPDATESTAMP);
+                    long stampLocal = memberCursor.getLong(idx_updateStamp);
                     long stampCloud = member.getUpdateStamp();
                     //time to compare time stamps and decide
                     if (stampLocal < stampCloud) {
@@ -232,6 +237,80 @@ public class TournamentService extends IntentService {
             Log.e(TAG, "Some error on server side: " + e);
             e.printStackTrace();
         }
+    }
+
+    /**
+     * gets all profiles from server and updates data locally
+     */
+    private void synchronizeProfiles() {
+        //select all the local members;
+        Uri memberUri = ClubMemberTable.CONTENT_URI;
+        String[] memberProjection = {ClubMemberTable.FIELD_PROFILEID};
+        int idx_profileId = 0;
+        Cursor memberCursor = mContentResolver.query(memberUri,memberProjection,null,null,null);
+        List<String> profileIds = new ArrayList<>();
+        while(memberCursor.moveToNext()){
+            profileIds.add(memberCursor.getString(idx_profileId));
+        }
+        memberCursor.close();
+        if (profileIds.size()==0){
+            Log.d(TAG,"No profiles to sync");
+            return;
+        }
+        SupportObject supportObject = new SupportObject();
+        supportObject.setMessage("Get profiles");
+        supportObject.setStringList(profileIds);
+
+        try {
+            ProfileCollection profileCollection = sTournamentEndpoint.getProfileListByProfileIdList(supportObject).execute();
+            List<Profile>profiles = profileCollection.getItems();
+            if (profiles.size()==0){
+                return;
+            }
+            Log.d(TAG,"Received profiles: " + profiles.size());
+
+            //wee have the profiles. Next step is to updated the sql profiles
+            for (Profile profile: profiles){
+                //update globalMap
+                //Map<String,String> profileNames = MyGlobalTools.
+
+                Uri profileUri = ProfileTable.CONTENT_URI;
+                String selectionProfile = ProfileTable.FIELD_PROFILEID+" =?";
+                String selectionProfileArgs[] = {profile.getProfileId()};
+                Cursor profileCursor = mContentResolver.query(profileUri,null,selectionProfile,selectionProfileArgs,null);
+                int count = profileCursor.getCount();
+                if (count > 1){
+                    Log.e(TAG, "More then one profile with the same id: " + profile.getProfileId());
+                    throw new IllegalStateException("More then one profile with the same id: " + profile.getProfileId());
+                }else if(count ==0){
+                    //time to insert the profile
+                    mContentResolver.insert(profileUri,ProfileTable.getContentValues(new ProfileSql(profile),false));
+                }else if(count ==1){
+                    profileCursor.moveToFirst();
+                    int idx_updateStamp = profileCursor.getColumnIndex(ClubTable.FIELD_UPDATESTAMP);
+                    long stampLocal = profileCursor.getLong(idx_updateStamp);
+                    long stampCloud = profile.getUpdateStamp();
+                    //time to compare time stamps and decide
+                    if (stampLocal < stampCloud){
+                        //update local
+                        int rowsUpdated = mContentResolver.update(profileUri,
+                                ProfileTable.getContentValues(new ProfileSql(profile),false),
+                                selectionProfile,selectionProfileArgs);
+                        if (rowsUpdated!=1){
+                            Log.e(TAG, "You should update only one row");
+                            throw new IllegalStateException("You should update only one row");
+                        }
+                    }else if (stampLocal > stampCloud){
+                        Log.e(TAG,"Please implement this. code = 003");
+                    }
+                }
+                profileCursor.close();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Some error on server side: " + e);
+            e.printStackTrace();
+        }
+
     }
 
     /**

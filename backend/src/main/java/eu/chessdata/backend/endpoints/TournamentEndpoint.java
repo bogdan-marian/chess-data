@@ -15,6 +15,7 @@ import java.util.List;
 
 import eu.chessdata.backend.entities.Club;
 import eu.chessdata.backend.entities.ClubMember;
+import eu.chessdata.backend.entities.Profile;
 import eu.chessdata.backend.entities.Round;
 import eu.chessdata.backend.entities.SupportObject;
 import eu.chessdata.backend.entities.Tournament;
@@ -185,10 +186,40 @@ public class TournamentEndpoint {
         //find the members
         SimpleQuery<ClubMember> memberQuery = ofy().load().type(ClubMember.class).filter("clubId in", clubIds);
         List<ClubMember> members = new ArrayList<>();
-        for (ClubMember member: memberQuery){
+        for (ClubMember member : memberQuery) {
             members.add(member);
         }
         return members;
     }
 
+    /**
+     * Builds and returns a list of Profiles based on the supplied profileId list
+     * contained inside the stringList member of the supportObject
+     *
+     * @param supportObject contains the list of profile ids
+     * @return
+     */
+    @ApiMethod(name = "getProfileListByProfileIdList", httpMethod = "post")
+    public List<Profile> getProfileListByProfileIdList(SupportObject supportObject) {
+        List<String> profileIds = supportObject.getStringList();
+
+        if (profileIds.size() == 0) {
+            return new ArrayList<>();
+        }
+
+        //build the keys
+        List<Key<Profile>> profileKeys = new ArrayList<>();
+        for (String profileId : profileIds) {
+            Key<Profile> profileKey = Key.create(Profile.class, profileId);
+            profileKeys.add(profileKey);
+        }
+
+        //find the profiles
+        List<Profile> profileList = new ArrayList<>();
+        SimpleQuery<Profile> profileQuery = ofy().load().type(Profile.class).filterKey("in", profileKeys);
+        for (Profile profile : profileQuery) {
+            profileList.add(profile);
+        }
+        return profileList;
+    }
 }

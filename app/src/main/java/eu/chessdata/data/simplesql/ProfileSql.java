@@ -47,4 +47,14 @@ public class ProfileSql {
         this.dateCreated = profile.getDateCreated();
         this.updateStamp = profile.getUpdateStamp();
     }
+
+    public ProfileSql(eu.chessdata.backend.tournamentEndpoint.model.Profile profile){
+        this.profileId = profile.getProfileId();
+        this.email = profile.getEmail().getEmail();
+        this.name = profile.getName();
+        this.dateOfBirth = profile.getDateOfBirth();
+        this.elo = profile.getElo();
+        this.dateCreated = profile.getDateCreated();
+        this.updateStamp = profile.getUpdateStamp();
+    }
 }
