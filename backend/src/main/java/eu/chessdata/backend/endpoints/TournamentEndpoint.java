@@ -16,6 +16,7 @@ import java.util.List;
 import eu.chessdata.backend.entities.Club;
 import eu.chessdata.backend.entities.ClubMember;
 import eu.chessdata.backend.entities.Round;
+import eu.chessdata.backend.entities.SupportObject;
 import eu.chessdata.backend.entities.Tournament;
 import eu.chessdata.backend.entities.TournamentPlayer;
 import eu.chessdata.backend.tools.MyEntry;
@@ -185,6 +186,18 @@ public class TournamentEndpoint {
         for(Long id: idList){
             ClubMember member = new ClubMember();
             member.setClubMemberId(id);
+            clubMembers.add(member);
+        }
+        return clubMembers;
+    }
+
+    @ApiMethod(name = "testSupportObjectLongList", httpMethod = "post")
+    public List<ClubMember> testSupportObjectLongList(SupportObject supportObject){
+        List<ClubMember> clubMembers = new ArrayList<>();
+        for(Long id: supportObject.getLongList()){
+            ClubMember member = new ClubMember();
+            member.setClubMemberId(id);
+            member.setProfileId("manualProfileId "+ id);
             clubMembers.add(member);
         }
         return clubMembers;
