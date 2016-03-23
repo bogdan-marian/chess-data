@@ -162,6 +162,7 @@ public class TournamentService extends IntentService {
         synchronizeClubMembers();
         synchronizeProfiles();
         ProfileService.startActionUpdateAllMembersMap(mSynchronizeAllContext);
+        synchronizeTournaments();
     }
 
     private void synchronizeClubMembers() {
@@ -311,6 +312,10 @@ public class TournamentService extends IntentService {
             e.printStackTrace();
         }
 
+    }
+
+    private void synchronizeTournaments(){
+        //TODO please finish this
     }
 
     /**
