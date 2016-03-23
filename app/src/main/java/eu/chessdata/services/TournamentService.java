@@ -48,19 +48,17 @@ import eu.chessdata.tools.MyGlobalTools;
  */
 public class TournamentService extends IntentService {
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    private static final String ACTION_CREATE_TOURNAMENT = "eu.chessdata.services.action" + "" +
-            ".ACTION_CREATE_TOURNAMENT";
-    private static final String ACTION_TOURNAMENT_ADD_PLAYER = "eu.chessdata.services.action" + "" +
-            ".ACTION_TOURNAMENT_ADD_PLAYER";
-    private static final String ACTION_SYNCHRONIZE_ALL = "eu.chessdata.services.action" + "" +
-            ".ACTION_SYNCHRONIZE_ALL";
-    private static final String EXTRA_JSON_TOURNAMENT = "eu.chessdata.services.extra" + "" +
-            ".JSON_TOURNAMENT";
-    private static final String EXTRA_TOURNAMENT_SQL_ID = "eu.chessdata.services" + "" +
-            ".EXTRA_TOURNAMENT_SQL_ID";
+    private static final String ACTION_CREATE_TOURNAMENT = "eu.chessdata.services.action.ACTION_CREATE_TOURNAMENT";
+    private static final String ACTION_TOURNAMENT_ADD_PLAYER = "eu.chessdata.services.action.ACTION_TOURNAMENT_ADD_PLAYER";
+    private static final String ACTION_SYNCHRONIZE_ALL = "eu.chessdata.services.action.ACTION_SYNCHRONIZE_ALL";
+
+    private static final String EXTRA_JSON_TOURNAMENT = "eu.chessdata.services.extra.JSON_TOURNAMENT";
+    private static final String EXTRA_TOURNAMENT_SQL_ID = "eu.chessdata.services.EXTRA_TOURNAMENT_SQL_ID";
     private static final String EXTRA_PLAYER_SQL_ID = "eu.chessdata.services.EXTRA_PLAYER_SQL_ID";
+
     private static TournamentEndpoint sTournamentEndpoint = buildTournamentEndpoint();
     private static GsonFactory sGsonFactory = new GsonFactory();
+    private static Context mSynchronizeAllContext;
     private String TAG = "my-debug-tag";
     private SharedPreferences mSharedPreferences;
     private ContentResolver mContentResolver;
@@ -86,6 +84,7 @@ public class TournamentService extends IntentService {
     }
 
     public static void startActionSynchronizeAll(Context context) {
+        mSynchronizeAllContext = context;
         Intent intent = new Intent(context, TournamentService.class);
         intent.setAction(ACTION_SYNCHRONIZE_ALL);
         context.startService(intent);
@@ -162,6 +161,7 @@ public class TournamentService extends IntentService {
         synchronizeClubs();
         synchronizeClubMembers();
         synchronizeProfiles();
+        ProfileService.startActionUpdateAllMembersMap(mSynchronizeAllContext);
     }
 
     private void synchronizeClubMembers() {
@@ -225,10 +225,10 @@ public class TournamentService extends IntentService {
                             Log.e(TAG, "You should update only one row");
                             throw new IllegalStateException("You should update only one row");
                         }
-                    }else if(stampLocal > stampCloud){
+                    } else if (stampLocal > stampCloud) {
                         Log.e(TAG, "Please implement this. code = 002");
-                    }else if (stampLocal == stampCloud){
-                        Log.d(TAG, "Nothing to update for this member");
+                    } else if (stampLocal == stampCloud) {
+                        //(TAG, "Nothing to update for this member");
                     }
                 }
                 memberCursor.close();
@@ -247,14 +247,14 @@ public class TournamentService extends IntentService {
         Uri memberUri = ClubMemberTable.CONTENT_URI;
         String[] memberProjection = {ClubMemberTable.FIELD_PROFILEID};
         int idx_profileId = 0;
-        Cursor memberCursor = mContentResolver.query(memberUri,memberProjection,null,null,null);
+        Cursor memberCursor = mContentResolver.query(memberUri, memberProjection, null, null, null);
         List<String> profileIds = new ArrayList<>();
-        while(memberCursor.moveToNext()){
+        while (memberCursor.moveToNext()) {
             profileIds.add(memberCursor.getString(idx_profileId));
         }
         memberCursor.close();
-        if (profileIds.size()==0){
-            Log.d(TAG,"No profiles to sync");
+        if (profileIds.size() == 0) {
+            Log.d(TAG, "No profiles to sync");
             return;
         }
         SupportObject supportObject = new SupportObject();
@@ -263,45 +263,45 @@ public class TournamentService extends IntentService {
 
         try {
             ProfileCollection profileCollection = sTournamentEndpoint.getProfileListByProfileIdList(supportObject).execute();
-            List<Profile>profiles = profileCollection.getItems();
-            if (profiles.size()==0){
+            List<Profile> profiles = profileCollection.getItems();
+            if (profiles.size() == 0) {
                 return;
             }
-            Log.d(TAG,"Received profiles: " + profiles.size());
+            Log.d(TAG, "Received profiles: " + profiles.size());
 
             //wee have the profiles. Next step is to updated the sql profiles
-            for (Profile profile: profiles){
+            for (Profile profile : profiles) {
                 //update globalMap
                 //Map<String,String> profileNames = MyGlobalTools.
 
                 Uri profileUri = ProfileTable.CONTENT_URI;
-                String selectionProfile = ProfileTable.FIELD_PROFILEID+" =?";
+                String selectionProfile = ProfileTable.FIELD_PROFILEID + " =?";
                 String selectionProfileArgs[] = {profile.getProfileId()};
-                Cursor profileCursor = mContentResolver.query(profileUri,null,selectionProfile,selectionProfileArgs,null);
+                Cursor profileCursor = mContentResolver.query(profileUri, null, selectionProfile, selectionProfileArgs, null);
                 int count = profileCursor.getCount();
-                if (count > 1){
+                if (count > 1) {
                     Log.e(TAG, "More then one profile with the same id: " + profile.getProfileId());
                     throw new IllegalStateException("More then one profile with the same id: " + profile.getProfileId());
-                }else if(count ==0){
+                } else if (count == 0) {
                     //time to insert the profile
-                    mContentResolver.insert(profileUri,ProfileTable.getContentValues(new ProfileSql(profile),false));
-                }else if(count ==1){
+                    mContentResolver.insert(profileUri, ProfileTable.getContentValues(new ProfileSql(profile), false));
+                } else if (count == 1) {
                     profileCursor.moveToFirst();
                     int idx_updateStamp = profileCursor.getColumnIndex(ClubTable.FIELD_UPDATESTAMP);
                     long stampLocal = profileCursor.getLong(idx_updateStamp);
                     long stampCloud = profile.getUpdateStamp();
                     //time to compare time stamps and decide
-                    if (stampLocal < stampCloud){
+                    if (stampLocal < stampCloud) {
                         //update local
                         int rowsUpdated = mContentResolver.update(profileUri,
-                                ProfileTable.getContentValues(new ProfileSql(profile),false),
-                                selectionProfile,selectionProfileArgs);
-                        if (rowsUpdated!=1){
+                                ProfileTable.getContentValues(new ProfileSql(profile), false),
+                                selectionProfile, selectionProfileArgs);
+                        if (rowsUpdated != 1) {
                             Log.e(TAG, "You should update only one row");
                             throw new IllegalStateException("You should update only one row");
                         }
-                    }else if (stampLocal > stampCloud){
-                        Log.e(TAG,"Please implement this. code = 003");
+                    } else if (stampLocal > stampCloud) {
+                        Log.e(TAG, "Please implement this. code = 003");
                     }
                 }
                 profileCursor.close();

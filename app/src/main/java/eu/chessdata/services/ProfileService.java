@@ -59,13 +59,7 @@ public class ProfileService extends IntentService {
         super("ProfileService");
     }
 
-    /**
-     * Starts this service to perform action Foo with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    // TODO: Customize helper method
+
     public static void startActionCreateVirtualProfile(Context context, Profile virtualProfile) {
         String jsonVirtualProfile = serializeVirtualProfile(virtualProfile);
 
@@ -75,13 +69,7 @@ public class ProfileService extends IntentService {
         context.startService(intent);
     }
 
-    /**
-     * Starts this service to perform action Baz with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    // TODO: Customize helper method
+
     public static void startActionUpdateAllMembersMap(Context context) {
         Intent intent = new Intent(context, ProfileService.class);
         intent.setAction(ACTION_UPDATE_ALL_MEMBERS_MAP);
@@ -127,13 +115,13 @@ public class ProfileService extends IntentService {
                         .createVirtualProfile(mClubEndpointId, mIdTokenString, profile)
                         .execute();
 
-                if (vipProfile == null){
+                if (vipProfile == null) {
                     Log.d(TAG, "Something when wrong: null vipProfile: ");
                     return;
                 }
                 String[] notCreated = vipProfile.getName().split(": ");
-                if (notCreated[0].equals("Not created")){
-                    Log.d(TAG,"Found chess-data-error: " + vipProfile.getName());
+                if (notCreated[0].equals("Not created")) {
+                    Log.d(TAG, "Found chess-data-error: " + vipProfile.getName());
                     return;
                 }
 
@@ -143,21 +131,21 @@ public class ProfileService extends IntentService {
                         ProfileTable.CONTENT_URI,
                         ProfileTable.getContentValues(profileSql, false)
                 );
-                if (ContentUris.parseId(newUri)<0){
-                    Log.d(TAG,"Not able to store Profile in the database");
+                if (ContentUris.parseId(newUri) < 0) {
+                    Log.d(TAG, "Not able to store Profile in the database");
                     return;
                 }
-                Log.d(TAG,"newUri for ProfileTable uri: "+newUri.toString());
+                Log.d(TAG, "newUri for ProfileTable uri: " + newUri.toString());
 
                 //get the member id from endpoints
                 ClubMember member = profileEndpoint.getJustCreatedVirtualMember
-                        (mIdTokenString,vipProfile.getProfileId(),mClubEndpointId).execute();
-                if (member.getProfileId().split(":").equals("Illegal request")){
-                    Log.d(TAG,"Something is not write" +member.getProfileId());
+                        (mIdTokenString, vipProfile.getProfileId(), mClubEndpointId).execute();
+                if (member.getProfileId().split(":").equals("Illegal request")) {
+                    Log.d(TAG, "Something is not write" + member.getProfileId());
                     return;
                 }
 
-                Log.d(TAG,"Wee have the member data"+member.getProfileId());
+                Log.d(TAG, "Wee have the member data" + member.getProfileId());
 
                 //store member in sqlite
                 ClubMemberSql memberSql = new ClubMemberSql(member);
@@ -165,8 +153,8 @@ public class ProfileService extends IntentService {
                         ClubMemberTable.CONTENT_URI,
                         ClubMemberTable.getContentValues(memberSql, false)
                 );
-                if (ContentUris.parseId(memberUri)<0){
-                    Log.d(TAG,"not able to store member data in sqlite");
+                if (ContentUris.parseId(memberUri) < 0) {
+                    Log.d(TAG, "not able to store member data in sqlite");
                     return;
                 }
                 //Updated the members map;
@@ -178,10 +166,10 @@ public class ProfileService extends IntentService {
                         ClubMemberTable.CONTENT_URI,
                         null,//projection
                         null,//selection
-                        null ,//selection args
+                        null,//selection args
                         null //sort order
                 );
-                Log.d(TAG,"Total club members = " + cursor.getCount());
+                Log.d(TAG, "Total club members = " + cursor.getCount());
             } catch (IOException e) {
                 Log.d(TAG, "Something when wrong: handleActionCreateVirtualProfile: ");
             }
@@ -193,33 +181,29 @@ public class ProfileService extends IntentService {
      * parameters.
      */
     private void handleActionUpdateAllMembersMap() {
-        if (sNamesUpdated){
-            return;
-        }
-        Log.d(TAG,"OK handleActionUpdateAllMembersMap: initialized");
+//        if (sNamesUpdated){
+//            return;
+//        }
+        Log.d(TAG, "OK handleActionUpdateAllMembersMap: initialized");
         // ClubMemberTable.FIELD_CLUBMEMBERID +" IS NOT NULL"
         Cursor membersCursor = mContentResolver.query(ClubMemberTable.CONTENT_URI,
                 null,//projection
-                ClubMemberTable.FIELD_CLUBMEMBERID +" IS NOT NULL",//selection
-                null ,//selection args
+                ClubMemberTable.FIELD_CLUBMEMBERID + " IS NOT NULL",//selection
+                null,//selection args
                 null //sort order
         );
-        if (membersCursor == null){
-            Log.d(TAG,"no members found");
+        if (membersCursor == null) {
+            Log.d(TAG, "no members found");
             return;
         }
 
         int idx_id = membersCursor.getColumnIndex(ClubMemberTable.FIELD_PROFILEID);
-        int i=0;
-        while (membersCursor.moveToNext()){
-
-
+        while (membersCursor.moveToNext()) {
             String id = membersCursor.getString(idx_id);
             if (id != null) {
                 String name = getNameById(id);
                 MyGlobalTools.addToMembersSqlIdToProfileName(id, name);
             }
-            i++;
         }
         membersCursor.close();
         sNamesUpdated = true;
@@ -268,25 +252,26 @@ public class ProfileService extends IntentService {
 
         Cursor cursor = mContentResolver.query(clubUri, projection, selection, selectionArguments, null);
         int count = cursor.getCount();
-        if (count <= 0){
+        if (count <= 0) {
             return -1L;
         }
         cursor.moveToFirst();
         long endPointId = cursor.getLong(COL_CLUBID);
         return endPointId;
     }
-    private String getNameById(String profileId){
-        String [] arguments = {profileId};
+
+    private String getNameById(String profileId) {
+        String[] arguments = {profileId};
         Cursor profileCursor = mContentResolver.query(
                 ProfileTable.CONTENT_URI,
                 null,
-                ProfileTable.FIELD_PROFILEID  +"= ?",
+                ProfileTable.FIELD_PROFILEID + "= ?",
                 arguments,
                 null
         );
 
-        if(!(profileCursor != null && profileCursor.moveToFirst())){
-            return "Not able to locate profile id: "+ profileId;
+        if (!(profileCursor != null && profileCursor.moveToFirst())) {
+            return "Not able to locate profile id: " + profileId;
         }
         int idx_profileName = profileCursor.getColumnIndex(ProfileTable.FIELD_NAME);
 
