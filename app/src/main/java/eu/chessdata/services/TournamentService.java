@@ -315,7 +315,24 @@ public class TournamentService extends IntentService {
     }
 
     private void synchronizeTournaments(){
-        //TODO please finish this
+        //select all the local clubs
+        Uri uri = ClubTable.CONTENT_URI;
+        String[] projection = {ClubTable.FIELD_CLUBID};
+        int idx_clubId = 0;
+        Cursor cursor = mContentResolver.query(uri, projection, null, null, null);
+        List<Long> clubIds = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            clubIds.add(cursor.getLong(idx_clubId));
+        }
+        cursor.close();
+        if (clubIds.size() == 0) {
+            Log.d(TAG, "No clubs to sync tournaments for");
+            return;
+        }
+        SupportObject supportObject = new SupportObject();
+        supportObject.setMessage("Get tournaments");
+        supportObject.setLongList(clubIds);
+        //TODO implement getAllTournaments
     }
 
     /**

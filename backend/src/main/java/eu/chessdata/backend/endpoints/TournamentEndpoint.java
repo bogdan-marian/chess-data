@@ -222,4 +222,20 @@ public class TournamentEndpoint {
         }
         return profileList;
     }
+
+    @ApiMethod(name = "getTournamentsByClubIds", httpMethod = "post")
+    public List<Tournament> getTournamentsByClubIds(SupportObject supportObject) {
+        List<Long> clubIds = supportObject.getLongList();
+        if (clubIds.size() == 0) {
+            return new ArrayList<>();
+        }
+
+        //find the tournaments
+        List<Tournament> tournaments = new ArrayList<>();
+        SimpleQuery<Tournament> tournamentsQuery = ofy().load().type(Tournament.class).filter("clubId in", clubIds);
+        for (Tournament tournament : tournamentsQuery) {
+            tournaments.add(tournament);
+        }
+        return tournaments;
+    }
 }
