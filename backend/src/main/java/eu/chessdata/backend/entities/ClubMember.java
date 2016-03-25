@@ -11,16 +11,22 @@ import com.googlecode.objectify.annotation.Index;
 public class ClubMember {
     @Id
     private Long clubMemberId;
-    @Index private String profileId;
-    @Index private Long clubId;
+    @Index
+    private String profileId;
+    @Index
+    private Long clubId;
     private boolean guestProfile;
     private boolean managerProfile;
-    @Index boolean archived = false;
+    @Index
+    boolean archived = false;
     private long dateCreated;
+    @Index
     private long updateStamp;
 
     //constructors
-    public ClubMember(){}
+    public ClubMember() {
+    }
+
     public ClubMember(Long clubMemberId,
                       String profileId,
                       Long clubId,
@@ -28,7 +34,7 @@ public class ClubMember {
                       boolean managerProfile,
                       boolean archived,
                       long dateCreated,
-                      long updateStamp){
+                      long updateStamp) {
         this.clubMemberId = clubMemberId;
         this.profileId = profileId;
         this.clubId = clubId;

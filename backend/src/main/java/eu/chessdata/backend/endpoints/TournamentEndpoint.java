@@ -12,6 +12,7 @@ import com.googlecode.objectify.cmd.SimpleQuery;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 import eu.chessdata.backend.entities.Club;
 import eu.chessdata.backend.entities.ClubMember;
@@ -40,6 +41,7 @@ import static eu.chessdata.backend.tools.OfyService.ofy;
         )
 )
 public class TournamentEndpoint {
+    private static final Logger log = Logger.getLogger("chess-data");
 
     @ApiMethod(name = "debugRound", httpMethod = "post")
     public Round debugRound() {
@@ -237,5 +239,21 @@ public class TournamentEndpoint {
             tournaments.add(tournament);
         }
         return tournaments;
+    }
+
+    @ApiMethod(name = "getTournamentPlayersByTournamentIds", httpMethod = "post")
+    public List<TournamentPlayer> getTournamentPlayersByTournamentIds(SupportObject supportObject){
+        List<Long>tournamentIds = supportObject.getLongList();
+        if (tournamentIds.size() == 0){
+            return new ArrayList<>();
+        }
+
+        //find tournamentPlayers
+        List<TournamentPlayer>tournamentPlayers = new ArrayList<>();
+        SimpleQuery<TournamentPlayer> playersQuery = ofy().load().type(TournamentPlayer.class).filter("tournamentId in", tournamentIds);
+        for (TournamentPlayer tournamentPlayer: playersQuery){
+            tournamentPlayers.add(tournamentPlayer);
+        }
+        return tournamentPlayers;
     }
 }

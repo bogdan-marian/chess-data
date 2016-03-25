@@ -1,8 +1,8 @@
 package eu.chessdata.backend.entities;
 
-import com.google.appengine.api.datastore.Email;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
 
 import java.util.Date;
 
@@ -13,6 +13,7 @@ import java.util.Date;
 public class Tournament {
     @Id
     private Long tournamentId;
+    @Index
     private Long clubId;
     private String name;
     private String description;
@@ -21,16 +22,19 @@ public class Tournament {
     private long endDate;
     private String location;
     private long dateCreated;
+    @Index
     private long updateStamp;
 
     //constructors
-    public Tournament(){}
+    public Tournament() {
+    }
+
     public Tournament(String name,
                       String description,
                       int totalRounds,
                       long startDate,
                       long endDate,
-                      String location){
+                      String location) {
         long creationTime = new Date().getTime();
 
         this.name = name;

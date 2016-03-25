@@ -28,6 +28,7 @@ import eu.chessdata.backend.tournamentEndpoint.model.Profile;
 import eu.chessdata.backend.tournamentEndpoint.model.ProfileCollection;
 import eu.chessdata.backend.tournamentEndpoint.model.SupportObject;
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
+import eu.chessdata.backend.tournamentEndpoint.model.TournamentCollection;
 import eu.chessdata.data.simplesql.ClubMemberSql;
 import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubSql;
@@ -314,7 +315,7 @@ public class TournamentService extends IntentService {
 
     }
 
-    private void synchronizeTournaments(){
+    private void synchronizeTournaments() {
         //select all the local clubs
         Uri uri = ClubTable.CONTENT_URI;
         String[] projection = {ClubTable.FIELD_CLUBID};
@@ -332,7 +333,53 @@ public class TournamentService extends IntentService {
         SupportObject supportObject = new SupportObject();
         supportObject.setMessage("Get tournaments");
         supportObject.setLongList(clubIds);
-        //TODO implement getAllTournaments
+
+        try {
+            TournamentCollection tournamentCollection = sTournamentEndpoint.getTournamentsByClubIds(supportObject).execute();
+            List<Tournament> tournaments = tournamentCollection.getItems();
+            if (tournaments == null ) {
+                tournaments = new ArrayList<>();
+            }
+            Log.d(TAG, "Received tournaments = " + tournaments.size());
+            for (Tournament tournament : tournaments) {
+                Uri uriTournaments = TournamentTable.CONTENT_URI;
+                String selectionTournaments = TournamentTable.FIELD_TOURNAMENTID + " =?";
+                String selectionTournamentsArgs[] = {tournament.getTournamentId().toString()};
+                Cursor tournamentCursor = mContentResolver.query(uriTournaments, null, selectionTournaments, selectionTournamentsArgs, null);
+                int count = tournamentCursor.getCount();
+                if (count > 1) {
+                    Log.e(TAG, "More then one tournament with the same id: " + tournament.getTournamentId());
+                    throw new IllegalStateException("More then one tournament with the same id: " + tournament.getTournamentId());
+                } else if (count == 0) {
+                    //time to insert the tournament
+                    mContentResolver.insert(TournamentTable.CONTENT_URI, TournamentTable.getContentValues(new TournamentSql(tournament), false));
+                } else if (count == 1) {
+                    tournamentCursor.moveToFirst();
+                    int idx_updateStamp = tournamentCursor.getColumnIndex(TournamentTable.FIELD_UPDATESTAMP);
+                    long stampLocal = tournamentCursor.getLong(idx_updateStamp);
+                    long stampCloud = tournament.getUpdateStamp();
+                    //time to compare time stamps and decide
+                    if (stampLocal < stampCloud) {
+                        //update local
+                        int rowsUpdated = mContentResolver.update(uriTournaments,
+                                TournamentTable.getContentValues(new TournamentSql(tournament), false),
+                                selectionTournaments, selectionTournamentsArgs);
+                        if (rowsUpdated != 1) {
+                            Log.e(TAG, "You should update only one row");
+                            throw new IllegalStateException("You should update only one TournamentTable");
+                        }
+                    } else if (stampLocal > stampCloud) {
+                        Log.e(TAG, "Please implement this. TournamentTable code = 004");
+                    } else if (stampLocal == stampCloud) {
+                        //nothing to update for this tournament
+                    }
+                }
+                tournamentCursor.close();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Some error on server side: " + e);
+            e.printStackTrace();
+        }
     }
 
     /**
