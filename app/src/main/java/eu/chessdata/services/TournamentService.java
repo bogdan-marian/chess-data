@@ -164,6 +164,7 @@ public class TournamentService extends IntentService {
         synchronizeProfiles();
         ProfileService.startActionUpdateAllMembersMap(mSynchronizeAllContext);
         synchronizeTournaments();
+        synchronizeTournamentPlayers();
     }
 
     private void synchronizeClubMembers() {
@@ -542,5 +543,26 @@ public class TournamentService extends IntentService {
         Log.d(TAG, "Not able to find club: getClubEndpointId: " + clubSqlId);
         return -1L;
 
+    }
+
+    private void synchronizeTournamentPlayers(){
+        //select all the local tournaments
+        Uri uri =TournamentPlayerTable.CONTENT_URI;
+        String[]projection = {TournamentPlayerTable.FIELD_TOURNAMENTID};
+        int idx_tournamentId = 0;
+        Cursor cursor = mContentResolver.query(uri,projection,null,null,null);
+        List<Long>tournamentIds = new ArrayList<>();
+        while(cursor.moveToNext()){
+            tournamentIds.add(cursor.getLong(idx_tournamentId));
+        }
+        cursor.close();
+        if (tournamentIds.size()==0){
+            return;
+        }
+        SupportObject supportObject = new SupportObject();
+        supportObject.setMessage("Get tournament players");
+        supportObject.setLongList(tournamentIds);
+
+        //todo implement on endpoints getTournamentPlayersByTournamentIds
     }
 }
