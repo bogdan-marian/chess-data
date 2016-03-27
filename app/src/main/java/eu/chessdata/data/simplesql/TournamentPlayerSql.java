@@ -4,6 +4,8 @@ import java.util.Date;
 
 import ckm.simple.sql_provider.annotation.SimpleSQLColumn;
 import ckm.simple.sql_provider.annotation.SimpleSQLTable;
+import eu.chessdata.backend.tournamentEndpoint.model.TournamentPlayer;
+import eu.chessdata.tools.MyGlobalTools;
 
 /**
  * When date is created locally only the tournamentPlayerId will be left null. In order to synchronize
@@ -37,6 +39,8 @@ public class TournamentPlayerSql {
     public TournamentPlayerSql() {
     }
 
+
+
     public TournamentPlayerSql(Long tournamentId, String profileId, String profileName) {
         long date = new Date().getTime();
         this.tournamentId = tournamentId;
@@ -44,6 +48,14 @@ public class TournamentPlayerSql {
         this.profileName = profileName;
         this.dateCreated = date;
         this.updateStamp = date;
+    }
+
+    public TournamentPlayerSql(TournamentPlayer player) {
+        this.tournamentId = player.getTournamentId();
+        this.profileId = player.getProfileId();
+        this.profileName = MyGlobalTools.getNameByProfileId(this.profileId);
+        this.dateCreated = player.getDateCreated();
+        this.updateStamp = player.getUpdateStamp();
     }
 
     //getters and setters

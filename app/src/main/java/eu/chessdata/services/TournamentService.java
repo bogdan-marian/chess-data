@@ -29,6 +29,8 @@ import eu.chessdata.backend.tournamentEndpoint.model.ProfileCollection;
 import eu.chessdata.backend.tournamentEndpoint.model.SupportObject;
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
 import eu.chessdata.backend.tournamentEndpoint.model.TournamentCollection;
+import eu.chessdata.backend.tournamentEndpoint.model.TournamentPlayer;
+import eu.chessdata.backend.tournamentEndpoint.model.TournamentPlayerCollection;
 import eu.chessdata.data.simplesql.ClubMemberSql;
 import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubSql;
@@ -338,7 +340,7 @@ public class TournamentService extends IntentService {
         try {
             TournamentCollection tournamentCollection = sTournamentEndpoint.getTournamentsByClubIds(supportObject).execute();
             List<Tournament> tournaments = tournamentCollection.getItems();
-            if (tournaments == null ) {
+            if (tournaments == null) {
                 tournaments = new ArrayList<>();
             }
             Log.d(TAG, "Received tournaments = " + tournaments.size());
@@ -545,24 +547,71 @@ public class TournamentService extends IntentService {
 
     }
 
-    private void synchronizeTournamentPlayers(){
+    private void synchronizeTournamentPlayers() {
         //select all the local tournaments
-        Uri uri =TournamentPlayerTable.CONTENT_URI;
-        String[]projection = {TournamentPlayerTable.FIELD_TOURNAMENTID};
+        Uri uri = TournamentTable.CONTENT_URI;
+        String[] projection = {TournamentTable.FIELD_TOURNAMENTID};
         int idx_tournamentId = 0;
-        Cursor cursor = mContentResolver.query(uri,projection,null,null,null);
-        List<Long>tournamentIds = new ArrayList<>();
-        while(cursor.moveToNext()){
+        Cursor cursor = mContentResolver.query(uri, projection, null, null, null);
+        List<Long> tournamentIds = new ArrayList<>();
+        while (cursor.moveToNext()) {
             tournamentIds.add(cursor.getLong(idx_tournamentId));
         }
         cursor.close();
-        if (tournamentIds.size()==0){
+        if (tournamentIds.size() == 0) {
             return;
         }
         SupportObject supportObject = new SupportObject();
         supportObject.setMessage("Get tournament players");
         supportObject.setLongList(tournamentIds);
 
-        //todo implement on endpoints getTournamentPlayersByTournamentIds
+        try {
+            TournamentPlayerCollection playerCollection = sTournamentEndpoint.getTournamentPlayersByTournamentIds(supportObject).execute();
+            List<TournamentPlayer> tournamentPlayers = playerCollection.getItems();
+            if (tournamentPlayers == null){
+                tournamentPlayers = new ArrayList<>();
+            }
+            Log.d(TAG,"Received players = " + tournamentPlayers.size());
+            for (TournamentPlayer player: tournamentPlayers){
+                Uri playerUri = TournamentPlayerTable.CONTENT_URI;
+                String playerSelection = TournamentPlayerTable.FIELD_TOURNAMENTPLAYERID+" =?";
+                String playerArgs[] = {player.getTournamentPlayerId().toString()};
+                Cursor playerCursor = mContentResolver.query(playerUri,null,playerSelection,playerArgs,null);
+                int count = playerCursor.getCount();
+                if (count > 1){
+                    String problems = "More then one player with the same id: " + player.getTournamentPlayerId();
+                    Log.e(TAG,problems);
+                    throw new IllegalStateException(problems);
+                } else if (count == 0){
+                    //time to insert the tournament
+                    mContentResolver.insert(playerUri,TournamentPlayerTable.getContentValues(new TournamentPlayerSql(player), false));
+                }else if(count ==1){
+                    playerCursor.moveToFirst();
+                    int idx_updateStamp = playerCursor.getColumnIndex(TournamentPlayerTable.FIELD_UPDATESTAMP);
+                    long stampLocal = playerCursor.getLong(idx_updateStamp);
+                    long stampCloud = player.getUpdateStamp();
+                    //time to compare time stamps and decide
+                    if (stampLocal < stampCloud){
+                        //update local
+                        int rowsUpdated = mContentResolver.update(playerUri,
+                                TournamentPlayerTable.getContentValues(new TournamentPlayerSql(player), false),
+                                playerSelection,playerArgs);
+                        if (rowsUpdated != 1){
+                            String problem = "You should update only one tournamentPlayerId: " + player.getTournamentPlayerId();
+                            Log.e(TAG,problem);
+                            throw new IllegalStateException(problem);
+                        }
+                    }else if (stampLocal > stampCloud){
+                        Log.e(TAG,"Please implement this. Update cloud tournament player");
+                    }else if (stampLocal == stampCloud){
+                        //nothing to update for this player
+                    }
+                }
+                playerCursor.close();
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Some error on server side: " + e);
+            e.printStackTrace();
+        }
     }
 }
