@@ -191,6 +191,23 @@ public class MyGlobalTools {
         while (cursor.moveToNext()) {
             returnVal = cursor.getInt(idx_TotalRounds);
         }
+        cursor.close();
         return returnVal;
+    }
+
+    public static String getTournamentNameTournamentId(Long tournamentId, ContentResolver contentResolver) {
+        Uri uri = TournamentTable.CONTENT_URI;
+        String projection[] = {TournamentTable.FIELD_NAME};
+        int idx_Name = 0;
+        String selection = TournamentTable.FIELD_TOURNAMENTID + " =?";
+        String args[] = {tournamentId.toString()};
+
+        Cursor cursor = contentResolver.query(uri, projection, selection, args, null);
+        String name = "Tournament not found";
+        while(cursor.moveToNext()){
+            name = cursor.getString(idx_Name);
+        }
+        cursor.close();
+        return name;
     }
 }

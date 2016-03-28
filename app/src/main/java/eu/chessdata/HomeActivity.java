@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -321,12 +322,19 @@ public class HomeActivity extends AppCompatActivity
                 RoundPagerFragment roundPagerFragment = new RoundPagerFragment();
                 roundPagerFragment.setArguments(bundle);
                 FragmentTransaction transactionPager = getSupportFragmentManager().beginTransaction();
-                transactionPager.replace(R.id.fragment_container,roundPagerFragment);
+                transactionPager.replace(R.id.fragment_container, roundPagerFragment);
                 transactionPager.addToBackStack(null);
                 transactionPager.commit();
 
                 break;
         }
+    }
+
+    public void roundStateContentSwitch(int containerViewId, Fragment presenceOrGames) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(containerViewId, presenceOrGames);
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 
     @Override

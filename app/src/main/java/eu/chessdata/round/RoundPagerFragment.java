@@ -57,7 +57,7 @@ public class RoundPagerFragment extends Fragment {
 
         @Override
         public Fragment getItem(int position) {
-            return RoundStateFragment.newInstance(mStringTournamentUri, position);
+            return RoundStateFragment.newInstance(mStringTournamentUri, position+1);
         }
 
         @Override
