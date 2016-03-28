@@ -3,6 +3,7 @@ package eu.chessdata.tools;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.net.Uri;
 import android.util.Log;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -175,5 +176,21 @@ public class MyGlobalTools {
                         null
                 ).setRootUrl(MyGlobalTools.ROOT_URL);
         return builder.build();
+    }
+
+    public static int getTournamentTotalRounds(ContentResolver contentResolver, String stringTournamentUri) {
+        Uri paramTournamentUri = Uri.parse(stringTournamentUri);
+        String tournamentSqlId = paramTournamentUri.getLastPathSegment();
+
+        Uri tournamentUri = TournamentTable.CONTENT_URI;
+        String selection = TournamentTable.FIELD__ID + " =?";
+        String args[] = {tournamentSqlId};
+        Cursor cursor = contentResolver.query(tournamentUri, null, selection, args, null);
+        int returnVal = 0;
+        int idx_TotalRounds = cursor.getColumnIndex(TournamentTable.FIELD_TOTALROUNDS);
+        while (cursor.moveToNext()) {
+            returnVal = cursor.getInt(idx_TotalRounds);
+        }
+        return returnVal;
     }
 }

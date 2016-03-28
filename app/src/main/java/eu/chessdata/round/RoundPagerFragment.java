@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 
 import eu.chessdata.R;
 import eu.chessdata.TournamentDetailsFragment;
+import eu.chessdata.tools.MyGlobalTools;
 
 /**
  * Created by Bogdan Oloeriu on 27/03/2016.
@@ -34,8 +35,9 @@ public class RoundPagerFragment extends Fragment {
         mTournamentName = getArguments().getString(TournamentDetailsFragment.TOURNAMENT_NAME);
 
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
-        mViewPager = (ViewPager)fragmentView.findViewById(R.id.container_round_pager);
+        mViewPager = (ViewPager) fragmentView.findViewById(R.id.container_round_pager);
         mViewPager.setAdapter(sectionsPagerAdapter);
+        mRoundCount = MyGlobalTools.getTournamentTotalRounds(getContext().getContentResolver(), mStringTournamentUri);
 
         return fragmentView;
     }
@@ -52,7 +54,7 @@ public class RoundPagerFragment extends Fragment {
 
         @Override
         public Fragment getItem(int position) {
-            return RoundStateFragment.newInstance(mStringTournamentUri,position);
+            return RoundStateFragment.newInstance(mStringTournamentUri, position);
         }
 
         @Override
