@@ -29,6 +29,7 @@ import java.util.Map;
 import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.members.MainMembersFragment;
+import eu.chessdata.round.RoundPagerFragment;
 import eu.chessdata.services.ProfileService;
 import eu.chessdata.services.TournamentService;
 import eu.chessdata.tools.MyGlobalTools;
@@ -141,7 +142,7 @@ public class HomeActivity extends AppCompatActivity
             managedClub.execute();
         } else if (id == R.id.action_create_club) {
             (new ClubCreateDialogFragment()).show(getSupportFragmentManager(), "ClubCreateDialogFragment");
-        }else if(id == R.id.action_sync_data_cloud_to_device){
+        } else if (id == R.id.action_sync_data_cloud_to_device) {
             TournamentService.startActionSynchronizeAll(getApplicationContext());
         }
 
@@ -300,21 +301,30 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     public void onTournamentDetailsItemSelected(int selection, String stringUri, String name) {
+        String uriString = stringUri;
+        Bundle bundle = new Bundle();
+        bundle.putString(TournamentDetailsFragment.TOURNAMENT_URI, uriString);
+        bundle.putString(TournamentDetailsFragment.TOURNAMENT_NAME, name);
         switch (selection) {
             case TournamentDetailsFragment.PLAYERS:
 
-                String uriString = stringUri;
-                Bundle bundle = new Bundle();
-                bundle.putString(TournamentDetailsFragment.TOURNAMENT_URI, uriString);
-                bundle.putString(TournamentDetailsFragment.TOURNAMENT_NAME,name);
                 TournamentPlayersFragment fragment = new TournamentPlayersFragment();
                 fragment.setArguments(bundle);
 
-
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container,fragment);
+                transaction.replace(R.id.fragment_container, fragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
+                break;
+            case TournamentDetailsFragment.ROUNDS:
+
+                RoundPagerFragment roundPagerFragment = new RoundPagerFragment();
+                roundPagerFragment.setArguments(bundle);
+                FragmentTransaction transactionPager = getSupportFragmentManager().beginTransaction();
+                transactionPager.replace(R.id.fragment_container,roundPagerFragment);
+                transactionPager.addToBackStack(null);
+                transactionPager.commit();
+
                 break;
         }
     }
