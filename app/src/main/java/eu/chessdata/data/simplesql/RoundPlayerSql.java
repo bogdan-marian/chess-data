@@ -11,27 +11,32 @@ public class RoundPlayerSql {
     @SimpleSQLColumn(value = "_id", primary = true)
     private long id;
 
-    @SimpleSQLColumn(value = "")
+    @SimpleSQLColumn(value = "roundPlayerId")
     private Long roundPlayerId;
 
-    @SimpleSQLColumn(value = "")
+    @SimpleSQLColumn(value = "roundId")
     private Long roundId;
 
-    @SimpleSQLColumn(value = "")
+    @SimpleSQLColumn(value = "profileId")
     private String profileId;
 
-    @SimpleSQLColumn(value = "")
+    @SimpleSQLColumn(value = "isPared")
     private boolean isPared;
 
-    @SimpleSQLColumn(value = "")
+    @SimpleSQLColumn(value = "dateCreated")
     private long dateCreated;
 
-    @SimpleSQLColumn(value = "")
+    @SimpleSQLColumn(value = "updateStamp")
     private long updateStamp;
 
     //constructors
 
     public RoundPlayerSql() {
+    }
+
+    //specific
+    public boolean getIsPared(){
+        return isPared();
     }
 
     //getters and setters
