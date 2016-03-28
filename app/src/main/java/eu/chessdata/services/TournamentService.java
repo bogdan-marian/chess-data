@@ -26,6 +26,8 @@ import eu.chessdata.backend.tournamentEndpoint.model.ClubMember;
 import eu.chessdata.backend.tournamentEndpoint.model.ClubMemberCollection;
 import eu.chessdata.backend.tournamentEndpoint.model.Profile;
 import eu.chessdata.backend.tournamentEndpoint.model.ProfileCollection;
+import eu.chessdata.backend.tournamentEndpoint.model.Round;
+import eu.chessdata.backend.tournamentEndpoint.model.RoundCollection;
 import eu.chessdata.backend.tournamentEndpoint.model.SupportObject;
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
 import eu.chessdata.backend.tournamentEndpoint.model.TournamentCollection;
@@ -37,6 +39,8 @@ import eu.chessdata.data.simplesql.ClubSql;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.data.simplesql.ProfileSql;
 import eu.chessdata.data.simplesql.ProfileTable;
+import eu.chessdata.data.simplesql.RoundSql;
+import eu.chessdata.data.simplesql.RoundTable;
 import eu.chessdata.data.simplesql.TournamentPlayerSql;
 import eu.chessdata.data.simplesql.TournamentPlayerTable;
 import eu.chessdata.data.simplesql.TournamentSql;
@@ -167,6 +171,7 @@ public class TournamentService extends IntentService {
         ProfileService.startActionUpdateAllMembersMap(mSynchronizeAllContext);
         synchronizeTournaments();
         synchronizeTournamentPlayers();
+        synchronizeRounds();
     }
 
     private void synchronizeClubMembers() {
@@ -610,6 +615,71 @@ public class TournamentService extends IntentService {
                 playerCursor.close();
             }
         } catch (IOException e) {
+            Log.e(TAG, "Some error on server side: " + e);
+            e.printStackTrace();
+        }
+    }
+
+    private void synchronizeRounds(){
+        //select all the local tournaments
+        Uri uri = TournamentTable.CONTENT_URI;
+        String[] projection = {TournamentTable.FIELD_TOURNAMENTID};
+        int idx_tournamentId = 0;
+        Cursor cursor = mContentResolver.query(uri, projection, null, null, null);
+        List<Long> tournamentIds = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            tournamentIds.add(cursor.getLong(idx_tournamentId));
+        }
+        cursor.close();
+        if (tournamentIds.size() == 0) {
+            return;
+        }
+        SupportObject supportObject = new SupportObject();
+        supportObject.setMessage("Get tournament players");
+        supportObject.setLongList(tournamentIds);
+        try{
+            RoundCollection roundCollection = sTournamentEndpoint.getRoundsByTournamentIds(supportObject).execute();
+            List<Round> rounds = roundCollection.getItems();
+            if(rounds == null){
+                rounds = new ArrayList<>();
+            }
+            Log.d(TAG,"Received rounds = " + rounds.size());
+            for (Round round:rounds){
+                Uri roundUri = RoundTable.CONTENT_URI;
+                String roundSelection = RoundTable.FIELD_ROUNDID + " =?";
+                String roundArgs[] = {round.getRoundId().toString()};
+                Cursor roundCursor = mContentResolver.query(roundUri,null,roundSelection,roundArgs,null);
+                int count = roundCursor.getCount();
+                if (count > 1){
+                    String problems = "More then one round with the same id";
+                    Log.e(TAG,problems);
+                    throw new IllegalStateException(problems);
+                } else if (count ==0){
+                    //time to insert round
+                    mContentResolver.insert(roundUri,RoundTable.getContentValues(new RoundSql(round),false));
+                }else if (count ==1){
+                    roundCursor.moveToFirst();
+                    int idx_updateStamp = roundCursor.getColumnIndex(RoundTable.FIELD_UPDATESTAMP);
+                    long stampLocal = roundCursor.getLong(idx_updateStamp);
+                    long stampCloud = round.getUpdateStamp();
+                    //time to compare stamps and decide
+                    if (stampLocal < stampCloud){
+                        //update local
+                        int rowsUpdated = mContentResolver.update(roundUri,
+                                RoundTable.getContentValues(new RoundSql(round),false),
+                                roundSelection,roundArgs);
+                        if (rowsUpdated != 1){
+                            String problem = "You should update only one roundId" + round.getRoundId();
+                            Log.e(TAG,problem);
+                            throw new IllegalStateException(problem);
+                        }
+                    }else if(stampLocal > stampCloud){
+                        Log.e(TAG,"Please implement this. Update cloud round");
+                    }
+                }
+                roundCursor.close();
+            }
+        }catch(IOException e){
             Log.e(TAG, "Some error on server side: " + e);
             e.printStackTrace();
         }
