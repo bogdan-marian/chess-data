@@ -33,8 +33,8 @@ public class RoundPresenceFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_round_presence, container, false);
 
-        TextView header = (TextView) view.findViewById(R.id.presence_header);
-        header.setText("Round " + mRoundNumber + ", " + mTournamentName + ", Presence");
+        TextView header = (TextView) view.findViewById(R.id.round_presence_header);
+        header.setText("Presence (Round " + mRoundNumber + ", " + mTournamentName + ")");
 
         return view;
     }

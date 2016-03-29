@@ -8,13 +8,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import eu.chessdata.R;
 import eu.chessdata.TournamentDetailsFragment;
@@ -25,9 +22,11 @@ import eu.chessdata.tools.MyGlobalTools;
 /**
  * Created by Bogdan Oloeriu on 27/03/2016.
  */
-public class RoundStateFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class RoundStateFragment extends Fragment {
     private static final String TAG = "my-debug-tag";
     private int ROUND_STATE_FRAGMENT_LOADER;
+
+    private View mView;
 
     private String mTournamentUri;
     private int mRoundNumber;
@@ -36,8 +35,6 @@ public class RoundStateFragment extends Fragment implements LoaderManager.Loader
 
     private String mTournamentId;
     private String mTournamentName;
-    private FragmentManager mFragmentManager;
-    private Fragment mPresenceFragment;
 
     public static RoundStateFragment newInstance(String stringTournamentUri, int roundNumber, FragmentManager fragmentManager) {
 
@@ -51,13 +48,12 @@ public class RoundStateFragment extends Fragment implements LoaderManager.Loader
 
 
         fragment.setArguments(args);
-        fragment.mFragmentManager = fragmentManager;
         return fragment;
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        getLoaderManager().initLoader(ROUND_STATE_FRAGMENT_LOADER, null, this);
+        //getLoaderManager().initLoader(ROUND_STATE_FRAGMENT_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
 
@@ -67,72 +63,25 @@ public class RoundStateFragment extends Fragment implements LoaderManager.Loader
         mContentResolver = getActivity().getContentResolver();
         mTournamentUri = getArguments().getString(TournamentDetailsFragment.TOURNAMENT_URI);
         mRoundNumber = getArguments().getInt(RoundPagerFragment.ROUND_NUMBER);
-
-        View view = inflater.inflate(R.layout.fragment_round_state, container, false);
-        TextView header = (TextView)view.findViewById(R.id.round_state_header);
+        mView = inflater.inflate(R.layout.fragment_round_state, container, false);
 
         computeData();
+        configureVisibility();
 
-        mPresenceFragment = RoundPresenceFragment.newInstance(mTournamentId, mRoundNumber + "", mTournamentName);
-        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container_presence_games,mPresenceFragment);
-        transaction.commit();
-
-        header.setText("Header: "+ mTournamentName+" " + mRoundNumber);
-
-        return view;
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        //query the round
-        //CursorLoader cursorLoader = new CursorLoader(getContext(), gameUri, null, gameSelection, gameArgs, null);
-
-        return null;
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        TextView presence = (TextView) getView().findViewById(R.id.place_holder_presence);
-        TextView games = (TextView) getView().findViewById(R.id.place_holder_games);
-        if (mGameCount > 0) {
-            //show only games
-            presence.setVisibility(View.GONE);
-            games.setVisibility(View.VISIBLE);
-        } else {
-            //show only presence
-            presence.setVisibility(View.VISIBLE);
-            games.setVisibility(View.GONE);
-
-
-            //((HomeActivity)getActivity()).roundStateContentSwitch(R.id.fragment_container_presence_games,presenceFragment);
-
-
-
-        }
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-
+        return mView;
     }
 
 
 
-    private void computeData(){
+
+    private void computeData() {
         Uri tournamentUri = Uri.parse(mTournamentUri);
         String stringTournamentSqlId = tournamentUri.getLastPathSegment();
         Long tournamentId = MyGlobalTools.getTournamentCloudIdBySqlId(Long.parseLong(stringTournamentSqlId), mContentResolver);
         mTournamentId = tournamentId.toString();
         mTournamentName = MyGlobalTools.getTournamentNameTournamentId(tournamentId, mContentResolver);
         String roundNumber = "" + mRoundNumber;
-        //Long tournamentSqlId = Long.parseLong(stringTournamentSqlId);
-        //find the roundSqlId
-        Log.d(TAG, "RoundStateFragment, uri = " + stringTournamentSqlId + " roundNumber = " + mRoundNumber);
 
-        /*find if there are games data available for the round. If no games display presence
-        if games then display results*/
-        //locate the round
         Uri roundUri = RoundTable.CONTENT_URI;
         String roundProjection[] = {RoundTable.FIELD_ROUNDID};
         int idx_roundId = 0;
@@ -148,7 +97,6 @@ public class RoundStateFragment extends Fragment implements LoaderManager.Loader
             Log.e(TAG, problem);
             throw new IllegalStateException(problem);
         }
-        Log.e(TAG, "round located: " + stringTournamentSqlId + ". " + roundNumber);
         roundCursor.moveToFirst();
         Long roundId = roundCursor.getLong(idx_roundId);
         roundCursor.close();
@@ -160,6 +108,28 @@ public class RoundStateFragment extends Fragment implements LoaderManager.Loader
         Cursor gameCursor = mContentResolver.query(gameUri, null, gameSelection, gameArgs, null);
         mGameCount = gameCursor.getCount();
         gameCursor.close();
-        Log.d(TAG, "End compute data, round "+ mRoundNumber );
+    }
+
+    private void configureVisibility() {
+        //if (mGameCount > 0) {}
+        if (mRoundNumber % 2 == 1) {
+            showPresence();
+        } else {
+            showGames();
+        }
+    }
+
+    private void showPresence() {
+        RoundPresenceFragment mPresenceFragment = RoundPresenceFragment.newInstance(mTournamentId, mRoundNumber + "", mTournamentName);
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container_presence_games, mPresenceFragment);
+        transaction.commit();
+    }
+
+    private void showGames() {
+        RoundGamesFragment gamesFragment = RoundGamesFragment.newInstance(mTournamentId, mRoundNumber + "", mTournamentName);
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(R.id.fragment_container_presence_games, gamesFragment);
+        transaction.commit();
     }
 }
