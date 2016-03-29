@@ -329,13 +329,6 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
-    /*public void roundStateContentSwitch(int containerViewId, Fragment presenceOrGames) {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(containerViewId, presenceOrGames);
-        transaction.addToBackStack(null);
-        transaction.commit();
-    }*/
-
     @Override
     public void onMainMembersCallback(Uri memberUri) {
         Log.d(TAG, "Home activity: Time to replace fragments: " + memberUri);

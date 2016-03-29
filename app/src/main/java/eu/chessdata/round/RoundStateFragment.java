@@ -74,9 +74,8 @@ public class RoundStateFragment extends Fragment implements LoaderManager.Loader
         computeData();
 
         mPresenceFragment = RoundPresenceFragment.newInstance(mTournamentId, mRoundNumber + "", mTournamentName);
-        FragmentTransaction transaction = mFragmentManager.beginTransaction();
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container_presence_games,mPresenceFragment);
-        transaction.addToBackStack(mTournamentName+mRoundNumber);
         transaction.commit();
 
         header.setText("Header: "+ mTournamentName+" " + mRoundNumber);
