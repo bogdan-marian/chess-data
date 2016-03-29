@@ -20,6 +20,9 @@ public class RoundPlayerSql {
     @SimpleSQLColumn(value = "profileId")
     private String profileId;
 
+    @SimpleSQLColumn(value = "profileName")
+    private String profileName;
+
     @SimpleSQLColumn(value = "isPared")
     private boolean isPared;
 
@@ -40,6 +43,15 @@ public class RoundPlayerSql {
     }
 
     //getters and setters
+
+
+    public String getProfileName() {
+        return profileName;
+    }
+
+    public void setProfileName(String profileName) {
+        this.profileName = profileName;
+    }
 
     public long getId() {
         return id;

@@ -17,12 +17,15 @@ public class RoundGamesFragment extends Fragment {
 
     private String mTournamentId;
     private String mTournamentName;
+
+    private String mRoundId;
     private String mRoundNumber;
 
-    public static RoundGamesFragment newInstance(String tournamentId, String roundNumber, String tournamentShortName) {
+    public static RoundGamesFragment newInstance(String tournamentId,String tournamentShortName ,String roundId, String roundNumber) {
         RoundGamesFragment roundGamesFragment = new RoundGamesFragment();
         roundGamesFragment.mTournamentId = tournamentId;
         roundGamesFragment.mTournamentName = tournamentShortName;
+        roundGamesFragment.mRoundId = roundId;
         roundGamesFragment.mRoundNumber = roundNumber;
 
         return roundGamesFragment;

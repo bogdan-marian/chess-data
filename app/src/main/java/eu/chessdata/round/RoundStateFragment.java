@@ -35,6 +35,7 @@ public class RoundStateFragment extends Fragment {
 
     private String mTournamentId;
     private String mTournamentName;
+    private String mRoundId;
 
     public static RoundStateFragment newInstance(String stringTournamentUri, int roundNumber, FragmentManager fragmentManager) {
 
@@ -72,8 +73,6 @@ public class RoundStateFragment extends Fragment {
     }
 
 
-
-
     private void computeData() {
         Uri tournamentUri = Uri.parse(mTournamentUri);
         String stringTournamentSqlId = tournamentUri.getLastPathSegment();
@@ -100,6 +99,7 @@ public class RoundStateFragment extends Fragment {
         roundCursor.moveToFirst();
         Long roundId = roundCursor.getLong(idx_roundId);
         roundCursor.close();
+        mRoundId = roundId.toString();
 
         //count the games
         Uri gameUri = GameTable.CONTENT_URI;
@@ -108,6 +108,9 @@ public class RoundStateFragment extends Fragment {
         Cursor gameCursor = mContentResolver.query(gameUri, null, gameSelection, gameArgs, null);
         mGameCount = gameCursor.getCount();
         gameCursor.close();
+
+        //compute roundId
+        //Uri roundUri = RoundTable.CONTENT_URI;
     }
 
     private void configureVisibility() {
@@ -120,14 +123,16 @@ public class RoundStateFragment extends Fragment {
     }
 
     private void showPresence() {
-        RoundPresenceFragment mPresenceFragment = RoundPresenceFragment.newInstance(mTournamentId, mRoundNumber + "", mTournamentName);
+        String roundNumber = mRoundNumber + "";
+        RoundPresenceFragment mPresenceFragment = RoundPresenceFragment.newInstance(mTournamentId, mTournamentName, mRoundId, roundNumber);
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container_presence_games, mPresenceFragment);
         transaction.commit();
     }
 
     private void showGames() {
-        RoundGamesFragment gamesFragment = RoundGamesFragment.newInstance(mTournamentId, mRoundNumber + "", mTournamentName);
+        String roundNumber = mRoundNumber + "";
+        RoundGamesFragment gamesFragment = RoundGamesFragment.newInstance(mTournamentId, mTournamentName, mRoundId, roundNumber);
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.replace(R.id.fragment_container_presence_games, gamesFragment);
         transaction.commit();
