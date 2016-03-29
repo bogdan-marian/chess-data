@@ -38,8 +38,10 @@ public class RoundPagerFragment extends Fragment {
 
         mRoundCount = MyGlobalTools.getTournamentTotalRounds(getContext().getContentResolver(), mStringTournamentUri);
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
+        ChangeListener changeListener = new ChangeListener();
         mViewPager = (ViewPager) fragmentView.findViewById(R.id.container_round_pager);
         mViewPager.setAdapter(sectionsPagerAdapter);
+        mViewPager.addOnPageChangeListener(changeListener);
 
         Log.d(TAG,"mRoundCount = " + mRoundCount);
         return fragmentView;
@@ -50,19 +52,44 @@ public class RoundPagerFragment extends Fragment {
      * one of the sections/tabs/pages.
      */
     public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
+        private final FragmentManager mFragmentManager;
+        private Fragment firstFragment;
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
+            mFragmentManager = fm;
         }
 
         @Override
         public Fragment getItem(int position) {
-            return RoundStateFragment.newInstance(mStringTournamentUri, position+1);
+
+            Log.d(TAG,"SectionPagerAdapter position+1 = " + (position+1));
+            return RoundStateFragment.newInstance(mStringTournamentUri, position+1,mFragmentManager);
+
+
         }
 
         @Override
         public int getCount() {
             return mRoundCount;
+        }
+    }
+
+    public class ChangeListener implements ViewPager.OnPageChangeListener {
+
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+            Log.d(TAG,"ChangeListener position + 1 = " + (position + 1));
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+
         }
     }
 }

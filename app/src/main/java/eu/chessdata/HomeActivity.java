@@ -8,7 +8,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -330,12 +329,12 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
-    public void roundStateContentSwitch(int containerViewId, Fragment presenceOrGames) {
+    /*public void roundStateContentSwitch(int containerViewId, Fragment presenceOrGames) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.replace(containerViewId, presenceOrGames);
         transaction.addToBackStack(null);
         transaction.commit();
-    }
+    }*/
 
     @Override
     public void onMainMembersCallback(Uri memberUri) {
