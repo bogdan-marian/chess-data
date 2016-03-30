@@ -76,7 +76,6 @@ public class TournamentAddPlayerFragment extends DialogFragment implements Adapt
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        //TODO insert bundle arguments and log them for debug
         Cursor cursor = mContentResolver.query(
                 ProfileTable.CONTENT_URI,
                 null,

@@ -9,9 +9,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -21,7 +23,7 @@ import eu.chessdata.data.simplesql.RoundPlayerTable;
 /**
  * Created by Bogdan Oloeriu on 28/03/2016.
  */
-public class RoundPresenceFragment extends Fragment  implements LoaderManager.LoaderCallbacks<Cursor>{
+public class RoundPresenceFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "my-debug-tag";
     private static final int PRESENCE_LOADER = 0;
 
@@ -33,7 +35,7 @@ public class RoundPresenceFragment extends Fragment  implements LoaderManager.Lo
     private RoundPresenceAdapter mRoundPresenceAdapter;
     private ContentResolver mContentResolver;
 
-    public static RoundPresenceFragment newInstance(String tournamentId,String tournamentShortName,String roundId, String roundNumber ) {
+    public static RoundPresenceFragment newInstance(String tournamentId, String tournamentShortName, String roundId, String roundNumber) {
         RoundPresenceFragment roundPresenceFragment = new RoundPresenceFragment();
         roundPresenceFragment.mTournamentId = tournamentId;
         roundPresenceFragment.mTournamentName = tournamentShortName;
@@ -45,7 +47,7 @@ public class RoundPresenceFragment extends Fragment  implements LoaderManager.Lo
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        getLoaderManager().initLoader(PRESENCE_LOADER,null,this);
+        getLoaderManager().initLoader(PRESENCE_LOADER, null, this);
         super.onActivityCreated(savedInstanceState);
     }
 
@@ -56,6 +58,16 @@ public class RoundPresenceFragment extends Fragment  implements LoaderManager.Lo
 
         TextView header = (TextView) view.findViewById(R.id.round_presence_header);
         header.setText("Presence (Round " + mRoundNumber + ", " + mTournamentName + ")");
+
+        Button button = (Button) view.findViewById(R.id.presence_add_player);
+        button.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Add for roundNr: " + mRoundNumber);
+                RoundAddPlayerFragment addPlayerFragment = RoundAddPlayerFragment.newInstance(mTournamentId, mRoundId);
+                addPlayerFragment.show(getFragmentManager(), "RoundAddPlayerFragment");
+            }
+        });
 
         mRoundPresenceAdapter = new RoundPresenceAdapter(getActivity(), null, 0);
         ListView listView = (ListView) view.findViewById(R.id.round_presence_list_view);
@@ -71,11 +83,11 @@ public class RoundPresenceFragment extends Fragment  implements LoaderManager.Lo
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri uri = RoundPlayerTable.CONTENT_URI;
 
-        String selection = RoundPlayerTable.FIELD_ROUNDID+" =?";
+        String selection = RoundPlayerTable.FIELD_ROUNDID + " =?";
         String selectionArgs[] = {mRoundId};
-        String sortOrder = RoundPlayerTable.FIELD_PROFILENAME+" ASC";
+        String sortOrder = RoundPlayerTable.FIELD_PROFILENAME + " ASC";
 
-        Loader<Cursor> cursorLoader = new CursorLoader(getContext(),uri,null,selection,selectionArgs,sortOrder);
+        Loader<Cursor> cursorLoader = new CursorLoader(getContext(), uri, null, selection, selectionArgs, sortOrder);
         return cursorLoader;
     }
 
