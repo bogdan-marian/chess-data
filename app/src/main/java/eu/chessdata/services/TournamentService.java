@@ -58,10 +58,14 @@ public class TournamentService extends IntentService {
     private static final String ACTION_CREATE_TOURNAMENT = "eu.chessdata.services.action.ACTION_CREATE_TOURNAMENT";
     private static final String ACTION_TOURNAMENT_ADD_PLAYER = "eu.chessdata.services.action.ACTION_TOURNAMENT_ADD_PLAYER";
     private static final String ACTION_SYNCHRONIZE_ALL = "eu.chessdata.services.action.ACTION_SYNCHRONIZE_ALL";
+    private static final String ACTION_CREATE_ROUND_PLAYER = "eu.chessdata.services.ACTION_CREATE_ROUND_PLAYER";
 
     private static final String EXTRA_JSON_TOURNAMENT = "eu.chessdata.services.extra.JSON_TOURNAMENT";
     private static final String EXTRA_TOURNAMENT_SQL_ID = "eu.chessdata.services.EXTRA_TOURNAMENT_SQL_ID";
     private static final String EXTRA_PLAYER_SQL_ID = "eu.chessdata.services.EXTRA_PLAYER_SQL_ID";
+    private static final String EXTRA_ROUND_ID = "eu.chessdata.services.EXTRA_ROUND_ID";
+    private static final String EXTRA_TOURNAMENT_ID = "eu.chessdata.services.EXTRA_TOURNAMENT_ID";
+    private static final String EXTRA_TOURNAMENT_PLAYER_SQL_ID = "eu.chessdata.services.EXTRA_TOURNAMENT_PLAYER_SQL_ID";
 
     private static TournamentEndpoint sTournamentEndpoint = buildTournamentEndpoint();
     private static GsonFactory sGsonFactory = new GsonFactory();
@@ -87,6 +91,16 @@ public class TournamentService extends IntentService {
         Intent intent = new Intent(context, TournamentService.class);
         intent.setAction(ACTION_CREATE_TOURNAMENT);
         intent.putExtra(EXTRA_JSON_TOURNAMENT, jsonTournament);
+        context.startService(intent);
+    }
+
+    public static void startActionCreateRoundPlayer(Context context, String roundId, String tournamentId,
+                                                    String tournamentPlayerSqlId) {
+        Intent intent = new Intent(context, TournamentService.class);
+        intent.setAction(ACTION_CREATE_ROUND_PLAYER);
+        intent.putExtra(EXTRA_ROUND_ID, roundId);
+        intent.putExtra(EXTRA_TOURNAMENT_ID, tournamentId);
+        intent.putExtra(EXTRA_TOURNAMENT_PLAYER_SQL_ID, tournamentPlayerSqlId);
         context.startService(intent);
     }
 
@@ -160,6 +174,11 @@ public class TournamentService extends IntentService {
                 handleActionTournamentAddPlayer(tournamentSqlId, playerSqlId);
             } else if (ACTION_SYNCHRONIZE_ALL.equals(action)) {
                 handleActionSynchronizeAll();
+            } else if (ACTION_CREATE_ROUND_PLAYER.equals(action)) {
+                final String roundId = intent.getStringExtra(EXTRA_ROUND_ID);
+                final String tournamentId = intent.getStringExtra(EXTRA_TOURNAMENT_ID);
+                final String tournamentPlayerSqlId = intent.getStringExtra(EXTRA_TOURNAMENT_PLAYER_SQL_ID);
+                handleActionCreateRoundPlayer(roundId,tournamentId,tournamentPlayerSqlId);
             }
         }
     }
@@ -573,42 +592,42 @@ public class TournamentService extends IntentService {
         try {
             TournamentPlayerCollection playerCollection = sTournamentEndpoint.getTournamentPlayersByTournamentIds(supportObject).execute();
             List<TournamentPlayer> tournamentPlayers = playerCollection.getItems();
-            if (tournamentPlayers == null){
+            if (tournamentPlayers == null) {
                 tournamentPlayers = new ArrayList<>();
             }
-            Log.d(TAG,"Received players = " + tournamentPlayers.size());
-            for (TournamentPlayer player: tournamentPlayers){
+            Log.d(TAG, "Received players = " + tournamentPlayers.size());
+            for (TournamentPlayer player : tournamentPlayers) {
                 Uri playerUri = TournamentPlayerTable.CONTENT_URI;
-                String playerSelection = TournamentPlayerTable.FIELD_TOURNAMENTPLAYERID+" =?";
+                String playerSelection = TournamentPlayerTable.FIELD_TOURNAMENTPLAYERID + " =?";
                 String playerArgs[] = {player.getTournamentPlayerId().toString()};
-                Cursor playerCursor = mContentResolver.query(playerUri,null,playerSelection,playerArgs,null);
+                Cursor playerCursor = mContentResolver.query(playerUri, null, playerSelection, playerArgs, null);
                 int count = playerCursor.getCount();
-                if (count > 1){
+                if (count > 1) {
                     String problems = "More then one player with the same id: " + player.getTournamentPlayerId();
-                    Log.e(TAG,problems);
+                    Log.e(TAG, problems);
                     throw new IllegalStateException(problems);
-                } else if (count == 0){
+                } else if (count == 0) {
                     //time to insert the tournament
-                    mContentResolver.insert(playerUri,TournamentPlayerTable.getContentValues(new TournamentPlayerSql(player), false));
-                }else if(count ==1){
+                    mContentResolver.insert(playerUri, TournamentPlayerTable.getContentValues(new TournamentPlayerSql(player), false));
+                } else if (count == 1) {
                     playerCursor.moveToFirst();
                     int idx_updateStamp = playerCursor.getColumnIndex(TournamentPlayerTable.FIELD_UPDATESTAMP);
                     long stampLocal = playerCursor.getLong(idx_updateStamp);
                     long stampCloud = player.getUpdateStamp();
                     //time to compare time stamps and decide
-                    if (stampLocal < stampCloud){
+                    if (stampLocal < stampCloud) {
                         //update local
                         int rowsUpdated = mContentResolver.update(playerUri,
                                 TournamentPlayerTable.getContentValues(new TournamentPlayerSql(player), false),
-                                playerSelection,playerArgs);
-                        if (rowsUpdated != 1){
+                                playerSelection, playerArgs);
+                        if (rowsUpdated != 1) {
                             String problem = "You should update only one tournamentPlayerId: " + player.getTournamentPlayerId();
-                            Log.e(TAG,problem);
+                            Log.e(TAG, problem);
                             throw new IllegalStateException(problem);
                         }
-                    }else if (stampLocal > stampCloud){
-                        Log.e(TAG,"Please implement this. Update cloud tournament player");
-                    }else if (stampLocal == stampCloud){
+                    } else if (stampLocal > stampCloud) {
+                        Log.e(TAG, "Please implement this. Update cloud tournament player");
+                    } else if (stampLocal == stampCloud) {
                         //nothing to update for this player
                     }
                 }
@@ -620,7 +639,7 @@ public class TournamentService extends IntentService {
         }
     }
 
-    private void synchronizeRounds(){
+    private void synchronizeRounds() {
         //select all the local tournaments
         Uri uri = TournamentTable.CONTENT_URI;
         String[] projection = {TournamentTable.FIELD_TOURNAMENTID};
@@ -637,51 +656,55 @@ public class TournamentService extends IntentService {
         SupportObject supportObject = new SupportObject();
         supportObject.setMessage("Get tournament players");
         supportObject.setLongList(tournamentIds);
-        try{
+        try {
             RoundCollection roundCollection = sTournamentEndpoint.getRoundsByTournamentIds(supportObject).execute();
             List<Round> rounds = roundCollection.getItems();
-            if(rounds == null){
+            if (rounds == null) {
                 rounds = new ArrayList<>();
             }
-            Log.d(TAG,"Received rounds = " + rounds.size());
-            for (Round round:rounds){
+            Log.d(TAG, "Received rounds = " + rounds.size());
+            for (Round round : rounds) {
                 Uri roundUri = RoundTable.CONTENT_URI;
                 String roundSelection = RoundTable.FIELD_ROUNDID + " =?";
                 String roundArgs[] = {round.getRoundId().toString()};
-                Cursor roundCursor = mContentResolver.query(roundUri,null,roundSelection,roundArgs,null);
+                Cursor roundCursor = mContentResolver.query(roundUri, null, roundSelection, roundArgs, null);
                 int count = roundCursor.getCount();
-                if (count > 1){
+                if (count > 1) {
                     String problems = "More then one round with the same id";
-                    Log.e(TAG,problems);
+                    Log.e(TAG, problems);
                     throw new IllegalStateException(problems);
-                } else if (count ==0){
+                } else if (count == 0) {
                     //time to insert round
-                    mContentResolver.insert(roundUri,RoundTable.getContentValues(new RoundSql(round),false));
-                }else if (count ==1){
+                    mContentResolver.insert(roundUri, RoundTable.getContentValues(new RoundSql(round), false));
+                } else if (count == 1) {
                     roundCursor.moveToFirst();
                     int idx_updateStamp = roundCursor.getColumnIndex(RoundTable.FIELD_UPDATESTAMP);
                     long stampLocal = roundCursor.getLong(idx_updateStamp);
                     long stampCloud = round.getUpdateStamp();
                     //time to compare stamps and decide
-                    if (stampLocal < stampCloud){
+                    if (stampLocal < stampCloud) {
                         //update local
                         int rowsUpdated = mContentResolver.update(roundUri,
-                                RoundTable.getContentValues(new RoundSql(round),false),
-                                roundSelection,roundArgs);
-                        if (rowsUpdated != 1){
+                                RoundTable.getContentValues(new RoundSql(round), false),
+                                roundSelection, roundArgs);
+                        if (rowsUpdated != 1) {
                             String problem = "You should update only one roundId" + round.getRoundId();
-                            Log.e(TAG,problem);
+                            Log.e(TAG, problem);
                             throw new IllegalStateException(problem);
                         }
-                    }else if(stampLocal > stampCloud){
-                        Log.e(TAG,"Please implement this. Update cloud round");
+                    } else if (stampLocal > stampCloud) {
+                        Log.e(TAG, "Please implement this. Update cloud round");
                     }
                 }
                 roundCursor.close();
             }
-        }catch(IOException e){
+        } catch (IOException e) {
             Log.e(TAG, "Some error on server side: " + e);
             e.printStackTrace();
         }
+    }
+
+    public void handleActionCreateRoundPlayer(String roundId, String tournamentId, String tournamentPlayerSqlId) {
+        Log.d(TAG, "handleActionCreateRoundPlayer: roundId="+roundId+" tournamentId="+tournamentId+" tournamentPlayerSqlId=" + tournamentPlayerSqlId);
     }
 }

@@ -17,13 +17,14 @@ import android.widget.ListView;
 
 import eu.chessdata.R;
 import eu.chessdata.data.simplesql.TournamentPlayerTable;
+import eu.chessdata.services.TournamentService;
 
 /**
  * Created by Bogdan Oloeriu on 30/03/2016.
  */
 public class RoundAddPlayerFragment extends DialogFragment implements
         LoaderManager.LoaderCallbacks<Cursor>
-        ,AdapterView.OnItemClickListener{
+        , AdapterView.OnItemClickListener {
 
     private final String TAG = "my-debug-tag";
     private final int ROUND_ADD_PLAYER_LOADER = 0;
@@ -86,8 +87,9 @@ public class RoundAddPlayerFragment extends DialogFragment implements
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Long tournamentPlayerSqlId = id;
-        Log.d(TAG,"tournamentPlayerSqlId = "+id+" position = " +position);
+        String tournamentPlayerSqlId = id + "";
+        Log.d(TAG, "onItemClick = " + id + " position = " + position);
+        TournamentService.startActionCreateRoundPlayer(getContext(), mRoundId, mTournamentId, tournamentPlayerSqlId);
         this.dismiss();
     }
 }
