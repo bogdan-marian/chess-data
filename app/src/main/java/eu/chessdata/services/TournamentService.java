@@ -74,6 +74,7 @@ public class TournamentService extends IntentService {
     private SharedPreferences mSharedPreferences;
     private ContentResolver mContentResolver;
     private String mIdTokenString;
+    private String mProfileId;
     private Long mClubEndpointId;
 
     public TournamentService() {
@@ -157,9 +158,8 @@ public class TournamentService extends IntentService {
             mSharedPreferences = getSharedPreferences(getString(R.string.preference_file_key),
                     Context.MODE_PRIVATE);
             mContentResolver = getContentResolver();
-            mIdTokenString = mSharedPreferences.getString(getString(R.string
-                    .pref_security_id_token_string), "defaultValue");
-
+            mIdTokenString = mSharedPreferences.getString(getString(R.string.pref_security_id_token_string), "defaultValue");
+            mProfileId = mSharedPreferences.getString(getString(R.string.pref_profile_profileId), "defaultValue");
             long clubSqlId = mSharedPreferences.getLong(getString(R.string
                     .pref_managed_club_sqlId), 0L);
             mClubEndpointId = getClubEndpointId(clubSqlId);
@@ -178,7 +178,7 @@ public class TournamentService extends IntentService {
                 final String roundId = intent.getStringExtra(EXTRA_ROUND_ID);
                 final String tournamentId = intent.getStringExtra(EXTRA_TOURNAMENT_ID);
                 final String tournamentPlayerSqlId = intent.getStringExtra(EXTRA_TOURNAMENT_PLAYER_SQL_ID);
-                handleActionCreateRoundPlayer(roundId,tournamentId,tournamentPlayerSqlId);
+                handleActionCreateRoundPlayer(roundId, tournamentId, tournamentPlayerSqlId);
             }
         }
     }
@@ -705,6 +705,10 @@ public class TournamentService extends IntentService {
     }
 
     public void handleActionCreateRoundPlayer(String roundId, String tournamentId, String tournamentPlayerSqlId) {
-        Log.d(TAG, "handleActionCreateRoundPlayer: roundId="+roundId+" tournamentId="+tournamentId+" tournamentPlayerSqlId=" + tournamentPlayerSqlId);
+        Log.d(TAG, "handleActionCreateRoundPlayer: roundId=" + roundId + " tournamentId=" + tournamentId + " tournamentPlayerSqlId=" + tournamentPlayerSqlId);
+        if (MyGlobalTools.profileCanManageClubByTournamentId(mContentResolver, mProfileId, tournamentId)) {
+            Log.d(TAG, "Is a manager");
+        }
+
     }
 }

@@ -15,6 +15,7 @@ import java.util.Map;
 
 import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
 import eu.chessdata.backend.tournamentEndpoint.model.TournamentPlayer;
+import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ProfileTable;
 import eu.chessdata.data.simplesql.TournamentPlayerTable;
 import eu.chessdata.data.simplesql.TournamentTable;
@@ -32,7 +33,7 @@ public class MyGlobalTools {
      * second string is the name of the profile
      */
     public static Map<String, String> memberSqlIdToProfileName = new HashMap<>();
-    private static String TAG = "my-debug-tat";
+    private static String TAG = "my-debug-tag";
     private static TournamentEndpoint tournamentEndpoint = buildTournamentEndpoint();
 
     public static void addToMembersSqlIdToProfileName(String id, String name) {
@@ -204,10 +205,43 @@ public class MyGlobalTools {
 
         Cursor cursor = contentResolver.query(uri, projection, selection, args, null);
         String name = "Tournament not found";
-        while(cursor.moveToNext()){
+        while (cursor.moveToNext()) {
             name = cursor.getString(idx_Name);
         }
         cursor.close();
         return name;
+    }
+
+    public static boolean profileCanManageClubByTournamentId(ContentResolver contentResolver, String profileId, String tournamentId) {
+        Uri tournamentUri = TournamentTable.CONTENT_URI;
+        String tournamentProjection[] = {TournamentTable.FIELD_CLUBID};
+        String tournamentSelection = TournamentTable.FIELD_TOURNAMENTID + " =?";
+        String tournamentArgs[] = {tournamentId};
+
+        Cursor tournamentCursor = contentResolver.query(tournamentUri, tournamentProjection, tournamentSelection, tournamentArgs, null);
+        if (!tournamentCursor.moveToNext()) {
+            //this should allays be able to locate the tournament;
+            String problem = "You passed an illegal tournament id: " + tournamentId;
+            Log.e(TAG, "You passed an illegal tournament id: " + tournamentId);
+            throw new IllegalStateException(problem);
+        }
+
+        String clubId = String.valueOf(tournamentCursor.getLong(0));
+        tournamentCursor.close();
+
+
+        Uri memberUri = ClubMemberTable.CONTENT_URI;
+        String memberSelection = ClubMemberTable.FIELD_CLUBID + " =? AND " +
+                ClubMemberTable.FIELD_PROFILEID + " =? AND " +
+                ClubMemberTable.FIELD_MANAGERPROFILE + " =? ";
+        String memberArgs[] = {clubId, profileId, "1"};
+
+        Cursor memberCursor = contentResolver.query(memberUri, null, memberSelection, memberArgs, null);
+        int count = memberCursor.getCount();
+        memberCursor.close();
+        if (count == 1) {
+            return true;
+        }
+        return false;
     }
 }
