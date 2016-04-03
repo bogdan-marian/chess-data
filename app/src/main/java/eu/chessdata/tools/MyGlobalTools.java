@@ -17,6 +17,8 @@ import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
 import eu.chessdata.backend.tournamentEndpoint.model.TournamentPlayer;
 import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ProfileTable;
+import eu.chessdata.data.simplesql.RoundPlayerTable;
+import eu.chessdata.data.simplesql.RoundTable;
 import eu.chessdata.data.simplesql.TournamentPlayerTable;
 import eu.chessdata.data.simplesql.TournamentTable;
 
@@ -243,5 +245,62 @@ public class MyGlobalTools {
             return true;
         }
         return false;
+    }
+
+    public static String getProfileIdByTournamentPlayerSqlId(ContentResolver contentResolver,
+                                                             String tournamentPlayerSqlId) {
+        Uri uri = TournamentPlayerTable.CONTENT_URI;
+        String projection[] = {TournamentPlayerTable.FIELD_PROFILEID};
+        String selection = TournamentPlayerTable.FIELD__ID + " =?";
+        String selectionArgs[] = {tournamentPlayerSqlId};
+
+        Cursor cursor = contentResolver.query(uri, projection, selection, selectionArgs, null);
+        if (cursor.getCount() != 1) {
+            String problem = "there should always find by an sqlId: " + tournamentPlayerSqlId;
+            Log.e(TAG, problem);
+            throw new IllegalStateException(problem);
+        }
+        cursor.moveToFirst();
+        String profileId = cursor.getString(0);
+        cursor.close();
+        return profileId;
+    }
+
+
+    public static boolean playerIsPresentInRound(ContentResolver contentResolver, String roundId, String tournamentPlayerSqlId) {
+        String profileId = getProfileIdByTournamentPlayerSqlId(contentResolver, tournamentPlayerSqlId);
+
+        Uri uri = RoundPlayerTable.CONTENT_URI;
+        String selection = RoundPlayerTable.FIELD_ROUNDID + " =? AND " + RoundPlayerTable.FIELD_PROFILEID + " =?";
+        String selectionArgs[] = {roundId, profileId};
+        Cursor cursor = contentResolver.query(uri, null, selection, selectionArgs, null);
+        int count = cursor.getCount();
+        cursor.close();
+        if (count == 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public static String getNameByProfileId(ContentResolver contentResolver, String profileId) {
+        Uri uri = ProfileTable.CONTENT_URI;
+        String projection[] = {ProfileTable.FIELD_NAME};
+        String selection = ProfileTable.FIELD_PROFILEID + " =?";
+        String selectionArgs[] = {profileId};
+        Cursor cursor = contentResolver.query(uri,projection,selection,selectionArgs,null);
+        int count = cursor.getCount();
+        if (count != 1){
+            String problem = "This selection should onways find one profile: " + profileId;
+            Log.e(TAG,problem);
+            throw new IllegalStateException(problem);
+        }
+        cursor.moveToFirst();
+        String name = cursor.getString(0);
+        return name;
+    }
+
+    public static void syncLocalRoundPlayers(ContentResolver contentResolver, String mIdTokenString) {
+        //TODO finish this
     }
 }

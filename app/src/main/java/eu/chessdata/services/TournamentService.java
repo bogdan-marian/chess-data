@@ -39,6 +39,8 @@ import eu.chessdata.data.simplesql.ClubSql;
 import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.data.simplesql.ProfileSql;
 import eu.chessdata.data.simplesql.ProfileTable;
+import eu.chessdata.data.simplesql.RoundPlayerSql;
+import eu.chessdata.data.simplesql.RoundPlayerTable;
 import eu.chessdata.data.simplesql.RoundSql;
 import eu.chessdata.data.simplesql.RoundTable;
 import eu.chessdata.data.simplesql.TournamentPlayerSql;
@@ -704,11 +706,28 @@ public class TournamentService extends IntentService {
         }
     }
 
-    public void handleActionCreateRoundPlayer(String roundId, String tournamentId, String tournamentPlayerSqlId) {
+    public void handleActionCreateRoundPlayer(String roundId,
+                                              String tournamentId,
+                                              String tournamentPlayerSqlId) {
         Log.d(TAG, "handleActionCreateRoundPlayer: roundId=" + roundId + " tournamentId=" + tournamentId + " tournamentPlayerSqlId=" + tournamentPlayerSqlId);
-        if (MyGlobalTools.profileCanManageClubByTournamentId(mContentResolver, mProfileId, tournamentId)) {
-            Log.d(TAG, "Is a manager");
+        if (!MyGlobalTools.profileCanManageClubByTournamentId(mContentResolver, mProfileId, tournamentId)) {
+            return;
         }
 
+        if (MyGlobalTools.playerIsPresentInRound(mContentResolver, roundId, tournamentPlayerSqlId)) {
+            return;
+        }
+        Log.d(TAG, "Player not present wee are admin and wee should at it");
+        Long lRoundId = Long.parseLong(roundId);
+        String profileId = MyGlobalTools.getProfileIdByTournamentPlayerSqlId(mContentResolver, tournamentPlayerSqlId);
+        String name = MyGlobalTools.getNameByProfileId(profileId);
+        RoundPlayerSql roundPlayerSql = new RoundPlayerSql(lRoundId, mProfileId, name);
+
+        Uri newUri = mContentResolver.insert(
+                RoundPlayerTable.CONTENT_URI,
+                RoundPlayerTable.getContentValues(roundPlayerSql,false)
+        );
+        MyGlobalTools.syncLocalRoundPlayers(mContentResolver, mIdTokenString);
+        //TODO finish this?
     }
 }

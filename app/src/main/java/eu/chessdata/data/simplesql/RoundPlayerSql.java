@@ -1,5 +1,7 @@
 package eu.chessdata.data.simplesql;
 
+import java.util.Date;
+
 import ckm.simple.sql_provider.annotation.SimpleSQLColumn;
 import ckm.simple.sql_provider.annotation.SimpleSQLTable;
 
@@ -36,6 +38,20 @@ public class RoundPlayerSql {
 
     public RoundPlayerSql() {
     }
+
+    public RoundPlayerSql(Long roundId, String profileId, String profileName) {
+        this.roundId = roundId;
+        this.profileId = profileId;
+        this.profileName = profileName;
+
+        this.isPared =  false;
+        long date = new Date().getTime();
+        this.dateCreated = date;
+        this.updateStamp = date;
+    }
+
+
+
 
     //specific
     public boolean getIsPared(){
