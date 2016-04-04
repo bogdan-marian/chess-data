@@ -19,6 +19,7 @@ import android.widget.TextView;
 
 import eu.chessdata.R;
 import eu.chessdata.data.simplesql.RoundPlayerTable;
+import eu.chessdata.tools.MyGlobalTools;
 
 /**
  * Created by Bogdan Oloeriu on 28/03/2016.

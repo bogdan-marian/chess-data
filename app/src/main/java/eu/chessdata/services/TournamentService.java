@@ -721,13 +721,15 @@ public class TournamentService extends IntentService {
         Long lRoundId = Long.parseLong(roundId);
         String profileId = MyGlobalTools.getProfileIdByTournamentPlayerSqlId(mContentResolver, tournamentPlayerSqlId);
         String name = MyGlobalTools.getNameByProfileId(profileId);
-        RoundPlayerSql roundPlayerSql = new RoundPlayerSql(lRoundId, mProfileId, name);
+        RoundPlayerSql roundPlayerSql = new RoundPlayerSql(lRoundId, profileId, name);
 
+        Log.d(TAG, "Player not present wee are admin and wee should at it, "+ roundId+", " + profileId);
         Uri newUri = mContentResolver.insert(
                 RoundPlayerTable.CONTENT_URI,
                 RoundPlayerTable.getContentValues(roundPlayerSql,false)
         );
         MyGlobalTools.syncLocalRoundPlayers(mContentResolver, mIdTokenString);
-        //TODO finish this?
+        //TODO show players inside fragment and sinc to the cloud
+
     }
 }

@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
+import eu.chessdata.backend.tournamentEndpoint.model.Round;
 import eu.chessdata.backend.tournamentEndpoint.model.TournamentPlayer;
 import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ProfileTable;
@@ -288,11 +289,11 @@ public class MyGlobalTools {
         String projection[] = {ProfileTable.FIELD_NAME};
         String selection = ProfileTable.FIELD_PROFILEID + " =?";
         String selectionArgs[] = {profileId};
-        Cursor cursor = contentResolver.query(uri,projection,selection,selectionArgs,null);
+        Cursor cursor = contentResolver.query(uri, projection, selection, selectionArgs, null);
         int count = cursor.getCount();
-        if (count != 1){
+        if (count != 1) {
             String problem = "This selection should onways find one profile: " + profileId;
-            Log.e(TAG,problem);
+            Log.e(TAG, problem);
             throw new IllegalStateException(problem);
         }
         cursor.moveToFirst();
@@ -302,5 +303,35 @@ public class MyGlobalTools {
 
     public static void syncLocalRoundPlayers(ContentResolver contentResolver, String mIdTokenString) {
         //TODO finish this
+        Uri uri = RoundPlayerTable.CONTENT_URI;
+        String[] projection = {
+                RoundPlayerTable.FIELD__ID,
+                RoundPlayerTable.FIELD_ROUNDID,
+                RoundPlayerTable.FIELD_PROFILEID,
+                RoundPlayerTable.FIELD_ISPARED,
+                RoundPlayerTable.FIELD_DATECREATED,
+                RoundPlayerTable.FIELD_UPDATESTAMP
+        };
+        int IDX_FIELD__ID = 0;
+        int IDX_ROUNDID = 1;
+        int IDX_PROFILEID = 2;
+        int IDX_ISPARED = 3;
+        int IDX_DATECREATED = 4;
+        int IDX_UPDATESTAMP = 5;
+
+        String selection = RoundPlayerTable.FIELD_ROUNDPLAYERID + " IS NULL";
+        Cursor cursor = contentResolver.query(uri, projection, selection, null, null);
+
+        while (cursor.moveToNext()){
+            //create the service in the cloud
+            Long roundId = cursor.getLong(IDX_ROUNDID);
+            String profileId = cursor.getString(IDX_PROFILEID);
+            boolean isPared = cursor.getInt(IDX_ISPARED)==1? true: false;
+            Long dateCreated = cursor.getLong(IDX_DATECREATED);
+            Long updateStamp = cursor.getLong(IDX_UPDATESTAMP);
+            Log.d(TAG,"Debug: " + roundId+", "+ profileId+", " + isPared+", " + dateCreated+", " + updateStamp);
+            //TODO implement cloudCode
+        }
+        cursor.close();
     }
 }
