@@ -15,9 +15,11 @@ import java.util.Map;
 
 import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
 import eu.chessdata.backend.tournamentEndpoint.model.Round;
+import eu.chessdata.backend.tournamentEndpoint.model.RoundPlayer;
 import eu.chessdata.backend.tournamentEndpoint.model.TournamentPlayer;
 import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ProfileTable;
+import eu.chessdata.data.simplesql.RoundPlayerSql;
 import eu.chessdata.data.simplesql.RoundPlayerTable;
 import eu.chessdata.data.simplesql.RoundTable;
 import eu.chessdata.data.simplesql.TournamentPlayerTable;
@@ -301,7 +303,7 @@ public class MyGlobalTools {
         return name;
     }
 
-    public static void syncLocalRoundPlayers(ContentResolver contentResolver, String mIdTokenString) {
+    public static void syncLocalRoundPlayers(ContentResolver contentResolver, String idTokenString) {
         //TODO finish this
         Uri uri = RoundPlayerTable.CONTENT_URI;
         String[] projection = {
@@ -329,8 +331,48 @@ public class MyGlobalTools {
             boolean isPared = cursor.getInt(IDX_ISPARED)==1? true: false;
             Long dateCreated = cursor.getLong(IDX_DATECREATED);
             Long updateStamp = cursor.getLong(IDX_UPDATESTAMP);
-            Log.d(TAG,"Debug: " + roundId+", "+ profileId+", " + isPared+", " + dateCreated+", " + updateStamp);
-            //TODO implement cloudCode
+            Log.d(TAG, "Debug: " + roundId + ", " + profileId + ", " + isPared + ", " + dateCreated + ", " + updateStamp);
+
+            RoundPlayer roundPlayer = new RoundPlayer();
+            roundPlayer.setRoundId(roundId);
+            roundPlayer.setProfileId(profileId);
+            roundPlayer.setIsPared(isPared);
+            roundPlayer.setDateCreated(dateCreated);
+            roundPlayer.setUpdateStamp(updateStamp);
+
+            try{
+                RoundPlayer vipPlayer = tournamentEndpoint.roundAddPlayer(idTokenString,roundPlayer)
+                        .execute();
+                if (vipPlayer != null){
+                    String hackMessage = vipPlayer.getProfileId();
+                    String message = hackMessage.split(":")[0];
+                    if (message.equals("Not created")){
+                        Log.d(TAG,"Something happened: " + hackMessage);
+                        //TODO delete the seleted player from local sqlite
+                        continue;
+                    }
+                }
+
+                //update the current roundPlayer;
+                RoundPlayerSql roundPlayerSql = new RoundPlayerSql(vipPlayer);
+                ContentValues contentValues = RoundPlayerTable.getContentValues(roundPlayerSql,false);
+                String selectionB = RoundPlayerTable.FIELD__ID+" =?";
+                Long myId = cursor.getLong(0);
+                String selectionArgsB[] = {myId.toString()};
+                int rowsUpdated = contentResolver.update(
+                        RoundPlayerTable.CONTENT_URI,
+                        contentValues,
+                        selectionB,
+                        selectionArgsB
+                );
+                if (rowsUpdated != 1){
+                    String problem = "You should only update 1 roundPlayer";
+                    Log.e(TAG,problem);
+                    throw new IllegalStateException(problem);
+                }
+            }catch (IOException e){
+                Log.d(TAG, "Not able to update to cloud local tournamentPlayer: " + e);
+            }
         }
         cursor.close();
     }

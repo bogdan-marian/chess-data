@@ -18,6 +18,7 @@ import eu.chessdata.backend.entities.Club;
 import eu.chessdata.backend.entities.ClubMember;
 import eu.chessdata.backend.entities.Profile;
 import eu.chessdata.backend.entities.Round;
+import eu.chessdata.backend.entities.RoundPlayer;
 import eu.chessdata.backend.entities.SupportObject;
 import eu.chessdata.backend.entities.Tournament;
 import eu.chessdata.backend.entities.TournamentPlayer;
@@ -104,6 +105,7 @@ public class TournamentEndpoint {
         Tournament tournament = ofy().load().type(Tournament.class).id(tournamentPlayer.getTournamentId()).now();
         if (tournament == null) {
             illegalPlayer.setProfileId("Not created: Not able to locate tournament: " + tournamentPlayer.getTournamentId());
+            return illegalPlayer;
         }
 
         //check if current user is a club manager
@@ -271,5 +273,55 @@ public class TournamentEndpoint {
             rounds.add(round);
         }
         return rounds;
+    }
+
+    @ApiMethod(name = "roundAddPlayer", httpMethod = "post")
+    public RoundPlayer roundAddPlayer(@Named("idTokenString") String idTokenString,
+                                      RoundPlayer roundPlayer){
+        MyEntry<MySecurityService.Status, GoogleIdToken.Payload> secPair =
+                MySecurityService.getProfile(idTokenString);
+        RoundPlayer illegalPlayer = new RoundPlayer();
+        if (secPair.getKey() != MySecurityService.Status.VALID_USER){
+            illegalPlayer.setProfileId("Not created: Illegal idTokenString: " + idTokenString);
+            return illegalPlayer;
+        }
+
+        //find the round
+        Round round = ofy().load().type(Round.class).id(roundPlayer.getRoundId()).now();
+        if (round == null){
+            illegalPlayer.setProfileId("Not created: not able to find the round: " + roundPlayer.getRoundId());
+            return illegalPlayer;
+        }
+
+        //find the tournament
+        Tournament tournament = ofy().load().type(Tournament.class).id(round.getTournamentId()).now();
+        if (tournament == null) {
+            illegalPlayer.setProfileId("Not created: Not able to locate tournament: " + round.getTournamentId());
+            return illegalPlayer;
+        }
+
+        //check if current user is a club manager
+        String profileId = ((GoogleIdToken.Payload) secPair.getValue()).getSubject();
+        if (!MySecurityService.isClubManager(profileId, tournament.getClubId())) {
+            illegalPlayer.setProfileId("Not created: Illegal request not a club manager");
+            return illegalPlayer;
+        }
+
+        //check if new player is not already playing in the round
+        Query<RoundPlayer>q = ofy().load().type(RoundPlayer.class);
+        q=q.filter("roundId =", roundPlayer.getRoundId());
+        q = q.filter("profileId", roundPlayer.getProfileId());
+        for(RoundPlayer player : q){
+            return player;
+        }
+
+        //new tournament player so wee persist the data
+        final Key<RoundPlayer> roundPlayerKey = factory().allocateId(RoundPlayer.class);
+        roundPlayer.setRoundPlayerId(roundPlayerKey.getId());
+        Long time = (new Date()).getTime();
+        roundPlayer.setDateCreated(time);
+        roundPlayer.setUpdateStamp(time);
+        ofy().save().entity(roundPlayer).now();
+        return roundPlayer;
     }
 }

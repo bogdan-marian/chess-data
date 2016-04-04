@@ -4,6 +4,8 @@ import java.util.Date;
 
 import ckm.simple.sql_provider.annotation.SimpleSQLColumn;
 import ckm.simple.sql_provider.annotation.SimpleSQLTable;
+import eu.chessdata.backend.tournamentEndpoint.model.RoundPlayer;
+import eu.chessdata.tools.MyGlobalTools;
 
 /**
  * Created by Bogdan Oloeriu on 28/03/2016.
@@ -48,6 +50,16 @@ public class RoundPlayerSql {
         long date = new Date().getTime();
         this.dateCreated = date;
         this.updateStamp = date;
+    }
+
+    public RoundPlayerSql(RoundPlayer roundPlayer){
+        this.roundPlayerId = roundPlayer.getRoundPlayerId();
+        this.roundId = roundPlayer.getRoundId();
+        this.profileId = roundPlayer.getProfileId();
+        this.profileName = MyGlobalTools.getNameByProfileId(this.profileId);
+        this.isPared = roundPlayer.getIsPared();
+        this.dateCreated = roundPlayer.getDateCreated();
+        this.updateStamp = roundPlayer.getUpdateStamp();
     }
 
 
