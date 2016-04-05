@@ -14,7 +14,7 @@ public class RoundPlayer {
     @Index
     private Long roundId;
     private String profileId;
-    private boolean isPared;
+    private boolean pared;
     private long dateCreated;
     @Index
     private long updateStamp;
@@ -46,11 +46,11 @@ public class RoundPlayer {
     }
 
     public boolean isPared() {
-        return isPared;
+        return pared;
     }
 
-    public void setIsPared(boolean isPared) {
-        this.isPared = isPared;
+    public void setPared(boolean pared) {
+        this.pared = pared;
     }
 
     public long getDateCreated() {

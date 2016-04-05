@@ -328,15 +328,15 @@ public class MyGlobalTools {
             //create the service in the cloud
             Long roundId = cursor.getLong(IDX_ROUNDID);
             String profileId = cursor.getString(IDX_PROFILEID);
-            boolean isPared = cursor.getInt(IDX_ISPARED)==1? true: false;
+            boolean pared = cursor.getInt(IDX_ISPARED)==1? true: false;
             Long dateCreated = cursor.getLong(IDX_DATECREATED);
             Long updateStamp = cursor.getLong(IDX_UPDATESTAMP);
-            Log.d(TAG, "Debug: " + roundId + ", " + profileId + ", " + isPared + ", " + dateCreated + ", " + updateStamp);
+
 
             RoundPlayer roundPlayer = new RoundPlayer();
             roundPlayer.setRoundId(roundId);
             roundPlayer.setProfileId(profileId);
-            roundPlayer.setIsPared(isPared);
+            roundPlayer.setPared(pared);
             roundPlayer.setDateCreated(dateCreated);
             roundPlayer.setUpdateStamp(updateStamp);
 

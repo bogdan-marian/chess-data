@@ -57,7 +57,7 @@ public class RoundPlayerSql {
         this.roundId = roundPlayer.getRoundId();
         this.profileId = roundPlayer.getProfileId();
         this.profileName = MyGlobalTools.getNameByProfileId(this.profileId);
-        this.isPared = roundPlayer.getIsPared();
+        this.isPared = roundPlayer.getPared();
         this.dateCreated = roundPlayer.getDateCreated();
         this.updateStamp = roundPlayer.getUpdateStamp();
     }
