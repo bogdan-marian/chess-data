@@ -28,6 +28,8 @@ import eu.chessdata.backend.tournamentEndpoint.model.Profile;
 import eu.chessdata.backend.tournamentEndpoint.model.ProfileCollection;
 import eu.chessdata.backend.tournamentEndpoint.model.Round;
 import eu.chessdata.backend.tournamentEndpoint.model.RoundCollection;
+import eu.chessdata.backend.tournamentEndpoint.model.RoundPlayer;
+import eu.chessdata.backend.tournamentEndpoint.model.RoundPlayerCollection;
 import eu.chessdata.backend.tournamentEndpoint.model.SupportObject;
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
 import eu.chessdata.backend.tournamentEndpoint.model.TournamentCollection;
@@ -193,6 +195,7 @@ public class TournamentService extends IntentService {
         synchronizeTournaments();
         synchronizeTournamentPlayers();
         synchronizeRounds();
+        synchronizeRoundPlayers();
     }
 
     private void synchronizeClubMembers() {
@@ -706,6 +709,69 @@ public class TournamentService extends IntentService {
         }
     }
 
+    private void synchronizeRoundPlayers() {
+        //select all local rounds
+        Uri uri = RoundTable.CONTENT_URI;
+        String[] projection = {RoundTable.FIELD_ROUNDID};
+        int idx_roundId = 0;
+        Cursor cursor = mContentResolver.query(uri, projection, null, null, null);
+        List<Long> roundIds = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            roundIds.add(cursor.getLong(idx_roundId));
+        }
+        cursor.close();
+        if (roundIds.size() == 0) {
+            return;
+        }
+        SupportObject supportObject = new SupportObject();
+        supportObject.setMessage("Get round players");
+        supportObject.setLongList(roundIds);
+        try {
+            RoundPlayerCollection roundPlayerCollection = sTournamentEndpoint.getRoundPlayersByRoundIds(supportObject).execute();
+            List<RoundPlayer> roundPlayers = roundPlayerCollection.getItems();
+            if (roundPlayers == null) {
+                roundPlayers = new ArrayList<>();
+            }
+            Log.d(TAG, "Received roundPlayers = " + roundPlayers.size());
+            for (RoundPlayer roundPlayer : roundPlayers) {
+                Uri roundPlayerUri = RoundPlayerTable.CONTENT_URI;
+                String selection = RoundPlayerTable.FIELD_ROUNDPLAYERID + " =?";
+                String selectionArgs[] = {roundPlayer.getRoundPlayerId().toString()};
+                Cursor roundPlayerCursor = mContentResolver.query(roundPlayerUri, null, selection, selectionArgs, null);
+                int count = roundPlayerCursor.getCount();
+                if (count > 1) {
+                    String problem = "More then one roundPlayer with the same id";
+                    Log.e(TAG, problem);
+                    throw new IllegalStateException(problem);
+                } else if (count == 0) {
+                    mContentResolver.insert(roundPlayerUri, RoundPlayerTable.getContentValues(new RoundPlayerSql(roundPlayer), false));
+                } else if (count == 1){
+                    roundPlayerCursor.moveToFirst();
+                    int idx_updateStamp = roundPlayerCursor.getColumnIndex(RoundPlayerTable.FIELD_UPDATESTAMP);
+                    long stampLocal = roundPlayerCursor.getLong(idx_updateStamp);
+                    long stampCloud = roundPlayer.getUpdateStamp();
+                    //time to compare and decide
+                    if (stampLocal < stampCloud){
+                        //update local
+                        int rowsUpdated = mContentResolver.update(roundPlayerUri,
+                                RoundPlayerTable.getContentValues(new RoundPlayerSql(roundPlayer), false),
+                                selection,selectionArgs);
+                        if (rowsUpdated != 1){
+                            String problem = "You should update only one roundPlayerId " + roundPlayer.getRoundId();
+                            Log.e(TAG, problem);
+                            throw new IllegalStateException(problem);
+                        }
+                    }else if (stampLocal > stampCloud){
+                        Log.e(TAG, "Please implement this. Update round roundPlayer");
+                    }
+                }
+
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Some error on server side: " + e);
+        }
+    }
+
     public void handleActionCreateRoundPlayer(String roundId,
                                               String tournamentId,
                                               String tournamentPlayerSqlId) {
@@ -723,10 +789,10 @@ public class TournamentService extends IntentService {
         String name = MyGlobalTools.getNameByProfileId(profileId);
         RoundPlayerSql roundPlayerSql = new RoundPlayerSql(lRoundId, profileId, name);
 
-        Log.d(TAG, "Player not present wee are admin and wee should at it, "+ roundId+", " + profileId);
+        Log.d(TAG, "Player not present wee are admin and wee should at it, " + roundId + ", " + profileId);
         Uri newUri = mContentResolver.insert(
                 RoundPlayerTable.CONTENT_URI,
-                RoundPlayerTable.getContentValues(roundPlayerSql,false)
+                RoundPlayerTable.getContentValues(roundPlayerSql, false)
         );
         MyGlobalTools.syncLocalRoundPlayers(mContentResolver, mIdTokenString);
         //TODO show players inside fragment and sinc to the cloud
