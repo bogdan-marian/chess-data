@@ -70,6 +70,15 @@ public class RoundPresenceFragment extends Fragment implements LoaderManager.Loa
             }
         });
 
+        Button create = (Button) view.findViewById(R.id.presence_creage_games);
+        create.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CreateGamesDialog createGamesDialog = CreateGamesDialog.newInstance(mRoundId);
+                createGamesDialog.show(getFragmentManager(), "CreateGamesDialog");
+            }
+        });
+
         mRoundPresenceAdapter = new RoundPresenceAdapter(getActivity(), null, 0);
         ListView listView = (ListView) view.findViewById(R.id.round_presence_list_view);
         listView.setAdapter(mRoundPresenceAdapter);

@@ -39,6 +39,7 @@ import eu.chessdata.data.simplesql.ClubMemberSql;
 import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubSql;
 import eu.chessdata.data.simplesql.ClubTable;
+import eu.chessdata.data.simplesql.GameTable;
 import eu.chessdata.data.simplesql.ProfileSql;
 import eu.chessdata.data.simplesql.ProfileTable;
 import eu.chessdata.data.simplesql.RoundPlayerSql;
@@ -63,6 +64,7 @@ public class TournamentService extends IntentService {
     private static final String ACTION_TOURNAMENT_ADD_PLAYER = "eu.chessdata.services.action.ACTION_TOURNAMENT_ADD_PLAYER";
     private static final String ACTION_SYNCHRONIZE_ALL = "eu.chessdata.services.action.ACTION_SYNCHRONIZE_ALL";
     private static final String ACTION_CREATE_ROUND_PLAYER = "eu.chessdata.services.ACTION_CREATE_ROUND_PLAYER";
+    private static final String ACTION_GENERATE_GAMES = "eu.chessdata.services.ACTION_GENERATE_GAMES";
 
     private static final String EXTRA_JSON_TOURNAMENT = "eu.chessdata.services.extra.JSON_TOURNAMENT";
     private static final String EXTRA_TOURNAMENT_SQL_ID = "eu.chessdata.services.EXTRA_TOURNAMENT_SQL_ID";
@@ -126,6 +128,13 @@ public class TournamentService extends IntentService {
         context.startService(intent);
     }
 
+    public static void startActionGenerateGames(Context context, String roundId) {
+        Intent intent = new Intent(context, TournamentService.class);
+        intent.setAction(ACTION_GENERATE_GAMES);
+        intent.putExtra(EXTRA_ROUND_ID, roundId);
+        context.startService(intent);
+    }
+
     /**
      * creates json from tournament
      *
@@ -183,6 +192,9 @@ public class TournamentService extends IntentService {
                 final String tournamentId = intent.getStringExtra(EXTRA_TOURNAMENT_ID);
                 final String tournamentPlayerSqlId = intent.getStringExtra(EXTRA_TOURNAMENT_PLAYER_SQL_ID);
                 handleActionCreateRoundPlayer(roundId, tournamentId, tournamentPlayerSqlId);
+            } else if (ACTION_GENERATE_GAMES.equals(action)) {
+                final String roundId = intent.getStringExtra(EXTRA_ROUND_ID);
+                handleActionGenerateGames(roundId);
             }
         }
     }
@@ -745,23 +757,23 @@ public class TournamentService extends IntentService {
                     throw new IllegalStateException(problem);
                 } else if (count == 0) {
                     mContentResolver.insert(roundPlayerUri, RoundPlayerTable.getContentValues(new RoundPlayerSql(roundPlayer), false));
-                } else if (count == 1){
+                } else if (count == 1) {
                     roundPlayerCursor.moveToFirst();
                     int idx_updateStamp = roundPlayerCursor.getColumnIndex(RoundPlayerTable.FIELD_UPDATESTAMP);
                     long stampLocal = roundPlayerCursor.getLong(idx_updateStamp);
                     long stampCloud = roundPlayer.getUpdateStamp();
                     //time to compare and decide
-                    if (stampLocal < stampCloud){
+                    if (stampLocal < stampCloud) {
                         //update local
                         int rowsUpdated = mContentResolver.update(roundPlayerUri,
                                 RoundPlayerTable.getContentValues(new RoundPlayerSql(roundPlayer), false),
-                                selection,selectionArgs);
-                        if (rowsUpdated != 1){
+                                selection, selectionArgs);
+                        if (rowsUpdated != 1) {
                             String problem = "You should update only one roundPlayerId " + roundPlayer.getRoundId();
                             Log.e(TAG, problem);
                             throw new IllegalStateException(problem);
                         }
-                    }else if (stampLocal > stampCloud){
+                    } else if (stampLocal > stampCloud) {
                         Log.e(TAG, "Please implement this. Update round roundPlayer");
                     }
                 }
@@ -797,5 +809,30 @@ public class TournamentService extends IntentService {
         MyGlobalTools.syncLocalRoundPlayers(mContentResolver, mIdTokenString);
         //TODO show players inside fragment and sinc to the cloud
 
+    }
+
+
+    private void handleActionGenerateGames(String roundId) {
+        //verify that there are no games created:
+        Uri verifyUri = GameTable.CONTENT_URI;
+        String verifySelection = GameTable.FIELD_ROUNDID + " =?";
+        String verifySelectionArgs[] = {roundId};
+        Cursor verifyCursor = mContentResolver.query(verifyUri, null, verifySelection, verifySelectionArgs, null);
+        int count = verifyCursor.getCount();
+        verifyCursor.close();
+        if (count > 0) {
+            return;
+        }
+        //select the palyers
+        Uri playersUri = RoundPlayerTable.CONTENT_URI;
+        String playersProjection[] = {RoundPlayerTable.FIELD_PROFILEID};
+        int idx_profileId = 0;
+        String playersSelection = RoundPlayerTable.FIELD_ROUNDID + " =?";
+        String playersSelectionArgs[] = {roundId};
+        Cursor playersCursor = mContentResolver.query(playersUri, playersProjection, playersSelection, playersSelectionArgs, null);
+        while(playersCursor.moveToNext()){
+            Log.d(TAG,"PlayerID = " + playersCursor.getLong(0));
+        }
+        playersCursor.close();
     }
 }
