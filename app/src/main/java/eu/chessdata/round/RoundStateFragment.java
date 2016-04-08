@@ -108,21 +108,17 @@ public class RoundStateFragment extends Fragment {
         Cursor gameCursor = mContentResolver.query(gameUri, null, gameSelection, gameArgs, null);
         mGameCount = gameCursor.getCount();
         gameCursor.close();
-
-        //compute roundId
-        //Uri roundUri = RoundTable.CONTENT_URI;
     }
 
     private void configureVisibility() {
-        //if (mGameCount > 0) {}
-        if (mRoundNumber % 2 == 1) {
+        if (mGameCount == 0) {
             showPresence();
         } else {
             showGames();
         }
     }
 
-    private void showPresence() {
+    protected void showPresence() {
         String roundNumber = mRoundNumber + "";
         RoundPresenceFragment mPresenceFragment = RoundPresenceFragment.newInstance(mTournamentId, mTournamentName, mRoundId, roundNumber);
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
@@ -130,7 +126,7 @@ public class RoundStateFragment extends Fragment {
         transaction.commit();
     }
 
-    private void showGames() {
+    protected void showGames() {
         String roundNumber = mRoundNumber + "";
         RoundGamesFragment gamesFragment = RoundGamesFragment.newInstance(mTournamentId, mTournamentName, mRoundId, roundNumber);
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();

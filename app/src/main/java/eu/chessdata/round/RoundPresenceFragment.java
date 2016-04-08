@@ -74,7 +74,8 @@ public class RoundPresenceFragment extends Fragment implements LoaderManager.Loa
         create.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CreateGamesDialog createGamesDialog = CreateGamesDialog.newInstance(mRoundId);
+                RoundStateFragment roundStateFragment = (RoundStateFragment) getParentFragment();
+                CreateGamesDialog createGamesDialog = CreateGamesDialog.newInstance(mRoundId, roundStateFragment);
                 createGamesDialog.show(getFragmentManager(), "CreateGamesDialog");
             }
         });

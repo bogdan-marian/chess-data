@@ -325,7 +325,6 @@ public class MyGlobalTools {
         Cursor cursor = contentResolver.query(uri, projection, selection, null, null);
 
         while (cursor.moveToNext()) {
-            //create the service in the cloud
             Long roundId = cursor.getLong(IDX_ROUNDID);
             String profileId = cursor.getString(IDX_PROFILEID);
             boolean pared = cursor.getInt(IDX_ISPARED) == 1 ? true : false;

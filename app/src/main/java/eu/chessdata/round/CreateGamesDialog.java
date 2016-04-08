@@ -13,10 +13,12 @@ import eu.chessdata.services.TournamentService;
  */
 public class CreateGamesDialog extends DialogFragment{
     private String mRoundId;
+    private RoundStateFragment mRoundStateFragment;
 
-    public static CreateGamesDialog newInstance (String roundId){
+    public static CreateGamesDialog newInstance (String roundId, RoundStateFragment roundStateFragment){
         CreateGamesDialog dialog = new CreateGamesDialog();
         dialog.mRoundId = roundId;
+        dialog.mRoundStateFragment = roundStateFragment;
         return  dialog;
     }
 
@@ -29,6 +31,7 @@ public class CreateGamesDialog extends DialogFragment{
             public void onClick(DialogInterface dialog, int which) {
                 //todo generate games
                 TournamentService.startActionGenerateGames(getContext(), mRoundId);
+                mRoundStateFragment.showGames();
             }
         });
         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
