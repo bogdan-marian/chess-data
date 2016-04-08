@@ -20,9 +20,10 @@ public class Game {
     private String blackPlayerId;
 
     /**
-     * 0 white player wins
-     * 1 black player wins
-     * 2 draw game
+     * 0 still not decided
+     * 1 white player wins
+     * 2 black player wins
+     * 3 draw game
      */
     @Index
     private int result;

@@ -39,6 +39,7 @@ import eu.chessdata.data.simplesql.ClubMemberSql;
 import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubSql;
 import eu.chessdata.data.simplesql.ClubTable;
+import eu.chessdata.data.simplesql.GameSql;
 import eu.chessdata.data.simplesql.GameTable;
 import eu.chessdata.data.simplesql.ProfileSql;
 import eu.chessdata.data.simplesql.ProfileTable;
@@ -830,8 +831,24 @@ public class TournamentService extends IntentService {
         String playersSelection = RoundPlayerTable.FIELD_ROUNDID + " =?";
         String playersSelectionArgs[] = {roundId};
         Cursor playersCursor = mContentResolver.query(playersUri, playersProjection, playersSelection, playersSelectionArgs, null);
+        List<GameSql> games = new ArrayList<>();
+        int i = 0;
+        int tableNumber = 0;
         while(playersCursor.moveToNext()){
-            Log.d(TAG,"PlayerID = " + playersCursor.getLong(0));
+            i++;
+            String whitePlayerId = null;
+            String blackPlayerId = null;
+            if (i%2==1){
+                tableNumber++;
+                whitePlayerId = playersCursor.getString(idx_profileId);
+            }else{
+                blackPlayerId = playersCursor.getString(idx_profileId);
+                //time to create the game
+                Long lRoundId = Long.parseLong(roundId);
+                int result = 0;//still not decided
+                GameSql game = new GameSql(lRoundId,tableNumber,whitePlayerId,blackPlayerId,result);
+                //create the g
+            }
         }
         playersCursor.close();
     }

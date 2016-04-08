@@ -1,5 +1,7 @@
 package eu.chessdata.data.simplesql;
 
+import java.util.Date;
+
 import ckm.simple.sql_provider.annotation.SimpleSQLColumn;
 import ckm.simple.sql_provider.annotation.SimpleSQLTable;
 
@@ -38,6 +40,21 @@ public class GameSql {
     //constructors
 
     public GameSql() {
+    }
+
+    public GameSql(Long roundId,
+                   int tableNumber,
+                   String whitePlayerId,
+                   String blackPlayerId,
+                   int result){
+        this.roundId = roundId;
+        this.tableNumber = tableNumber;
+        this.whitePlayerId = whitePlayerId;
+        this.blackPlayerId = blackPlayerId;
+        this.result = result;
+        long date = new Date().getTime();
+        this.dateCreated = date;
+        this.updateStamp = date;
     }
 
 
