@@ -18,6 +18,7 @@ import eu.chessdata.backend.tournamentEndpoint.model.Round;
 import eu.chessdata.backend.tournamentEndpoint.model.RoundPlayer;
 import eu.chessdata.backend.tournamentEndpoint.model.TournamentPlayer;
 import eu.chessdata.data.simplesql.ClubMemberTable;
+import eu.chessdata.data.simplesql.GameTable;
 import eu.chessdata.data.simplesql.ProfileTable;
 import eu.chessdata.data.simplesql.RoundPlayerSql;
 import eu.chessdata.data.simplesql.RoundPlayerTable;
@@ -304,7 +305,6 @@ public class MyGlobalTools {
     }
 
     public static void syncLocalRoundPlayers(ContentResolver contentResolver, String idTokenString) {
-        //TODO finish this
         Uri uri = RoundPlayerTable.CONTENT_URI;
         String[] projection = {
                 RoundPlayerTable.FIELD__ID,
@@ -324,11 +324,11 @@ public class MyGlobalTools {
         String selection = RoundPlayerTable.FIELD_ROUNDPLAYERID + " IS NULL";
         Cursor cursor = contentResolver.query(uri, projection, selection, null, null);
 
-        while (cursor.moveToNext()){
+        while (cursor.moveToNext()) {
             //create the service in the cloud
             Long roundId = cursor.getLong(IDX_ROUNDID);
             String profileId = cursor.getString(IDX_PROFILEID);
-            boolean pared = cursor.getInt(IDX_ISPARED)==1? true: false;
+            boolean pared = cursor.getInt(IDX_ISPARED) == 1 ? true : false;
             Long dateCreated = cursor.getLong(IDX_DATECREATED);
             Long updateStamp = cursor.getLong(IDX_UPDATESTAMP);
 
@@ -340,14 +340,14 @@ public class MyGlobalTools {
             roundPlayer.setDateCreated(dateCreated);
             roundPlayer.setUpdateStamp(updateStamp);
 
-            try{
-                RoundPlayer vipPlayer = tournamentEndpoint.roundAddPlayer(idTokenString,roundPlayer)
+            try {
+                RoundPlayer vipPlayer = tournamentEndpoint.roundAddPlayer(idTokenString, roundPlayer)
                         .execute();
-                if (vipPlayer != null){
+                if (vipPlayer != null) {
                     String hackMessage = vipPlayer.getProfileId();
                     String message = hackMessage.split(":")[0];
-                    if (message.equals("Not created")){
-                        Log.d(TAG,"Something happened: " + hackMessage);
+                    if (message.equals("Not created")) {
+                        Log.d(TAG, "Something happened: " + hackMessage);
                         //TODO delete the seleted player from local sqlite
                         continue;
                     }
@@ -355,8 +355,8 @@ public class MyGlobalTools {
 
                 //update the current roundPlayer;
                 RoundPlayerSql roundPlayerSql = new RoundPlayerSql(vipPlayer);
-                ContentValues contentValues = RoundPlayerTable.getContentValues(roundPlayerSql,false);
-                String selectionB = RoundPlayerTable.FIELD__ID+" =?";
+                ContentValues contentValues = RoundPlayerTable.getContentValues(roundPlayerSql, false);
+                String selectionB = RoundPlayerTable.FIELD__ID + " =?";
                 Long myId = cursor.getLong(0);
                 String selectionArgsB[] = {myId.toString()};
                 int rowsUpdated = contentResolver.update(
@@ -365,15 +365,41 @@ public class MyGlobalTools {
                         selectionB,
                         selectionArgsB
                 );
-                if (rowsUpdated != 1){
+                if (rowsUpdated != 1) {
                     String problem = "You should only update 1 roundPlayer";
-                    Log.e(TAG,problem);
+                    Log.e(TAG, problem);
                     throw new IllegalStateException(problem);
                 }
-            }catch (IOException e){
+            } catch (IOException e) {
                 Log.d(TAG, "Not able to update to cloud local tournamentPlayer: " + e);
             }
         }
         cursor.close();
+    }
+
+    public static void syncLocalGames(ContentResolver contentResolver, String idTokenString) {
+        Uri uri = GameTable.CONTENT_URI;
+        String[] projection = {
+                GameTable.FIELD_ROUNDID,
+                GameTable.FIELD_TABLENUMBER,
+                GameTable.FIELD_WHITEPLAYERID,
+                GameTable.FIELD_BLACKPLAYERID,
+                GameTable.FIELD_RESULT,
+                GameTable.FIELD_DATECREATED,
+                GameTable.FIELD_UPDATESTAMP
+        };
+        int idx_roundId = 0;
+        int idx_tableNumber = 1;
+        int idx_whitePlayerId = 2;
+        int idx_blackPlayerId = 3;
+        int idx_result = 4;
+        int idx_dateCreated = 5;
+        int idx_updateStamp = 6;
+
+        String selection = GameTable.FIELD_GAMEID + " IS NULL";
+        Cursor cursor = contentResolver.query(uri, projection, selection, null, null);
+        while(cursor.moveToNext()){
+            Log.d(TAG,"Sql tableNumber: " + cursor.getInt(idx_tableNumber));
+        }
     }
 }

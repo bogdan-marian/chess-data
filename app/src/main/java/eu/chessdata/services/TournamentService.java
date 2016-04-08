@@ -847,9 +847,13 @@ public class TournamentService extends IntentService {
                 Long lRoundId = Long.parseLong(roundId);
                 int result = 0;//still not decided
                 GameSql game = new GameSql(lRoundId,tableNumber,whitePlayerId,blackPlayerId,result);
-                //create the g
+                Uri newUri = mContentResolver.insert(
+                        GameTable.CONTENT_URI,
+                        GameTable.getContentValues(game,false)
+                );
             }
         }
         playersCursor.close();
+        MyGlobalTools.syncLocalGames(mContentResolver, mIdTokenString);
     }
 }
