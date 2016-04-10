@@ -24,7 +24,7 @@ import eu.chessdata.data.simplesql.RoundPlayerTable;
  */
 public class RoundGamesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = "my-debug-tag";
-    private static final int GAMES_LOADER = 0;
+    private static final int GAMES_LOADER = 1;
 
     private String mTournamentId;
     private String mTournamentName;
@@ -74,6 +74,7 @@ public class RoundGamesFragment extends Fragment implements LoaderManager.Loader
         String selection = GameTable.FIELD_ROUNDID + " =?";
         String selectionArgs[] = {mRoundId};
         String sortOrder = GameTable.FIELD_TABLENUMBER + " ASC";
+
         Loader<Cursor> cursorLoader = new CursorLoader(
                 getContext(),
                 uri,
@@ -82,7 +83,7 @@ public class RoundGamesFragment extends Fragment implements LoaderManager.Loader
                 selectionArgs,
                 sortOrder
         );
-        return null;
+        return cursorLoader;
     }
 
     @Override

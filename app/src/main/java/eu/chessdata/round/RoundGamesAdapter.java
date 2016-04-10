@@ -29,6 +29,7 @@ public class RoundGamesAdapter extends CursorAdapter{
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
         TextView textView = (TextView) view.findViewById(R.id.list_item_text_general_view);
+        textView.setText(getCursorData(cursor));
     }
 
     private String getCursorData(Cursor cursor){
@@ -36,11 +37,14 @@ public class RoundGamesAdapter extends CursorAdapter{
         int idx_blackId = cursor.getColumnIndex(GameTable.FIELD_BLACKPLAYERID);
         int idx_result = cursor.getColumnIndex(GameTable.FIELD_RESULT);
         int idx_tableNr = cursor.getColumnIndex(GameTable.FIELD_TABLENUMBER);
+
+        String whiteId = cursor.getString(idx_whiteId);
+        String blackId = cursor.getString(idx_blackId);
+
         StringBuilder sb = new StringBuilder();
         sb.append(cursor.getInt(idx_tableNr)+". ");
-        sb.append(MyGlobalTools.getNameByProfileId(cursor.getString(idx_whiteId))+" vs ");
-        sb.append(MyGlobalTools.getNameByProfileId(cursor.getString(idx_blackId))+" \n\t");
-        sb.append(getResult(cursor.getInt(idx_result)));
+        sb.append(MyGlobalTools.getNameByProfileId(whiteId)+" "+getResult(cursor.getInt(idx_result)));
+        sb.append(MyGlobalTools.getNameByProfileId(blackId));
 
         return sb.toString();
     }

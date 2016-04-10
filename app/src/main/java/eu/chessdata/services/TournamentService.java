@@ -834,10 +834,13 @@ public class TournamentService extends IntentService {
         List<GameSql> games = new ArrayList<>();
         int i = 0;
         int tableNumber = 0;
+        String whitePlayerId = null;
+        String blackPlayerId = null;
         while(playersCursor.moveToNext()){
+            String id = playersCursor.getString(idx_profileId);
+            String name = MyGlobalTools.getNameByProfileId(id);
+            Log.d(TAG,id+", " + name);
             i++;
-            String whitePlayerId = null;
-            String blackPlayerId = null;
             if (i%2==1){
                 tableNumber++;
                 whitePlayerId = playersCursor.getString(idx_profileId);
@@ -851,6 +854,8 @@ public class TournamentService extends IntentService {
                         GameTable.CONTENT_URI,
                         GameTable.getContentValues(game,false)
                 );
+                whitePlayerId = null;
+                blackPlayerId = null;
             }
         }
         playersCursor.close();
