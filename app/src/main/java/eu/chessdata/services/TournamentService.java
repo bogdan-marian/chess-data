@@ -832,27 +832,37 @@ public class TournamentService extends IntentService {
         String playersSelectionArgs[] = {roundId};
         Cursor playersCursor = mContentResolver.query(playersUri, playersProjection, playersSelection, playersSelectionArgs, null);
         List<GameSql> games = new ArrayList<>();
+        int playersCount = playersCursor.getCount();
         int i = 0;
         int tableNumber = 0;
         String whitePlayerId = null;
         String blackPlayerId = null;
-        while(playersCursor.moveToNext()){
+        while (playersCursor.moveToNext()) {
             String id = playersCursor.getString(idx_profileId);
             String name = MyGlobalTools.getNameByProfileId(id);
-            Log.d(TAG,id+", " + name);
+            Log.d(TAG, id + ", " + name);
             i++;
-            if (i%2==1){
+            if (i % 2 == 1) {
                 tableNumber++;
                 whitePlayerId = playersCursor.getString(idx_profileId);
-            }else{
+                if (i == playersCount) {
+                    //this is a player that has no partner
+                    Long lRoundId = Long.parseLong(roundId);
+                    int result = 4;//no partner
+                    GameSql game = new GameSql(lRoundId, tableNumber, whitePlayerId, null, result);
+                    Uri newUri = mContentResolver.insert(
+                            GameTable.CONTENT_URI,
+                            GameTable.getContentValues(game, false));
+                }
+            } else {
                 blackPlayerId = playersCursor.getString(idx_profileId);
                 //time to create the game
                 Long lRoundId = Long.parseLong(roundId);
                 int result = 0;//still not decided
-                GameSql game = new GameSql(lRoundId,tableNumber,whitePlayerId,blackPlayerId,result);
+                GameSql game = new GameSql(lRoundId, tableNumber, whitePlayerId, blackPlayerId, result);
                 Uri newUri = mContentResolver.insert(
                         GameTable.CONTENT_URI,
-                        GameTable.getContentValues(game,false)
+                        GameTable.getContentValues(game, false)
                 );
                 whitePlayerId = null;
                 blackPlayerId = null;

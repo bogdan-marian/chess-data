@@ -14,12 +14,4 @@
         android:id="@+id/round_games_list_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"></ListView>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="----------------"/>
-    <ListView
-        android:id="@+id/round_games_not_paired_list_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"></ListView>
 </LinearLayout>
