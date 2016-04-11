@@ -24,6 +24,7 @@ public class Game {
      * 1 white player wins
      * 2 black player wins
      * 3 draw game
+     * 4 no partner
      */
     @Index
     private int result;
