@@ -14,15 +14,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import eu.chessdata.backend.tournamentEndpoint.TournamentEndpoint;
-import eu.chessdata.backend.tournamentEndpoint.model.Round;
+import eu.chessdata.backend.tournamentEndpoint.model.Game;
 import eu.chessdata.backend.tournamentEndpoint.model.RoundPlayer;
 import eu.chessdata.backend.tournamentEndpoint.model.TournamentPlayer;
 import eu.chessdata.data.simplesql.ClubMemberTable;
+import eu.chessdata.data.simplesql.GameSql;
 import eu.chessdata.data.simplesql.GameTable;
 import eu.chessdata.data.simplesql.ProfileTable;
 import eu.chessdata.data.simplesql.RoundPlayerSql;
 import eu.chessdata.data.simplesql.RoundPlayerTable;
-import eu.chessdata.data.simplesql.RoundTable;
 import eu.chessdata.data.simplesql.TournamentPlayerTable;
 import eu.chessdata.data.simplesql.TournamentTable;
 
@@ -356,7 +356,7 @@ public class MyGlobalTools {
                 RoundPlayerSql roundPlayerSql = new RoundPlayerSql(vipPlayer);
                 ContentValues contentValues = RoundPlayerTable.getContentValues(roundPlayerSql, false);
                 String selectionB = RoundPlayerTable.FIELD__ID + " =?";
-                Long myId = cursor.getLong(0);
+                Long myId = cursor.getLong(IDX_FIELD__ID);
                 String selectionArgsB[] = {myId.toString()};
                 int rowsUpdated = contentResolver.update(
                         RoundPlayerTable.CONTENT_URI,
@@ -385,8 +385,10 @@ public class MyGlobalTools {
                 GameTable.FIELD_BLACKPLAYERID,
                 GameTable.FIELD_RESULT,
                 GameTable.FIELD_DATECREATED,
-                GameTable.FIELD_UPDATESTAMP
+                GameTable.FIELD_UPDATESTAMP,
+                GameTable.FIELD__ID
         };
+        int idx_field__id = 7;
         int idx_roundId = 0;
         int idx_tableNumber = 1;
         int idx_whitePlayerId = 2;
@@ -397,8 +399,58 @@ public class MyGlobalTools {
 
         String selection = GameTable.FIELD_GAMEID + " IS NULL";
         Cursor cursor = contentResolver.query(uri, projection, selection, null, null);
-        while(cursor.moveToNext()){
-            Log.d(TAG,"Sql tableNumber: " + cursor.getInt(idx_tableNumber));
+        while (cursor.moveToNext()) {
+            Log.d(TAG, "Sql tableNumber: " + cursor.getInt(idx_tableNumber));
+
+            Long roundId = cursor.getLong(idx_roundId);
+            int tableNumber = cursor.getInt(idx_tableNumber);
+            String whiteId = cursor.getString(idx_whitePlayerId);
+            String blackId = cursor.getString(idx_blackPlayerId);
+            int result = cursor.getInt(idx_result);
+            Long dateCreated = cursor.getLong(idx_dateCreated);
+            Long updateStamp = cursor.getLong(idx_updateStamp);
+
+            Game game = new Game();
+            game.setRoundId(roundId);
+            game.setTableNumber(tableNumber);
+            game.setWhitePlayerId(whiteId);
+            game.setBlackPlayerId(blackId);
+            game.setResult(result);
+            game.setDateCreated(dateCreated);
+            game.setUpdateStamp(updateStamp);
+
+            try {
+                Game vipGame = tournamentEndpoint.gameCreateGame(idTokenString, game).execute();
+                if (vipGame != null) {
+                    String hackMessage = vipGame.getWhitePlayerId();
+                    String message = hackMessage.split(":")[0];
+                    if (message.equals("Not created")) {
+                        Log.d(TAG, "Something happened: " + hackMessage);
+                        //TODO delete the selected game from local sqlite
+                        continue;
+                    }
+                }
+
+                //update the current game;
+                GameSql gameSql = new GameSql(vipGame);
+                ContentValues contentValues = GameTable.getContentValues(gameSql, false);
+                String selectionB = GameTable.FIELD__ID + " =?";
+                Long myId = cursor.getLong(idx_field__id);
+                String selectionArgsB[] = {myId.toString()};
+                int rowsUpdated = contentResolver.update(
+                        GameTable.CONTENT_URI,
+                        contentValues,
+                        selectionB,
+                        selectionArgsB
+                );
+                if (rowsUpdated != 1) {
+                    String problem = "You should only update 1 game";
+                    Log.e(TAG, problem);
+                    throw new IllegalStateException(problem);
+                }
+            } catch (IOException e) {
+                Log.d(TAG, "Not able to update to cloud local game: " + e);
+            }
         }
     }
 }

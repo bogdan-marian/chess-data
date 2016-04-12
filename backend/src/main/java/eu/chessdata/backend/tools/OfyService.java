@@ -6,6 +6,7 @@ import com.googlecode.objectify.ObjectifyService;
 
 import eu.chessdata.backend.entities.Club;
 import eu.chessdata.backend.entities.ClubMember;
+import eu.chessdata.backend.entities.Game;
 import eu.chessdata.backend.entities.Profile;
 import eu.chessdata.backend.entities.Round;
 import eu.chessdata.backend.entities.RoundPlayer;
@@ -27,6 +28,7 @@ public class OfyService {
         ObjectifyService.register(Round.class);
         ObjectifyService.register(TournamentPlayer.class);
         ObjectifyService.register(RoundPlayer.class);
+        ObjectifyService.register(Game.class);
     }
 
     public static Objectify ofy(){

@@ -4,6 +4,7 @@ import java.util.Date;
 
 import ckm.simple.sql_provider.annotation.SimpleSQLColumn;
 import ckm.simple.sql_provider.annotation.SimpleSQLTable;
+import eu.chessdata.backend.tournamentEndpoint.model.Game;
 
 /**
  * Created by Bogdan Oloeriu on 28/03/2016.
@@ -55,6 +56,17 @@ public class GameSql {
         long date = new Date().getTime();
         this.dateCreated = date;
         this.updateStamp = date;
+    }
+
+    public GameSql(Game game) {
+        this.gameId = game.getGameId();
+        this.roundId = game.getRoundId();
+        this.tableNumber = game.getTableNumber();
+        this.whitePlayerId = game.getWhitePlayerId();
+        this.blackPlayerId = game.getBlackPlayerId();
+        this.result = game.getResult();
+        this.dateCreated = game.getDateCreated();
+        this.updateStamp = game.getUpdateStamp();
     }
 
 

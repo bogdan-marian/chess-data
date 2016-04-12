@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 
 import eu.chessdata.backend.entities.Club;
 import eu.chessdata.backend.entities.ClubMember;
+import eu.chessdata.backend.entities.Game;
 import eu.chessdata.backend.entities.Profile;
 import eu.chessdata.backend.entities.Round;
 import eu.chessdata.backend.entities.RoundPlayer;
@@ -244,46 +245,46 @@ public class TournamentEndpoint {
     }
 
     @ApiMethod(name = "getTournamentPlayersByTournamentIds", httpMethod = "post")
-    public List<TournamentPlayer> getTournamentPlayersByTournamentIds(SupportObject supportObject){
-        List<Long>tournamentIds = supportObject.getLongList();
-        if (tournamentIds.size() == 0){
+    public List<TournamentPlayer> getTournamentPlayersByTournamentIds(SupportObject supportObject) {
+        List<Long> tournamentIds = supportObject.getLongList();
+        if (tournamentIds.size() == 0) {
             return new ArrayList<>();
         }
 
         //find tournamentPlayers
-        List<TournamentPlayer>tournamentPlayers = new ArrayList<>();
+        List<TournamentPlayer> tournamentPlayers = new ArrayList<>();
         SimpleQuery<TournamentPlayer> playersQuery = ofy().load().type(TournamentPlayer.class).filter("tournamentId in", tournamentIds);
-        for (TournamentPlayer tournamentPlayer: playersQuery){
+        for (TournamentPlayer tournamentPlayer : playersQuery) {
             tournamentPlayers.add(tournamentPlayer);
         }
         return tournamentPlayers;
     }
 
     @ApiMethod(name = "getRoundsByTournamentIds", httpMethod = "post")
-    public List<Round> getRoundsByTournamentIds(SupportObject supportObject){
-        List<Long>tournamentIds = supportObject.getLongList();
-        if (tournamentIds.size() == 0){
+    public List<Round> getRoundsByTournamentIds(SupportObject supportObject) {
+        List<Long> tournamentIds = supportObject.getLongList();
+        if (tournamentIds.size() == 0) {
             return new ArrayList<>();
         }
 
         //find rounds
         List<Round> rounds = new ArrayList<>();
         SimpleQuery<Round> roundsQuery = ofy().load().type(Round.class).filter("tournamentId in", tournamentIds);
-        for (Round round: roundsQuery){
+        for (Round round : roundsQuery) {
             rounds.add(round);
         }
         return rounds;
     }
 
     @ApiMethod(name = "getRoundPlayersByRoundIds", httpMethod = "post")
-    public List<RoundPlayer> getRoundPlayersByRoundIds(SupportObject supportObject){
+    public List<RoundPlayer> getRoundPlayersByRoundIds(SupportObject supportObject) {
         List<Long> roundIds = supportObject.getLongList();
-        if (roundIds.size() == 0){
+        if (roundIds.size() == 0) {
             return new ArrayList<>();
         }
         List<RoundPlayer> roundPlayers = new ArrayList<>();
         SimpleQuery<RoundPlayer> roundPlayerQuery = ofy().load().type(RoundPlayer.class).filter("roundId in", roundIds);
-        for (RoundPlayer roundPlayer: roundPlayerQuery){
+        for (RoundPlayer roundPlayer : roundPlayerQuery) {
             roundPlayers.add(roundPlayer);
         }
         return roundPlayers;
@@ -291,18 +292,18 @@ public class TournamentEndpoint {
 
     @ApiMethod(name = "roundAddPlayer", httpMethod = "post")
     public RoundPlayer roundAddPlayer(@Named("idTokenString") String idTokenString,
-                                      RoundPlayer roundPlayer){
+                                      RoundPlayer roundPlayer) {
         MyEntry<MySecurityService.Status, GoogleIdToken.Payload> secPair =
                 MySecurityService.getProfile(idTokenString);
         RoundPlayer illegalPlayer = new RoundPlayer();
-        if (secPair.getKey() != MySecurityService.Status.VALID_USER){
+        if (secPair.getKey() != MySecurityService.Status.VALID_USER) {
             illegalPlayer.setProfileId("Not created: Illegal idTokenString: " + idTokenString);
             return illegalPlayer;
         }
 
         //find the round
         Round round = ofy().load().type(Round.class).id(roundPlayer.getRoundId()).now();
-        if (round == null){
+        if (round == null) {
             illegalPlayer.setProfileId("Not created: not able to find the round: " + roundPlayer.getRoundId());
             return illegalPlayer;
         }
@@ -322,10 +323,10 @@ public class TournamentEndpoint {
         }
 
         //check if new player is not already playing in the round
-        Query<RoundPlayer>q = ofy().load().type(RoundPlayer.class);
-        q=q.filter("roundId =", roundPlayer.getRoundId());
+        Query<RoundPlayer> q = ofy().load().type(RoundPlayer.class);
+        q = q.filter("roundId =", roundPlayer.getRoundId());
         q = q.filter("profileId", roundPlayer.getProfileId());
-        for(RoundPlayer player : q){
+        for (RoundPlayer player : q) {
             return player;
         }
 
@@ -337,5 +338,57 @@ public class TournamentEndpoint {
         roundPlayer.setUpdateStamp(time);
         ofy().save().entity(roundPlayer).now();
         return roundPlayer;
+    }
+
+    @ApiMethod(name = "gameCreateGame", httpMethod = "post")
+    public Game gameCreateGame(@Named("idTokenString") String idTokenString,
+                               Game game) {
+        //check if idTokenString exists
+        MyEntry<MySecurityService.Status, GoogleIdToken.Payload> secPair =
+                MySecurityService.getProfile(idTokenString);
+        Game illegalGame = new Game();
+        if (secPair.getKey() != MySecurityService.Status.VALID_USER) {
+            illegalGame.setWhitePlayerId("Not created: Illegal idTokenString: " + idTokenString);
+            return illegalGame;
+        }
+
+        //find the round
+        Round round = ofy().load().type(Round.class).id(game.getRoundId()).now();
+        if (round == null) {
+            illegalGame.setWhitePlayerId("Not created: not able to find the round: " + game.getRoundId());
+            return illegalGame;
+        }
+
+        //find the tournament
+        Tournament tournament = ofy().load().type(Tournament.class).id(round.getTournamentId()).now();
+        if (tournament == null) {
+            illegalGame.setWhitePlayerId("Not created: Not able to locate tournament: " + round.getTournamentId());
+            return illegalGame;
+        }
+
+        //check if current user is a club manager
+        String profileId = ((GoogleIdToken.Payload) secPair.getValue()).getSubject();
+        if (!MySecurityService.isClubManager(profileId, tournament.getClubId())) {
+            illegalGame.setWhitePlayerId("Not created: Illegal request not a club manager");
+            return illegalGame;
+        }
+
+        //check if new game is not already in datastore
+        Query<Game> q = ofy().load().type(Game.class);
+        q = q.filter("roundId =", game.getRoundId());
+        q = q.filter("tableNumber =", game.getTableNumber());
+        for (Game foundGame : q) {
+            return foundGame;
+        }
+
+        //new game so wee persist data
+        final Key<Game> gameKey = factory().allocateId(Game.class);
+        game.setGameId(gameKey.getId());
+        Long time = (new Date()).getTime();
+        game.setDateCreated(time);
+        game.setUpdateStamp(time);
+        ofy().save().entity(game).now();
+
+        return game;
     }
 }

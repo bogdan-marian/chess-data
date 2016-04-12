@@ -13,6 +13,7 @@ public class Game {
     private Long gameId;
     @Index
     private Long roundId;
+    @Index
     private int tableNumber;
     @Index
     private String whitePlayerId;
