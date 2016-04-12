@@ -24,6 +24,8 @@ import eu.chessdata.backend.tournamentEndpoint.model.Club;
 import eu.chessdata.backend.tournamentEndpoint.model.ClubCollection;
 import eu.chessdata.backend.tournamentEndpoint.model.ClubMember;
 import eu.chessdata.backend.tournamentEndpoint.model.ClubMemberCollection;
+import eu.chessdata.backend.tournamentEndpoint.model.Game;
+import eu.chessdata.backend.tournamentEndpoint.model.GameCollection;
 import eu.chessdata.backend.tournamentEndpoint.model.Profile;
 import eu.chessdata.backend.tournamentEndpoint.model.ProfileCollection;
 import eu.chessdata.backend.tournamentEndpoint.model.Round;
@@ -209,6 +211,7 @@ public class TournamentService extends IntentService {
         synchronizeTournamentPlayers();
         synchronizeRounds();
         synchronizeRoundPlayers();
+        synchronizeGames();
     }
 
     private void synchronizeClubMembers() {
@@ -785,6 +788,68 @@ public class TournamentService extends IntentService {
         }
     }
 
+    private void synchronizeGames(){
+        //select all local rounds
+        Uri uri = RoundTable.CONTENT_URI;
+        String[] projection = {RoundTable.FIELD_ROUNDID};
+        int idx_roundId = 0;
+        Cursor cursor = mContentResolver.query(uri, projection, null, null, null);
+        List<Long> roundIds = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            roundIds.add(cursor.getLong(idx_roundId));
+        }
+        cursor.close();
+        if (roundIds.size() == 0) {
+            return;
+        }
+        SupportObject supportObject = new SupportObject();
+        supportObject.setMessage("Get games");
+        supportObject.setLongList(roundIds);
+        try{
+            GameCollection gameCollection = sTournamentEndpoint.getGamesByRoundIds(supportObject).execute();
+            List<Game> games = gameCollection.getItems();
+            if (games == null){
+                games = new ArrayList<>();
+            }
+            Log.d(TAG,"Received games = " + games.size());
+            for (Game game: games){
+                Uri gameUri = GameTable.CONTENT_URI;
+                String selection = GameTable.FIELD_GAMEID + " =?";
+                String selectionArgs[] = {game.getGameId().toString()};
+                Cursor gameCursor = mContentResolver.query(gameUri,null,selection,selectionArgs,null);
+                int count = gameCursor.getCount();
+                if (count > 1){
+                    String problem = "More then one game with the same id";
+                    Log.e(TAG, problem);
+                    throw new IllegalStateException(problem);
+                }else if(count == 0){
+                    mContentResolver.insert(gameUri,GameTable.getContentValues(new GameSql(game),false));
+                }else if (count == 1){
+                    gameCursor.moveToFirst();
+                    int idx_updateStamp = gameCursor.getColumnIndex(GameTable.FIELD_UPDATESTAMP);
+                    long stampLocal = gameCursor.getLong(idx_updateStamp);
+                    long stampCloud = game.getUpdateStamp();
+                    //time to compare and ecide
+                    if (stampLocal < stampCloud){
+                        //update local
+                        int rowsUpdated = mContentResolver.update(gameUri,
+                                GameTable.getContentValues(new GameSql(game),false),
+                                selection,selectionArgs);
+                        if (rowsUpdated != 1) {
+                            String problem = "You should update only one game " + game.getGameId();
+                            Log.e(TAG, problem);
+                            throw new IllegalStateException(problem);
+                        }
+                    }else if (stampLocal > stampCloud){
+                        Log.e(TAG, "Please implement this. Update game");
+                    }
+                }
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Some error on server side: " + e);
+        }
+    }
+
     public void handleActionCreateRoundPlayer(String roundId,
                                               String tournamentId,
                                               String tournamentPlayerSqlId) {
@@ -808,8 +873,6 @@ public class TournamentService extends IntentService {
                 RoundPlayerTable.getContentValues(roundPlayerSql, false)
         );
         MyGlobalTools.syncLocalRoundPlayers(mContentResolver, mIdTokenString);
-        //TODO show players inside fragment and sinc to the cloud
-
     }
 
 

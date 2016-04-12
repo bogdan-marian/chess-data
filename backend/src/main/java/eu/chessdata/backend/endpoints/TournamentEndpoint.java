@@ -290,6 +290,20 @@ public class TournamentEndpoint {
         return roundPlayers;
     }
 
+    @ApiMethod(name = "getGamesByRoundIds", httpMethod = "post")
+    public List<Game> getGamesByRoundIds(SupportObject supportObject){
+        List<Long> roundIds = supportObject.getLongList();
+        if (roundIds.size() == 0) {
+            return new ArrayList<>();
+        }
+        List<Game> games = new ArrayList<>();
+        SimpleQuery<Game> gameSimpleQuery = ofy().load().type(Game.class).filter("roundId in", roundIds);
+        for(Game game: gameSimpleQuery){
+            games.add(game);
+        }
+        return games;
+    }
+
     @ApiMethod(name = "roundAddPlayer", httpMethod = "post")
     public RoundPlayer roundAddPlayer(@Named("idTokenString") String idTokenString,
                                       RoundPlayer roundPlayer) {
