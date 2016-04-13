@@ -108,5 +108,8 @@ public class RoundGamesFragment extends Fragment implements
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         String gameSqlId = String.valueOf(id);
         Log.d(TAG,"gameSqlId = " + id);
+        GameSetResultDialog setResultDialog = GameSetResultDialog.newInstance(gameSqlId,
+                getActivity().getContentResolver());
+        setResultDialog.show(getFragmentManager(),"GameSetResultDialog");
     }
 }
