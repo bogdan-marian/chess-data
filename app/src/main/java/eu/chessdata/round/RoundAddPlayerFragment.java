@@ -8,7 +8,6 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,8 +86,7 @@ public class RoundAddPlayerFragment extends DialogFragment implements
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        String tournamentPlayerSqlId = id + "";
-        Log.d(TAG, "onItemClick = " + id + " position = " + position);
+        String tournamentPlayerSqlId = String.valueOf(id);
         TournamentService.startActionCreateRoundPlayer(getContext(), mRoundId, mTournamentId, tournamentPlayerSqlId);
         this.dismiss();
     }

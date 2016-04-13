@@ -9,9 +9,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -21,7 +23,9 @@ import eu.chessdata.data.simplesql.GameTable;
 /**
  * Created by Bogdan Oloeriu on 29/03/2016.
  */
-public class RoundGamesFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class RoundGamesFragment extends Fragment implements
+        LoaderManager.LoaderCallbacks<Cursor>,
+        AdapterView.OnItemClickListener{
     private static final String TAG = "my-debug-tag";
     private static final int GAMES_LOADER = 1;
 
@@ -60,6 +64,7 @@ public class RoundGamesFragment extends Fragment implements LoaderManager.Loader
         mRoundGamesAdapter = new RoundGamesAdapter(getActivity(), null, 0);
         ListView listView = (ListView) view.findViewById(R.id.round_games_list_view);
         listView.setAdapter(mRoundGamesAdapter);
+        listView.setOnItemClickListener(this);
 
 
         mContentResolver = getActivity().getContentResolver();
@@ -96,5 +101,12 @@ public class RoundGamesFragment extends Fragment implements LoaderManager.Loader
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mRoundGamesAdapter.swapCursor(null);
+    }
+
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        String gameSqlId = String.valueOf(id);
+        Log.d(TAG,"gameSqlId = " + id);
     }
 }
