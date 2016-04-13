@@ -68,6 +68,7 @@ public class TournamentService extends IntentService {
     private static final String ACTION_SYNCHRONIZE_ALL = "eu.chessdata.services.action.ACTION_SYNCHRONIZE_ALL";
     private static final String ACTION_CREATE_ROUND_PLAYER = "eu.chessdata.services.ACTION_CREATE_ROUND_PLAYER";
     private static final String ACTION_GENERATE_GAMES = "eu.chessdata.services.ACTION_GENERATE_GAMES";
+    private static final String ACTION_GAME_SET_RESULT = "eu.chessdata.services.ACTION_GAME_SET_RESULT";
 
     private static final String EXTRA_JSON_TOURNAMENT = "eu.chessdata.services.extra.JSON_TOURNAMENT";
     private static final String EXTRA_TOURNAMENT_SQL_ID = "eu.chessdata.services.EXTRA_TOURNAMENT_SQL_ID";
@@ -75,6 +76,8 @@ public class TournamentService extends IntentService {
     private static final String EXTRA_ROUND_ID = "eu.chessdata.services.EXTRA_ROUND_ID";
     private static final String EXTRA_TOURNAMENT_ID = "eu.chessdata.services.EXTRA_TOURNAMENT_ID";
     private static final String EXTRA_TOURNAMENT_PLAYER_SQL_ID = "eu.chessdata.services.EXTRA_TOURNAMENT_PLAYER_SQL_ID";
+    private static final String EXTRA_GAME_SQL_ID = "eu.chessdata.services.EXTRA_GAME_SQL_ID";
+    private static final String EXTRA_GAME_RESULT = "eu.chessdata.services.EXTRA_GAME_RESULT";
 
     private static TournamentEndpoint sTournamentEndpoint = buildTournamentEndpoint();
     private static GsonFactory sGsonFactory = new GsonFactory();
@@ -198,6 +201,13 @@ public class TournamentService extends IntentService {
             } else if (ACTION_GENERATE_GAMES.equals(action)) {
                 final String roundId = intent.getStringExtra(EXTRA_ROUND_ID);
                 handleActionGenerateGames(roundId);
+            } else if (ACTION_GAME_SET_RESULT.equals(action)) {
+                final String gameSqlId = intent.getStringExtra(EXTRA_GAME_SQL_ID);
+                final int intResult = intent.getIntExtra(EXTRA_GAME_RESULT, 0);
+                String result = String.valueOf(intResult);
+                if (intResult == 1 || intResult == 2 || intResult == 3) {
+                    handleActionGameSetResult(gameSqlId, result);
+                }
             }
         }
     }
@@ -788,7 +798,7 @@ public class TournamentService extends IntentService {
         }
     }
 
-    private void synchronizeGames(){
+    private void synchronizeGames() {
         //select all local rounds
         Uri uri = RoundTable.CONTENT_URI;
         String[] projection = {RoundTable.FIELD_ROUNDID};
@@ -805,42 +815,42 @@ public class TournamentService extends IntentService {
         SupportObject supportObject = new SupportObject();
         supportObject.setMessage("Get games");
         supportObject.setLongList(roundIds);
-        try{
+        try {
             GameCollection gameCollection = sTournamentEndpoint.getGamesByRoundIds(supportObject).execute();
             List<Game> games = gameCollection.getItems();
-            if (games == null){
+            if (games == null) {
                 games = new ArrayList<>();
             }
-            Log.d(TAG,"Received games = " + games.size());
-            for (Game game: games){
+            Log.d(TAG, "Received games = " + games.size());
+            for (Game game : games) {
                 Uri gameUri = GameTable.CONTENT_URI;
                 String selection = GameTable.FIELD_GAMEID + " =?";
                 String selectionArgs[] = {game.getGameId().toString()};
-                Cursor gameCursor = mContentResolver.query(gameUri,null,selection,selectionArgs,null);
+                Cursor gameCursor = mContentResolver.query(gameUri, null, selection, selectionArgs, null);
                 int count = gameCursor.getCount();
-                if (count > 1){
+                if (count > 1) {
                     String problem = "More then one game with the same id";
                     Log.e(TAG, problem);
                     throw new IllegalStateException(problem);
-                }else if(count == 0){
-                    mContentResolver.insert(gameUri,GameTable.getContentValues(new GameSql(game),false));
-                }else if (count == 1){
+                } else if (count == 0) {
+                    mContentResolver.insert(gameUri, GameTable.getContentValues(new GameSql(game), false));
+                } else if (count == 1) {
                     gameCursor.moveToFirst();
                     int idx_updateStamp = gameCursor.getColumnIndex(GameTable.FIELD_UPDATESTAMP);
                     long stampLocal = gameCursor.getLong(idx_updateStamp);
                     long stampCloud = game.getUpdateStamp();
                     //time to compare and ecide
-                    if (stampLocal < stampCloud){
+                    if (stampLocal < stampCloud) {
                         //update local
                         int rowsUpdated = mContentResolver.update(gameUri,
-                                GameTable.getContentValues(new GameSql(game),false),
-                                selection,selectionArgs);
+                                GameTable.getContentValues(new GameSql(game), false),
+                                selection, selectionArgs);
                         if (rowsUpdated != 1) {
                             String problem = "You should update only one game " + game.getGameId();
                             Log.e(TAG, problem);
                             throw new IllegalStateException(problem);
                         }
-                    }else if (stampLocal > stampCloud){
+                    } else if (stampLocal > stampCloud) {
                         Log.e(TAG, "Please implement this. Update game");
                     }
                 }
@@ -933,5 +943,17 @@ public class TournamentService extends IntentService {
         }
         playersCursor.close();
         MyGlobalTools.syncLocalGames(mContentResolver, mIdTokenString);
+    }
+
+    public static void startActionGameSetResult(String gameSqlId, int result, Context context) {
+        Intent intent = new Intent(context, TournamentService.class);
+        intent.setAction(ACTION_GAME_SET_RESULT);
+        intent.putExtra(EXTRA_GAME_SQL_ID, gameSqlId);
+        intent.putExtra(EXTRA_GAME_RESULT, result);
+        context.startService(intent);
+    }
+
+    private void handleActionGameSetResult(String gameSqlId, String result) {
+        Log.d(TAG, "handleGameSetResult: gameSqlId = " + gameSqlId + ", result = " + result);
     }
 }

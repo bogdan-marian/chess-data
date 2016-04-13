@@ -9,9 +9,9 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 
 import eu.chessdata.data.simplesql.GameTable;
+import eu.chessdata.services.TournamentService;
 import eu.chessdata.tools.MyGlobalTools;
 
 /**
@@ -50,7 +50,8 @@ public class GameSetResultDialog extends DialogFragment {
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Log.d("my-debug-tag", "Item = " + which);
+                int result = which+1;
+                TournamentService.startActionGameSetResult(mGameSqlId,result,getContext());
                 dismiss();
             }
         });
