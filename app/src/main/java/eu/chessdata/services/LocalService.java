@@ -1022,7 +1022,20 @@ public class LocalService extends IntentService {
     }
 
     private boolean isAdminByClubId(String clubId) {
+        Uri uri = ClubMemberTable.CONTENT_URI;
+        String[] projection = {ClubMemberTable.FIELD_CLUBMEMBERID};
+        int idx_clubMemberId = 0;
+        String selection = ClubMemberTable.FIELD_CLUBID + " =? " +
+                "AND " + ClubMemberTable.FIELD_PROFILEID + " =? " +
+                "AND " + ClubMemberTable.FIELD_MANAGERPROFILE + " =?";
+        String[] selectionArgs = {clubId, mProfileId, "1"};
+
+        Cursor cursor = mContentResolver.query(uri, projection, selection, selectionArgs, null);
         boolean returnValue = false;
+        if (cursor.getCount() > 0) {
+            returnValue = true;
+        }
+        cursor.close();
         return returnValue;
     }
 }
