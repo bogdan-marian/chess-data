@@ -92,6 +92,8 @@ public class LocalService extends IntentService {
     private String mProfileId;
     private Long mClubEndpointId;
 
+
+
     public LocalService() {
         super("LocalService");
     }
@@ -981,6 +983,7 @@ public class LocalService extends IntentService {
                 DeviceToCloudTable.getContentValues(deviceToCloudSql,false));
 
         Log.d(TAG, "Super. Wee have someone who is an admin");
+
     }
 
     private boolean isAdminByGameSqlId(String gameSqlId) {
