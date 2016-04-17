@@ -42,6 +42,13 @@ public class MyGlobalTools {
     private static String TAG = "my-debug-tag";
     private static TournamentEndpoint tournamentEndpoint = buildTournamentEndpoint();
 
+    /**
+     * enum required to decide what items to update in cloud
+     */
+    public enum Table{
+        GAME;
+    }
+
     public static void addToMembersSqlIdToProfileName(String id, String name) {
         memberSqlIdToProfileName.put(id, name);
     }

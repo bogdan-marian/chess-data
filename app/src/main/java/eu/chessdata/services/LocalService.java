@@ -41,6 +41,8 @@ import eu.chessdata.data.simplesql.ClubMemberSql;
 import eu.chessdata.data.simplesql.ClubMemberTable;
 import eu.chessdata.data.simplesql.ClubSql;
 import eu.chessdata.data.simplesql.ClubTable;
+import eu.chessdata.data.simplesql.DeviceToCloudSql;
+import eu.chessdata.data.simplesql.DeviceToCloudTable;
 import eu.chessdata.data.simplesql.GameSql;
 import eu.chessdata.data.simplesql.GameTable;
 import eu.chessdata.data.simplesql.ProfileSql;
@@ -54,6 +56,7 @@ import eu.chessdata.data.simplesql.TournamentPlayerTable;
 import eu.chessdata.data.simplesql.TournamentSql;
 import eu.chessdata.data.simplesql.TournamentTable;
 import eu.chessdata.tools.MyGlobalTools;
+import eu.chessdata.tools.MyGlobalTools.Table;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -958,6 +961,25 @@ public class LocalService extends IntentService {
             Log.d(TAG, "Not admin");
             return;
         }
+        //update the local game
+        Uri gameUri = GameTable.CONTENT_URI;
+        ContentValues gameValues = new ContentValues();
+        gameValues.put(GameTable.FIELD_RESULT, result);
+        String gameSelection = GameTable.FIELD__ID + " =?";
+        String[] gameSelectionArgs = {gameSqlId};
+        int gamesUpdated = mContentResolver.update(gameUri, gameValues, gameSelection, gameSelectionArgs);
+        if (gamesUpdated != 1) {
+            String problem = "You should only update one game";
+            Log.e(TAG, problem);
+            throw new IllegalStateException(problem);
+        }
+
+        //insert device to cloud item;
+        DeviceToCloudSql deviceToCloudSql = new DeviceToCloudSql(Table.GAME, Long.valueOf(gameSqlId));
+        mContentResolver.insert(
+                DeviceToCloudTable.CONTENT_URI,
+                DeviceToCloudTable.getContentValues(deviceToCloudSql,false));
+
         Log.d(TAG, "Super. Wee have someone who is an admin");
     }
 
