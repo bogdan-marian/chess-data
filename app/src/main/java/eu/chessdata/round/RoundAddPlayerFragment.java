@@ -16,7 +16,7 @@ import android.widget.ListView;
 
 import eu.chessdata.R;
 import eu.chessdata.data.simplesql.TournamentPlayerTable;
-import eu.chessdata.services.TournamentService;
+import eu.chessdata.services.LocalService;
 
 /**
  * Created by Bogdan Oloeriu on 30/03/2016.
@@ -87,7 +87,7 @@ public class RoundAddPlayerFragment extends DialogFragment implements
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         String tournamentPlayerSqlId = String.valueOf(id);
-        TournamentService.startActionCreateRoundPlayer(getContext(), mRoundId, mTournamentId, tournamentPlayerSqlId);
+        LocalService.startActionCreateRoundPlayer(getContext(), mRoundId, mTournamentId, tournamentPlayerSqlId);
         this.dismiss();
     }
 }

@@ -21,7 +21,7 @@ import java.util.Map;
 import eu.chessdata.R;
 import eu.chessdata.TournamentDetailsFragment;
 import eu.chessdata.data.simplesql.ProfileTable;
-import eu.chessdata.services.TournamentService;
+import eu.chessdata.services.LocalService;
 import eu.chessdata.tools.MyGlobalTools;
 
 /**
@@ -70,7 +70,7 @@ public class TournamentAddPlayerFragment extends DialogFragment implements Adapt
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         //Toast.makeText(getActivity(),tempItems[position],Toast.LENGTH_SHORT).show();
         long profileSqlId = id;
-        TournamentService.startActionTournamentAddPlayer(getContext(), mTournamentSqlId,profileSqlId);
+        LocalService.startActionTournamentAddPlayer(getContext(), mTournamentSqlId,profileSqlId);
         this.dismiss();
     }
 

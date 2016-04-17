@@ -16,7 +16,7 @@ import android.widget.NumberPicker;
 import java.util.Date;
 
 import eu.chessdata.backend.tournamentEndpoint.model.Tournament;
-import eu.chessdata.services.TournamentService;
+import eu.chessdata.services.LocalService;
 
 /**
  * Created by Bogdan Oloeriu on 24/01/2016.
@@ -47,7 +47,7 @@ public class TournamentCreateFragment extends DialogFragment{
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Tournament tournament = buildTournament();
-                TournamentService.startActionCreateTournament(getContext(), tournament);
+                LocalService.startActionCreateTournament(getContext(), tournament);
             }
         });
 

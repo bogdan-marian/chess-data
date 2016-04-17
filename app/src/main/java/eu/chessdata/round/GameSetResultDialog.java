@@ -11,7 +11,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 
 import eu.chessdata.data.simplesql.GameTable;
-import eu.chessdata.services.TournamentService;
+import eu.chessdata.services.LocalService;
 import eu.chessdata.tools.MyGlobalTools;
 
 /**
@@ -51,7 +51,7 @@ public class GameSetResultDialog extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 int result = which+1;
-                TournamentService.startActionGameSetResult(mGameSqlId,result,getContext());
+                LocalService.startActionGameSetResult(mGameSqlId,result,getContext());
                 dismiss();
             }
         });

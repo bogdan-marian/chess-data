@@ -31,7 +31,7 @@ import eu.chessdata.data.simplesql.ClubTable;
 import eu.chessdata.members.MainMembersFragment;
 import eu.chessdata.round.RoundPagerFragment;
 import eu.chessdata.services.ProfileService;
-import eu.chessdata.services.TournamentService;
+import eu.chessdata.services.LocalService;
 import eu.chessdata.tools.MyGlobalTools;
 import eu.chessdata.tournament.TournamentPlayersFragment;
 
@@ -143,7 +143,7 @@ public class HomeActivity extends AppCompatActivity
         } else if (id == R.id.action_create_club) {
             (new ClubCreateDialogFragment()).show(getSupportFragmentManager(), "ClubCreateDialogFragment");
         } else if (id == R.id.action_sync_data_cloud_to_device) {
-            TournamentService.startActionSynchronizeAll(getApplicationContext());
+            LocalService.startActionSynchronizeAll(getApplicationContext());
         }
 
         return super.onOptionsItemSelected(item);

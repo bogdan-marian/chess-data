@@ -6,7 +6,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 
-import eu.chessdata.services.TournamentService;
+import eu.chessdata.services.LocalService;
 
 /**
  * Created by Bogdan Oloeriu on 07/04/2016.
@@ -30,7 +30,7 @@ public class CreateGamesDialog extends DialogFragment{
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //todo generate games
-                TournamentService.startActionGenerateGames(getContext(), mRoundId);
+                LocalService.startActionGenerateGames(getContext(), mRoundId);
                 mRoundStateFragment.showGames();
             }
         });

@@ -31,10 +31,13 @@
             android:name=".services.ClubCreateService"
             android:exported="false" />
         <service
-            android:name=".services.TournamentService"
+            android:name=".services.LocalService"
             android:exported="false" />
         <service
             android:name=".services.ProfileService"
+            android:exported="false" />
+        <service
+            android:name=".services.CloudService"
             android:exported="false"></service>
     </application>
 

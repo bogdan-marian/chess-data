@@ -61,7 +61,7 @@ import eu.chessdata.tools.MyGlobalTools;
  * <p/>
  * helper methods.
  */
-public class TournamentService extends IntentService {
+public class LocalService extends IntentService {
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_CREATE_TOURNAMENT = "eu.chessdata.services.action.ACTION_CREATE_TOURNAMENT";
     private static final String ACTION_TOURNAMENT_ADD_PLAYER = "eu.chessdata.services.action.ACTION_TOURNAMENT_ADD_PLAYER";
@@ -89,8 +89,8 @@ public class TournamentService extends IntentService {
     private String mProfileId;
     private Long mClubEndpointId;
 
-    public TournamentService() {
-        super("TournamentService");
+    public LocalService() {
+        super("LocalService");
     }
 
     /**
@@ -101,7 +101,7 @@ public class TournamentService extends IntentService {
      */
     public static void startActionCreateTournament(Context context, Tournament tournament) {
         String jsonTournament = serializeToJson(tournament);
-        Intent intent = new Intent(context, TournamentService.class);
+        Intent intent = new Intent(context, LocalService.class);
         intent.setAction(ACTION_CREATE_TOURNAMENT);
         intent.putExtra(EXTRA_JSON_TOURNAMENT, jsonTournament);
         context.startService(intent);
@@ -109,7 +109,7 @@ public class TournamentService extends IntentService {
 
     public static void startActionCreateRoundPlayer(Context context, String roundId, String tournamentId,
                                                     String tournamentPlayerSqlId) {
-        Intent intent = new Intent(context, TournamentService.class);
+        Intent intent = new Intent(context, LocalService.class);
         intent.setAction(ACTION_CREATE_ROUND_PLAYER);
         intent.putExtra(EXTRA_ROUND_ID, roundId);
         intent.putExtra(EXTRA_TOURNAMENT_ID, tournamentId);
@@ -119,14 +119,14 @@ public class TournamentService extends IntentService {
 
     public static void startActionSynchronizeAll(Context context) {
         mSynchronizeAllContext = context;
-        Intent intent = new Intent(context, TournamentService.class);
+        Intent intent = new Intent(context, LocalService.class);
         intent.setAction(ACTION_SYNCHRONIZE_ALL);
         context.startService(intent);
     }
 
     public static void startActionTournamentAddPlayer(Context context, Long tournamentSqlId, Long
             playerSqlId) {
-        Intent intent = new Intent(context, TournamentService.class);
+        Intent intent = new Intent(context, LocalService.class);
         intent.setAction(ACTION_TOURNAMENT_ADD_PLAYER);
         intent.putExtra(EXTRA_TOURNAMENT_SQL_ID, tournamentSqlId);
         intent.putExtra(EXTRA_PLAYER_SQL_ID, playerSqlId);
@@ -135,7 +135,7 @@ public class TournamentService extends IntentService {
     }
 
     public static void startActionGenerateGames(Context context, String roundId) {
-        Intent intent = new Intent(context, TournamentService.class);
+        Intent intent = new Intent(context, LocalService.class);
         intent.setAction(ACTION_GENERATE_GAMES);
         intent.putExtra(EXTRA_ROUND_ID, roundId);
         context.startService(intent);
@@ -946,7 +946,7 @@ public class TournamentService extends IntentService {
     }
 
     public static void startActionGameSetResult(String gameSqlId, int result, Context context) {
-        Intent intent = new Intent(context, TournamentService.class);
+        Intent intent = new Intent(context, LocalService.class);
         intent.setAction(ACTION_GAME_SET_RESULT);
         intent.putExtra(EXTRA_GAME_SQL_ID, gameSqlId);
         intent.putExtra(EXTRA_GAME_RESULT, result);
@@ -954,6 +954,75 @@ public class TournamentService extends IntentService {
     }
 
     private void handleActionGameSetResult(String gameSqlId, String result) {
-        Log.d(TAG, "handleGameSetResult: gameSqlId = " + gameSqlId + ", result = " + result);
+        if (!isAdminByGameSqlId(gameSqlId)) {
+            Log.d(TAG, "Not admin");
+            return;
+        }
+        Log.d(TAG, "Super. Wee have someone who is an admin");
+    }
+
+    private boolean isAdminByGameSqlId(String gameSqlId) {
+        Uri uri = GameTable.CONTENT_URI;
+        String[] projection = {GameTable.FIELD_ROUNDID};
+        int idx_roundId = 0;
+        String selection = GameTable.FIELD__ID + " =?";
+        String[] selectionArgs = {gameSqlId};
+        Cursor cursor = mContentResolver.query(uri, projection, selection, selectionArgs, null);
+        if (cursor.getCount() != 1) {
+            String problem = "Illegal state exception in isAdminByGameSqlId";
+            Log.e(TAG, problem);
+            throw new IllegalStateException(problem);
+        }
+        cursor.moveToFirst();
+        Long roundId = cursor.getLong(idx_roundId);
+        cursor.close();
+        boolean returnValue = isAdminByRoundId(roundId.toString());
+        return returnValue;
+    }
+
+    private boolean isAdminByRoundId(String roundId) {
+        Uri uri = RoundTable.CONTENT_URI;
+        String[] projection = {RoundTable.FIELD_TOURNAMENTID};
+        int idx_tournamentId = 0;
+        String selection = RoundTable.FIELD_ROUNDID + " =?";
+        String[] selectionArgs = {roundId};
+
+        Cursor cursor = mContentResolver.query(uri, projection, selection, selectionArgs, null);
+        if (cursor.getCount() != 1) {
+            String problem = "Illegal state exception in isAdminByRoundId";
+            Log.e(TAG, problem);
+            throw new IllegalStateException(problem);
+        }
+        cursor.moveToFirst();
+        Long tournamentId = cursor.getLong(idx_tournamentId);
+        cursor.close();
+        boolean returnValue = isAdminByTournamentId(tournamentId.toString());
+        return returnValue;
+    }
+
+    private boolean isAdminByTournamentId(String tournamentId) {
+        Uri uri = TournamentTable.CONTENT_URI;
+        String[] projection = {TournamentTable.FIELD_CLUBID};
+        int idx_clubId = 0;
+        String selection = TournamentTable.FIELD_TOURNAMENTID + " =?";
+        String[] selectionArgs = {tournamentId};
+
+        Cursor cursor = mContentResolver.query(uri, projection, selection, selectionArgs, null);
+        if (cursor.getCount() != 1) {
+            String problem = "Illegal state exception in isAdminByTournamentId";
+            Log.e(TAG, problem);
+            throw new IllegalStateException(problem);
+        }
+        cursor.moveToFirst();
+        Long clubId = cursor.getLong(idx_clubId);
+        Log.d(TAG, "ClubId = " + clubId);
+        cursor.close();
+        boolean returnValue = isAdminByClubId(clubId.toString());
+        return returnValue;
+    }
+
+    private boolean isAdminByClubId(String clubId) {
+        boolean returnValue = false;
+        return returnValue;
     }
 }
