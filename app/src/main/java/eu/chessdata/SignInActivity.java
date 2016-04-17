@@ -31,6 +31,8 @@ import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.extensions.android.json.AndroidJsonFactory;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import eu.chessdata.backend.profileEndpoint.ProfileEndpoint;
 import eu.chessdata.backend.profileEndpoint.model.Profile;
@@ -67,6 +69,7 @@ public class SignInActivity extends AppCompatActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler());
         setContentView(R.layout.activity_sign_in);
 
         // Views
@@ -568,6 +571,24 @@ public class SignInActivity extends AppCompatActivity implements
         protected void onPostExecute(Profile profile) {
             Intent intent = new Intent(mSignInActivity,HomeActivity.class);
             startActivity(intent);
+        }
+    }
+
+    public class ExceptionHandler implements java.lang.Thread.UncaughtExceptionHandler {
+        private final String LINE_SEPARATOR = "\n";
+
+        @SuppressWarnings("deprecation")
+        public void uncaughtException(Thread thread, Throwable exception) {
+            StringWriter stackTrace = new StringWriter();
+            exception.printStackTrace(new PrintWriter(stackTrace));
+
+            StringBuilder errorReport = new StringBuilder();
+            errorReport.append(stackTrace.toString());
+
+            Log.e(TAG, errorReport.toString());
+
+            android.os.Process.killProcess(android.os.Process.myPid());
+            System.exit(10);
         }
     }
 }
