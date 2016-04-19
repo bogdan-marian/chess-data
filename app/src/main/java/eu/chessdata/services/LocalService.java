@@ -85,13 +85,13 @@ public class LocalService extends IntentService {
     private static TournamentEndpoint sTournamentEndpoint = buildTournamentEndpoint();
     private static GsonFactory sGsonFactory = new GsonFactory();
     private static Context mSynchronizeAllContext;
+    private static Context mContext;
     private String TAG = "my-debug-tag";
     private SharedPreferences mSharedPreferences;
     private ContentResolver mContentResolver;
     private String mIdTokenString;
     private String mProfileId;
     private Long mClubEndpointId;
-
 
 
     public LocalService() {
@@ -951,6 +951,9 @@ public class LocalService extends IntentService {
     }
 
     public static void startActionGameSetResult(String gameSqlId, int result, Context context) {
+        if (mContext == null) {
+            mContext = context;
+        }
         Intent intent = new Intent(context, LocalService.class);
         intent.setAction(ACTION_GAME_SET_RESULT);
         intent.putExtra(EXTRA_GAME_SQL_ID, gameSqlId);
@@ -966,6 +969,7 @@ public class LocalService extends IntentService {
         //update the local game
         Uri gameUri = GameTable.CONTENT_URI;
         ContentValues gameValues = new ContentValues();
+
         gameValues.put(GameTable.FIELD_RESULT, result);
         String gameSelection = GameTable.FIELD__ID + " =?";
         String[] gameSelectionArgs = {gameSqlId};
@@ -980,10 +984,10 @@ public class LocalService extends IntentService {
         DeviceToCloudSql deviceToCloudSql = new DeviceToCloudSql(Table.GAME, Long.valueOf(gameSqlId));
         mContentResolver.insert(
                 DeviceToCloudTable.CONTENT_URI,
-                DeviceToCloudTable.getContentValues(deviceToCloudSql,false));
+                DeviceToCloudTable.getContentValues(deviceToCloudSql, false));
 
-        Log.d(TAG, "Super. Wee have someone who is an admin");
-
+        //start device to cloud service
+        CloudService.startActionDeviceToCloud(mContext);
     }
 
     private boolean isAdminByGameSqlId(String gameSqlId) {
@@ -1040,7 +1044,6 @@ public class LocalService extends IntentService {
         }
         cursor.moveToFirst();
         Long clubId = cursor.getLong(idx_clubId);
-        Log.d(TAG, "ClubId = " + clubId);
         cursor.close();
         boolean returnValue = isAdminByClubId(clubId.toString());
         return returnValue;
