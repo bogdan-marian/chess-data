@@ -12,13 +12,13 @@ import eu.chessdata.backend.tournamentEndpoint.model.Game;
 @SimpleSQLTable(table="game",provider = "SimpleProvider")
 public class GameSql {
     @SimpleSQLColumn(value="_id", primary = true)
-    public long id;
+    private long id;
 
     @SimpleSQLColumn(value = "gameId")
-    public Long gameId;
+    private Long gameId;
 
     @SimpleSQLColumn(value = "roundId")
-    public Long roundId;
+    private Long roundId;
 
     @SimpleSQLColumn(value = "tableNumber")
     private int tableNumber;

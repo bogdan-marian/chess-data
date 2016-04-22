@@ -405,4 +405,52 @@ public class TournamentEndpoint {
 
         return game;
     }
+
+    @ApiMethod(name = "gameUpdate", httpMethod = "post")
+    public Game gameUpdate(@Named("idTokenString") String idTokenString, Game game){
+        Game illegalGame = new Game();
+        MyEntry<MySecurityService.Status, GoogleIdToken.Payload> secPair =
+                MySecurityService.getProfile(idTokenString);
+        if (secPair.getKey() != MySecurityService.Status.VALID_USER) {
+            illegalGame.setWhitePlayerId("No update: Illegal idTokenString: " + idTokenString);
+            return illegalGame;
+        }
+
+        //find the round
+        Round round = ofy().load().type(Round.class).id(game.getRoundId()).now();
+        if (round == null) {
+            illegalGame.setWhitePlayerId("No update: not able to find the round: " + game.getRoundId());
+            return illegalGame;
+        }
+
+        //find the tournament
+        Tournament tournament = ofy().load().type(Tournament.class).id(round.getTournamentId()).now();
+        if (tournament == null) {
+            illegalGame.setWhitePlayerId("No update: Not able to locate tournament: " + round.getTournamentId());
+            return illegalGame;
+        }
+
+        //check if current user is a club manager
+        String profileId = ((GoogleIdToken.Payload) secPair.getValue()).getSubject();
+        if (!MySecurityService.isClubManager(profileId, tournament.getClubId())) {
+            illegalGame.setWhitePlayerId("No update: Illegal request not a club manager");
+            return illegalGame;
+        }
+
+        //select the game
+        Game vipGame = ofy().load().type(Game.class).id(game.getGameId()).now();
+        if (vipGame == null){
+            illegalGame.setWhitePlayerId("No update: Not able to locate the game: " + game.getGameId());
+            return illegalGame;
+        }
+        //compare updateStamps
+        if (game.getUpdateStamp()< vipGame.getUpdateStamp()){
+            //no update just return
+            return vipGame;
+        }else{
+            //update dataStore and return
+            ofy().save().entity(game).now();
+            return  game;
+        }
+    }
 }

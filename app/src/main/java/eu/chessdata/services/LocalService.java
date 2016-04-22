@@ -16,6 +16,7 @@ import com.google.api.client.json.gson.GsonFactory;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import eu.chessdata.R;
@@ -969,8 +970,11 @@ public class LocalService extends IntentService {
         //update the local game
         Uri gameUri = GameTable.CONTENT_URI;
         ContentValues gameValues = new ContentValues();
+        long updateStamp = (new Date()).getTime();
 
         gameValues.put(GameTable.FIELD_RESULT, result);
+        gameValues.put(GameTable.FIELD_UPDATESTAMP, String.valueOf(updateStamp));
+
         String gameSelection = GameTable.FIELD__ID + " =?";
         String[] gameSelectionArgs = {gameSqlId};
         int gamesUpdated = mContentResolver.update(gameUri, gameValues, gameSelection, gameSelectionArgs);
