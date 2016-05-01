@@ -28,7 +28,6 @@ dependencies {
     compile 'com.googlecode.objectify:objectify:5.0.3'
     compile 'javax.servlet:servlet-api:2.5'
     compile 'com.google.api.client:google-api-client-auth-oauth:1.2.3-alpha'
-    //compile 'org.javatuples:javatuples:1.2'
 }
 
 appengine {
