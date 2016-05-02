@@ -1,14 +1,16 @@
 <!doctype html>
 
-<html lang="en">
+<html lang="en" ng-app="tournamentApp">
 <head>
     <meta charset="utf-8">
-
     <title>chess-data</title>
-
 </head>
 
-<body>
+<body ng-controller="TournamentController as tournament">
+    <script type="text/javascript" src="/js/frameworks/angular.min.js"></script>
+    <script type="text/javascript" src="/js/tournamentApp.js"></script>
     <h1>Home chess data</h1>
+    <p>{{"hello" + " you"}}: 5 + 5 = {{5 + 5}}</p>
+    <p>{{tournament.product.name}}</p>
 </body>
 </html>
