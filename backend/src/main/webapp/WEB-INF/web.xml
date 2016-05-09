@@ -18,15 +18,15 @@
         <servlet-name>SystemServiceServlet</servlet-name>
         <url-pattern>/_ah/spi/*</url-pattern>
     </servlet-mapping>
-
-    <servlet>
-        <servlet-name>TournamentServlet</servlet-name>
-        <servlet-class>eu.chessdata.backend.servlets.TournamentServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>TournamentServlet</servlet-name>
-        <url-pattern>/tournament/*</url-pattern><!--tournament/*-->
-    </servlet-mapping>
+    <!--
+        <servlet>
+            <servlet-name>TournamentServlet</servlet-name>
+            <servlet-class>eu.chessdata.backend.servlets.TournamentServlet</servlet-class>
+        </servlet>
+        <servlet-mapping>
+            <servlet-name>TournamentServlet</servlet-name>
+            <url-pattern>/tournament</url-pattern>&lt;!&ndash;tournament/*&ndash;&gt;
+        </servlet-mapping>-->
 
     <welcome-file-list>
         <welcome-file>index.html</welcome-file>

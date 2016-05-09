@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 public class TournamentServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        RequestDispatcher view = req.getRequestDispatcher("/apps/tournament/home.html");
+        RequestDispatcher view = req.getRequestDispatcher("/tournament/home.html");
         view.forward(req,resp);
     }
 }
