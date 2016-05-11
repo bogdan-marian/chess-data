@@ -6,8 +6,14 @@
     'use strict';
     angular
         .module('app', [
+            //Angular module
             'ngRoute',
-            'firebase'
+
+            //Third-party modules
+            'firebase',
+            
+            //Custom modules
+            'app.landing'
         ]);
 })();
 
