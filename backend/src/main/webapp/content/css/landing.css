@@ -31,6 +31,9 @@ a:hover {
 
 html,
 body {
+    background: url(../images/langing_001_pawn.png) no-repeat center center ;
+    background-size: cover;
+    
     height: 100%;
     background-color: #333;
 }
